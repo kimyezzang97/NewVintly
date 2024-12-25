@@ -1,7 +1,7 @@
 ```mermaid
 erDiagram
     MEMBER {
-        int member_idx PK "AUTO INCREMENT"
+        int member_id PK "AUTO INCREMENT"
         string email UK "이메일"
         string password "비밀번호"
         string nickname UK "닉네임"
@@ -12,7 +12,7 @@ erDiagram
     }
     
     SHOP {
-        int shop_idx PK "AUTO INCREMENT"
+        int shop_id PK "AUTO INCREMENT"
         string state "경기도 or 서울특별시"
         string district "경기도의 시나 구 or 특별시의 구"
         string town "동 ex)석수2동"
@@ -23,8 +23,8 @@ erDiagram
     }
     SHOP_IMAGE ||--o{ SHOP : is
     SHOP_IMAGE {
-        int image_idx PK  "AUTO INCREMENT"
-        int shop_idx FK "SHOP 테이블과 연결된 외래 키"
+        int image_id PK  "AUTO INCREMENT"
+        int shop_id FK "SHOP 테이블과 연결된 외래 키"
         string image_path "이미지경로"
     }
 ```
