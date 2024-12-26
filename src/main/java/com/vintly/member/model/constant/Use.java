@@ -1,8 +1,9 @@
-package com.vintly.member.constant;
+package com.vintly.member.model.constant;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+// MEMBER - useYn(사용여부)
 @Getter
 @RequiredArgsConstructor
 public enum Use {

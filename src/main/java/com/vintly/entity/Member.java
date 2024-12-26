@@ -1,6 +1,6 @@
 package com.vintly.entity;
 
-import com.vintly.member.constant.Use;
+import com.vintly.member.model.constant.Use;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
