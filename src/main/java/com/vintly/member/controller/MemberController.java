@@ -42,4 +42,18 @@ public class MemberController {
                 .data(memberService.getChkEmail(email))
                 .build());
     }
+
+    /**
+     * nickname 중복 체크
+     * @param nickname
+     * @return
+     */
+    @GetMapping("/nickname/{nickname}")
+    public ResponseEntity<?> getChkNickname(@PathVariable("nickname") String nickname){
+        return ResponseEntity.ok(ApiResponse.builder()
+                .status(HttpStatus.OK)
+                .msg("")
+                .data(memberService.getChkNickname(nickname))
+                .build());
+    }
 }

@@ -10,4 +10,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // email 중복 확인
     Integer countByEmail(String email);
 
+    // 닉네임 중복 체크
+    Integer countByNickname(String nickname);
 }

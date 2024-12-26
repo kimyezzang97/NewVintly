@@ -17,9 +17,11 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
-    // email 중복체크
+    // email 중복 체크
     public Integer getChkEmail(String email){
         return memberRepository.countByEmail(email);
     }
 
+    // nickname 중복 체크
+    public Integer getChkNickname(String nickname){return memberRepository.countByNickname(nickname);}
 }
