@@ -2,9 +2,9 @@
 erDiagram
     MEMBER {
         int member_id PK "AUTO INCREMENT"
-        string email UK "이메일"
-        string password "비밀번호"
-        string nickname UK "닉네임"
+        string email UK "이메일[최대64자]"
+        string password "비밀번호[최대20자]"
+        string nickname UK "닉네임[최대10자]"
         string email_code "이메일 인증 번호"
         date create_date "생성 날짜"
         date del_date "계정 삭제 날짜"
