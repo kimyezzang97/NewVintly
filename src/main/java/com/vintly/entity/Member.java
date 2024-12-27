@@ -6,13 +6,18 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EntityListeners(AuditingEntityListener.class)
 public class Member {
 
     @Id
@@ -32,8 +37,9 @@ public class Member {
     @Column(name = "email_code")
     private String emailCode;
 
-    @Column(name = "email_ex_date")
-    private LocalDateTime emailExDate;
+    @Column(name = "create_date", nullable = false)
+    @CreatedDate
+    private LocalDateTime createDate;
 
     @Column(name = "del_date")
     private LocalDateTime delDate;
@@ -47,8 +53,7 @@ public class Member {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
-        this.emailCode = "" + ThreadLocalRandom.current().nextInt(100000, 1000000);
-        this.emailExDate = LocalDateTime.now().plusDays(3); // 만든 날짜보다 3일 후 입력
+        this.emailCode = "" + ThreadLocalRandom.current().nextInt(100000, 1000000); // 메일 코드 6자리 생성
         this.useYn = Use.K; // 대기
     }
 
