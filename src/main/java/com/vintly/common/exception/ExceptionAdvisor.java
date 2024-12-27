@@ -1,6 +1,9 @@
 package com.vintly.common.exception;
 
 import com.vintly.common.ApiResponse;
+import com.vintly.common.exception.memebr.NicknameValidException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -22,6 +25,32 @@ public class ExceptionAdvisor {
         return ResponseEntity.ok(ApiResponse.builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .msg(errorMsg)
+                .data("")
+                .build());
+    }
+
+    // PathVariable valid exception
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<?> pathValidationError(ConstraintViolationException exception) {
+
+        String errorMsg = "규칙을 지켜 확인해주세요.";
+
+        return ResponseEntity.ok(ApiResponse.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .msg(errorMsg)
+                .data("")
+                .build());
+    }
+
+    /**
+     * [member]
+     */
+    // 닉네임 규칙 valid
+    @ExceptionHandler(NicknameValidException.class)
+    protected ResponseEntity<?> memberNotExist(NicknameValidException exception) {
+        return ResponseEntity.ok(ApiResponse.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .msg("닉네임 규칙을 확인해주세요.")
                 .data("")
                 .build());
     }
