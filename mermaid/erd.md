@@ -6,7 +6,7 @@ erDiagram
         string password "비밀번호"
         string nickname UK "닉네임"
         string email_code "이메일 인증 번호"
-        date email_ex_date "이메일 만료 날짜"
+        date create_date "생성 날짜"
         date del_date "계정 삭제 날짜"
         char use_yn "[사용 유무] 사용 : Y, 탈퇴 : N, 추방 : X, 대기 : K"
     }
