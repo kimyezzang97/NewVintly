@@ -1,14 +1,13 @@
 package com.vintly.member.controller;
 
 import com.vintly.common.ApiResponse;
+import com.vintly.member.model.req.JoinReq;
 import com.vintly.member.service.MemberService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/members")
@@ -55,5 +54,10 @@ public class MemberController {
                 .msg("")
                 .data(memberService.getChkNickname(nickname))
                 .build());
+    }
+
+    @PostMapping("/join")
+    public void createMember(@Valid @RequestBody JoinReq joinReq){
+        memberService.createMember(joinReq);
     }
 }
