@@ -15,7 +15,7 @@ public class JoinReq {
 
     // nickname
     @NotBlank(message = "nickname을 공백없이 입력해주세요.")
-    @Pattern(regexp = "^[가-힣A-Za-z0-9_-]{1,15}$", message = "영어,한글 혹은 '-','_' 으로 1~15자로 입력해주세요.")
+    @Pattern(regexp = "^[가-힣A-Za-z0-9_-]{1,10}$", message = "영어,한글 혹은 '-','_' 으로 1~10자로 입력해주세요.")
     private String nickname;
 
     // 이메일
