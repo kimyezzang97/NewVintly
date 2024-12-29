@@ -67,8 +67,19 @@ public class MemberController {
                 .build());
     }
 
+    /**
+     * 회원가입
+     * @param joinReq
+     * @return
+     */
     @PostMapping("/join")
-    public void createMember(@Valid @RequestBody JoinReq joinReq){
+    public ResponseEntity<?> createMember(@Valid @RequestBody JoinReq joinReq){
         memberService.createMember(joinReq);
+
+        return ResponseEntity.ok(ApiResponse.builder()
+                .status(HttpStatus.OK)
+                .msg("")
+                .data("")
+                .build());
     }
 }

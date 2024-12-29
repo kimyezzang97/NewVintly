@@ -1,6 +1,7 @@
 package com.vintly.common.exception;
 
 import com.vintly.common.ApiResponse;
+import com.vintly.common.exception.memebr.ConflictMemberException;
 import com.vintly.common.exception.memebr.NicknameValidException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -51,6 +52,16 @@ public class ExceptionAdvisor {
         return ResponseEntity.ok(ApiResponse.builder()
                 .status(HttpStatus.BAD_REQUEST)
                 .msg("닉네임 규칙을 확인해주세요.")
+                .data("")
+                .build());
+    }
+
+    // 중복확인 필요
+    @ExceptionHandler(ConflictMemberException.class)
+    protected ResponseEntity<?> conflictMember(ConflictMemberException exception) {
+        return ResponseEntity.ok(ApiResponse.builder()
+                .status(HttpStatus.BAD_REQUEST)
+                .msg("중복확인을 해주세요.")
                 .data("")
                 .build());
     }

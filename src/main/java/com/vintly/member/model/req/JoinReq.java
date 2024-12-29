@@ -39,4 +39,7 @@ public class JoinReq {
                 .build();
     }
 
+    public void encPassword(String encodePassword){
+        this.password = encodePassword;
+    }
 }
