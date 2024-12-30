@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Comment;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,25 +26,32 @@ public class Member {
     @Column(name = "member_id")
     private Long memberId;
 
+    @Comment("이메일")
     @Column(nullable = false, length = 50)
     private String email;
 
+    @Comment("비밀번호")
     @Column(nullable = false)
     private String password;
 
+    @Comment("닉네임")
     @Column(nullable = false)
     private String nickname;
 
+    @Comment("인증번호")
     @Column(name = "email_code")
     private String emailCode;
 
+    @Comment("계정 생성 날짜")
     @Column(name = "create_date", nullable = false)
     @CreatedDate
     private LocalDateTime createDate;
 
+    @Comment("계정 삭제 날짜")
     @Column(name = "del_date")
     private LocalDateTime delDate;
 
+    @Comment("[계정 사용 여부] 사용 : Y, 탈퇴 : N, 추방 : X, 대기 : K")
     @Enumerated(value = EnumType.STRING)
     @Column(name = "use_yn")
     private Use useYn;
