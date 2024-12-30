@@ -4,16 +4,20 @@ import com.vintly.common.ApiResponse;
 import com.vintly.common.exception.memebr.NicknameValidException;
 import com.vintly.member.model.req.JoinReq;
 import com.vintly.member.service.MemberService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/members")
@@ -81,5 +85,23 @@ public class MemberController {
                 .msg("")
                 .data("")
                 .build());
+    }
+
+    /**
+     * 이메일 인증
+     * @param code
+     * @param email
+     * @param res
+     * @throws IOException
+     */
+    @GetMapping("/verify")
+    public void verifyMember(@RequestParam String code, @RequestParam String email, HttpServletResponse res) throws IOException {
+        Integer isVerified = memberService.verifyEmail(code, email, res);
+        System.out.println(isVerified);
+        if (isVerified == 1){
+            res.sendRedirect("/members/verify/success");
+        } else {
+            res.sendRedirect("/members/verify/fail");
+        }
     }
 }
