@@ -50,7 +50,7 @@ public class ExceptionAdvisor {
     protected ResponseEntity<?> nicknameValidError(NicknameValidException exception) {
         return ResponseEntity.ok(ApiResponse.builder()
                 .status(exception.getStatus())
-                .msg(exception.getMessage())
+                .msg(exception.getStatus().getMessage())
                 .data("")
                 .build());
     }
@@ -60,7 +60,7 @@ public class ExceptionAdvisor {
     protected ResponseEntity<?> conflictMember(ConflictMemberException exception) {
         return ResponseEntity.ok(ApiResponse.builder()
                 .status(StatusEnum.JOIN_CONFLICT)
-                .msg(exception.getMessage())
+                .msg(exception.getStatus().getMessage())
                 .data("")
                 .build());
     }
