@@ -24,7 +24,7 @@ public class ExceptionAdvisor {
         String errorMsg = bindingResult.getFieldErrors().get(0).getDefaultMessage();
 
         return ResponseEntity.ok(ApiResponse.builder()
-                .status(HttpStatus.BAD_REQUEST)
+                .status(StatusEnum.BAD_REQUEST)
                 .msg(errorMsg)
                 .data("")
                 .build());
@@ -33,11 +33,10 @@ public class ExceptionAdvisor {
     // PathVariable valid exception
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<?> pathValidationError(ConstraintViolationException exception) {
-
         String errorMsg = "규칙을 지켜 확인해주세요.";
 
         return ResponseEntity.ok(ApiResponse.builder()
-                .status(HttpStatus.BAD_REQUEST)
+                .status(StatusEnum.VALID_ERROR)
                 .msg(errorMsg)
                 .data("")
                 .build());
@@ -46,12 +45,12 @@ public class ExceptionAdvisor {
     /**
      * [member]
      */
-    // 닉네임 규칙 valid
+    // 닉네임, email 규칙 valid
     @ExceptionHandler(NicknameValidException.class)
-    protected ResponseEntity<?> memberNotExist(NicknameValidException exception) {
+    protected ResponseEntity<?> nicknameValidError(NicknameValidException exception) {
         return ResponseEntity.ok(ApiResponse.builder()
-                .status(HttpStatus.BAD_REQUEST)
-                .msg("닉네임 규칙을 확인해주세요.")
+                .status(exception.getStatus())
+                .msg(exception.getMessage())
                 .data("")
                 .build());
     }
@@ -60,8 +59,8 @@ public class ExceptionAdvisor {
     @ExceptionHandler(ConflictMemberException.class)
     protected ResponseEntity<?> conflictMember(ConflictMemberException exception) {
         return ResponseEntity.ok(ApiResponse.builder()
-                .status(HttpStatus.BAD_REQUEST)
-                .msg("중복확인을 해주세요.")
+                .status(StatusEnum.JOIN_CONFLICT)
+                .msg(exception.getMessage())
                 .data("")
                 .build());
     }

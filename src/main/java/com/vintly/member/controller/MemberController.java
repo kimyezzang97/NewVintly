@@ -1,6 +1,7 @@
 package com.vintly.member.controller;
 
 import com.vintly.common.ApiResponse;
+import com.vintly.common.exception.StatusEnum;
 import com.vintly.common.exception.memebr.NicknameValidException;
 import com.vintly.member.model.req.JoinReq;
 import com.vintly.member.service.MemberService;
@@ -34,7 +35,7 @@ public class MemberController {
     @GetMapping("/test")
     public ResponseEntity<?> test(){
         return ResponseEntity.ok(ApiResponse.builder()
-                .status(HttpStatus.OK)
+                .status(StatusEnum.OK)
                 .msg("TEST")
                 .data("").build());
     }
@@ -47,7 +48,7 @@ public class MemberController {
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getChkEmail(@PathVariable("email") @NotBlank @Email @Size(max = 64) String email){
         return ResponseEntity.ok(ApiResponse.builder()
-                .status(HttpStatus.OK)
+                .status(StatusEnum.OK)
                 .msg("")
                 .data(memberService.getChkEmail(email))
                 .build());
@@ -65,7 +66,7 @@ public class MemberController {
         }
 
         return ResponseEntity.ok(ApiResponse.builder()
-                .status(HttpStatus.OK)
+                .status(StatusEnum.OK)
                 .msg("")
                 .data(memberService.getChkNickname(nickname))
                 .build());
@@ -81,7 +82,7 @@ public class MemberController {
         memberService.createMember(joinReq);
 
         return ResponseEntity.ok(ApiResponse.builder()
-                .status(HttpStatus.OK)
+                .status(StatusEnum.OK)
                 .msg("")
                 .data("")
                 .build());
