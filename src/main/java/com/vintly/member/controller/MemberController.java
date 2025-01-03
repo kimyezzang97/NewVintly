@@ -76,7 +76,7 @@ public class MemberController {
      * @param joinReq
      * @return
      */
-    @PostMapping("/join")
+    @PostMapping("")
     public ResponseEntity<?> createMember(@Valid @RequestBody JoinReq joinReq){
         memberService.createMember(joinReq);
 
