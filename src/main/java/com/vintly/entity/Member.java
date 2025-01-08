@@ -56,13 +56,18 @@ public class Member {
     @Column(name = "use_yn")
     private Use useYn;
 
+    @Comment("계정 레벨")
+    @Column(name = "role")
+    private String role;
+
     @Builder
-    public Member(String email, String password, String nickname){
+    public Member(String email, String password, String nickname, String role){
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.emailCode = "" + ThreadLocalRandom.current().nextInt(100000, 1000000); // 메일 코드 6자리 생성
         this.useYn = Use.K; // 대기
+        if(role == null || role.isEmpty()) this.role = "ROLE_USER";
     }
 
     public void enableMember(){

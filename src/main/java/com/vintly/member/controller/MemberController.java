@@ -25,7 +25,7 @@ import java.io.IOException;
 @Validated
 public class MemberController {
 
-    private MemberService memberService;
+    private final MemberService memberService;
 
     @Autowired
     public MemberController(MemberService memberService){
@@ -98,7 +98,6 @@ public class MemberController {
     @GetMapping("/verify")
     public void verifyMember(@RequestParam String code, @RequestParam String email, HttpServletResponse res) throws IOException {
         Integer isVerified = memberService.verifyEmail(code, email, res);
-        System.out.println(isVerified);
         if (isVerified == 1){
             res.sendRedirect("/members/verify/success");
         } else {

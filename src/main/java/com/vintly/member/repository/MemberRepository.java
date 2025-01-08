@@ -7,12 +7,16 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // email 중복 확인
     Integer countByEmail(String email);
+
+    // email 중복확인 또 다른 방법
+    // Boolean existsByEmail(String email);
 
     // 닉네임 중복 체크
     Integer countByNickname(String nickname);
@@ -25,4 +29,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // 이메일 코드, 이메일로 Member 엔티티 가져오기
     Member findByEmailCodeAndEmail(String code, String email);
+
+    // login 시 email(ID로 씀) 로 유저 정보 가져오기
+    Optional<Member> findByEmail(String email);
 }

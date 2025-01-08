@@ -31,9 +31,9 @@ public class MemberService {
     @Value("${company.port}")
     private String serverPort;
 
-    private MemberRepository memberRepository;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-    private MailService mailService;
+    private final MemberRepository memberRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final MailService mailService;
 
     @Autowired
     public MemberService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder, MailService mailService) {
@@ -85,7 +85,7 @@ public class MemberService {
         emailValues.put("nickname", joinReq.getNickname());
 
         emailValues.put("url", "http://" + serverAddress + ":" + serverPort +
-                "/api/v1/members/verify?code=" + code +"&email=" + joinReq.getEmail());
+                "/api/v1/members/verify?code=" + code + "&email=" + joinReq.getEmail());
 
         mailService.mailSend(mailDTO, emailValues,"join");
     }
