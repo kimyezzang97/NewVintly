@@ -1,11 +1,9 @@
 package com.vintly.common.exception;
 
-import com.vintly.common.ApiResponse;
+import com.vintly.common.config.ApiResponse;
 import com.vintly.common.exception.memebr.ConflictMemberException;
 import com.vintly.common.exception.memebr.NicknameValidException;
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;

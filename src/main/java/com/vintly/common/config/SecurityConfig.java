@@ -51,11 +51,13 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
 
                 // 경로 인증 인가 설정
-                .authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/login", "/logout", "/join","/api/v1/members/**",
-                        "/members/verify/**").permitAll() // 모든 경로 허용
-                .requestMatchers("/admin").hasRole("ADMIN") // admin 권한자만 사용
-                .anyRequest().authenticated()) // 로그인한 사용자는 가능
+                .authorizeHttpRequests(
+                        (auth) -> auth
+                        .requestMatchers("/login", "/logout", "/join","/api/v1/members/**",
+                                    "/members/verify/**").permitAll() // 모든 경로 허용
+                        .requestMatchers("/admin").hasRole("ADMIN") // admin 권한자만 사용
+                        .anyRequest().authenticated()
+                ) // 로그인한 사용자는 가능
 
                 // 세션 없이 (stateless) / JWT 사용
                 .sessionManagement((sessionManagement) -> sessionManagement

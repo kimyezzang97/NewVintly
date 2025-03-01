@@ -1,6 +1,5 @@
 package com.vintly.member.service;
 
-import com.vintly.common.ApiResponse;
 import com.vintly.common.exception.memebr.ConflictMemberException;
 import com.vintly.common.util.mail.MailService;
 import com.vintly.common.util.mail.model.MailDto;
@@ -9,14 +8,9 @@ import com.vintly.member.model.req.JoinReq;
 import com.vintly.member.repository.MemberRepository;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
-import org.hibernate.mapping.Join;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;

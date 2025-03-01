@@ -1,4 +1,4 @@
-package com.vintly.common;
+package com.vintly.common.config;
 
 import com.vintly.common.exception.StatusEnum;
 import lombok.Builder;
