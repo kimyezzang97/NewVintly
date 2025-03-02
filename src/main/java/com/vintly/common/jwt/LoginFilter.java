@@ -1,7 +1,7 @@
 package com.vintly.common.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vintly.entity.RefreshEntity;
+import com.vintly.entity.Refresh;
 import com.vintly.member.repository.RefreshRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletInputStream;
@@ -43,8 +43,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         ObjectMapper objectMapper = new ObjectMapper();
         String username = "";
         String password = "";
-        //        String username = obtainUsername(request); [form-data 방식]
-        //        String password = obtainPassword(request);
         try {
             ServletInputStream inputStream = request.getInputStream();
             String messageBody = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
@@ -74,11 +72,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = auth.getAuthority();
 
         //토큰 생성
-        String access = jwtUtil.createJwt("access", username, role, 600000L);
-        String refresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
+        String access = jwtUtil.createJwt("access", username, role, 600000L); // 10분
+        String refresh = jwtUtil.createJwt("refresh", username, role, 86400000L); // 24시간
 
         //Refresh 토큰 저장
-        addRefreshEntity(username, refresh, 86400000L);
+        addRefreshEntity(username, refresh, 86400000L); // 24시간
 
         //응답 설정
         response.setHeader("access", access); // header 는 access 토큰
@@ -87,7 +85,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     private void addRefreshEntity(String username, String refresh, Long expiredMs) {
-
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(timestamp);
@@ -95,7 +92,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         Timestamp newDate = new Timestamp(calendar.getTimeInMillis());
 
-        RefreshEntity refreshEntity = RefreshEntity.builder()
+        Refresh refreshEntity = Refresh.builder()
                 .memberId(username)
                 .refreshToken(refresh)
                 .expiration(newDate)
@@ -107,17 +104,21 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     // login 실패시
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
-
         response.setStatus(401);
-    }
 
+        // 로그인 실패 시 refresh 쿠키 삭제
+        Cookie cookie = new Cookie("refresh", null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+    }
 
     private Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24*60*60);
-        //cookie.setSecure(true);
-        //cookie.setPath("/");
-        cookie.setHttpOnly(true);
+        cookie.setMaxAge(24*60*60); // 24시간
+        cookie.setHttpOnly(true); // XSS 방어, JS 접근 차단
+        //cookie.setSecure(true); // HTTPS 접근시만
+        //cookie.setPath("/"); 경로지정 필요시
 
         return cookie;
     }
