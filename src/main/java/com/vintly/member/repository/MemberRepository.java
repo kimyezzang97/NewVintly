@@ -13,22 +13,16 @@ import java.util.Optional;
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // email 중복 확인
-    Integer countByEmail(String email);
+    Boolean existsByEmail(String email);
 
-    // email 중복확인 또 다른 방법
-    // Boolean existsByEmail(String email);
-
-    // 닉네임 중복 체크
-    Integer countByNickname(String nickname);
+    // 닉네임 중복 확인
+    Boolean existsByNickname(String nickname);
 
     // 인증기간 지난 ID 삭제
     Integer deleteByCreateDateBeforeAndUseYn(LocalDateTime today, Use use);
 
-    // 아이디, 인증코드 체크
-    Integer countByEmailCodeAndEmail(String code, String email);
-
     // 이메일 코드, 이메일로 Member 엔티티 가져오기
-    Member findByEmailCodeAndEmail(String code, String email);
+    Optional<Member> findByEmailCodeAndEmail(String code, String email);
 
     // login 시 email(ID로 씀) 로 유저 정보 가져오기
     Optional<Member> findByEmail(String email);
