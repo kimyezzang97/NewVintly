@@ -16,9 +16,9 @@ import java.time.LocalDateTime;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Getter
-@Entity
+@Entity(name = "member")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners(AuditingEntityListener.class) // JPA 생성 시간 자동 적용
 public class Member {
 
     @Id

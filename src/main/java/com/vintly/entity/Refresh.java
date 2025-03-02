@@ -6,15 +6,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.sql.Date;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Entity(name = "refresh")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class RefreshEntity {
+public class Refresh {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,7 +26,7 @@ public class RefreshEntity {
     private Timestamp expiration;
 
     @Builder
-    public RefreshEntity(String memberId, String refreshToken, Timestamp expiration){
+    public Refresh(String memberId, String refreshToken, Timestamp expiration){
         this.memberId = memberId;
         this.refreshToken = refreshToken;
         this.expiration = expiration;
