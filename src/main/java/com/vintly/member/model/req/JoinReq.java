@@ -14,14 +14,14 @@ import lombok.NoArgsConstructor;
 public class JoinReq {
 
     // nickname
-    @NotBlank(message = "nickname을 공백없이 입력해주세요.")
-    @Pattern(regexp = "^[가-힣A-Za-z0-9_-]{1,10}$", message = "영어,한글 혹은 '-','_' 으로 1~10자로 입력해주세요.")
+    @NotBlank(message = "닉네임을 공백없이 입력해주세요.")
+    @Pattern(regexp = "^[가-힣A-Za-z0-9_-]{2,10}$", message = "영어,한글 혹은 '-','_' 으로 1~10자로 입력해주세요.")
     private String nickname;
 
     // 이메일
     @Email
     @NotBlank(message = "이메일을 공백없이 입력해주세요")
-    @Pattern(regexp = "^.{0,64}$", message = "64자 이하로 입력하주세요.")
+    @Pattern(regexp = "^.{5,64}$", message = "64자 이하 이메일 형식으로 입력해주세요.")
     private String email;
 
     // 비밀번호
@@ -39,6 +39,7 @@ public class JoinReq {
                 .build();
     }
 
+    // 비밀번호 암호화
     public void encPassword(String encodePassword){
         this.password = encodePassword;
     }
