@@ -1,7 +1,6 @@
 package com.vintly.member.service;
 
 import com.vintly.entity.Member;
-import com.vintly.member.model.CustomUserDetails;
 import com.vintly.member.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,12 +22,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Member> userData = memberRepository.findByEmail(username);
 
-        if (userData.isPresent()) {
-            return new CustomUserDetails(userData.get());
-        }
+        System.out.println("username: " + username);
+        // 이메일을 통해 사용자 정보를 조회하고, 없으면 예외를 던짐 (401)
+        Member member = memberRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException(""));
 
-        return null;
+        return new CustomUserDetails(member);
     }
 }
