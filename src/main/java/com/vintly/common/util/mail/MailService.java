@@ -1,5 +1,6 @@
 package com.vintly.common.util.mail;
 
+import com.vintly.common.exception.memebr.ConflictMemberException;
 import com.vintly.common.util.mail.model.MailDto;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -17,8 +18,8 @@ import java.util.HashMap;
 @Service
 public class MailService {
 
-    private JavaMailSender mailSender;
-    private SpringTemplateEngine templateEngine;
+    private final JavaMailSender mailSender;
+    private final SpringTemplateEngine templateEngine;
 
     @Value("${spring.mail.username}")
     private String fromAddress;
@@ -30,29 +31,34 @@ public class MailService {
     }
 
     // 메일 전송
-    public void mailSend(MailDto mailDTO, HashMap<String, String> values, String htmlName) throws MessagingException, IOException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+    public void mailSend(MailDto mailDTO, HashMap<String, Object> values, String htmlName) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-        //메일 제목 설정
-        helper.setSubject(mailDTO.getTitle());
+            //메일 제목 설정
+            helper.setSubject(mailDTO.getTitle());
 
-        // 발신자 설정
-        helper.setFrom(fromAddress);
+            // 발신자 설정
+            helper.setFrom(fromAddress);
 
-        //수신자 설정
-        helper.setTo(mailDTO.getAddress());
+            //수신자 설정
+            helper.setTo(mailDTO.getAddress());
 
-        //템플릿에 전달할 데이터 설정
-        Context context = new Context();
-        values.forEach((key, value)->{
-            context.setVariable(key, value);
-        });
+            //템플릿에 전달할 데이터 설정
+            Context context = new Context();
+            context.setVariables(values);
 
-        //메일 내용 설정 : 템플릿 프로세스
-        String html = templateEngine.process(htmlName,context);
-        helper.setText(html,true);
+            //메일 내용 설정 : 템플릿 프로세스
+            String html = templateEngine.process(htmlName, context);
+            helper.setText(html, true);
 
-        mailSender.send(message);
+            mailSender.send(message);
+
+        } catch (Exception e){
+            System.out.println("\uD83D\uDCE7 메일 발송 실패! 회원가입 롤백됨");
+            e.printStackTrace();
+            throw new ConflictMemberException();
+        }
     }
 }
