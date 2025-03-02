@@ -1,7 +1,9 @@
 package com.vintly.common.exception;
 
 import com.vintly.common.config.ApiResponse;
+import com.vintly.common.exception.memebr.AccessExpiredException;
 import com.vintly.common.exception.memebr.ConflictMemberException;
+import com.vintly.common.exception.memebr.EmailSendException;
 import com.vintly.common.exception.memebr.NicknameValidException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
@@ -61,6 +63,22 @@ public class ExceptionAdvisor {
                 .msg(exception.getStatus().getMessage())
                 .data("")
                 .build());
+    }
+
+    // 회원가입 - 이메일 발송 실패
+    @ExceptionHandler(EmailSendException.class)
+    protected ResponseEntity<?> emailSendError(EmailSendException exception) {
+        return ResponseEntity.ok(ApiResponse.builder()
+                .status(StatusEnum.EMAIL_SEND_ERROR)
+                .msg(exception.getStatus().getMessage())
+                .data("")
+                .build());
+    }
+
+    // 로그인 - access 토큰 만료
+    @ExceptionHandler(AccessExpiredException.class)
+    protected ResponseEntity<?> AccessExpired(AccessExpiredException exception) {
+        return ResponseEntity.status(401).build();
     }
 }
 
