@@ -1,12 +1,12 @@
 package com.vintly.member.repository;
 
-import com.vintly.entity.RefreshEntity;
+import com.vintly.entity.Refresh;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 
-public interface RefreshRepository extends JpaRepository<RefreshEntity, Long> {
+public interface RefreshRepository extends JpaRepository<Refresh, Long> {
 
     Boolean existsByRefreshToken(String refresh);
 
