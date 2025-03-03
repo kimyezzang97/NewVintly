@@ -29,11 +29,12 @@ jobs:
         id: set-timestamp
         run: echo "TIMESTAMP=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_ENV
 
-      
+
 
       # ✅ 성공/실패 상관없이 Discord 알림
       - name: Send Deployment Notification
         if: always()
+        continue-on-error: true  # 실패하더라도 계속 진행
         uses: Ilshidur/action-discord@master
         env:
           DISCORD_WEBHOOK: ${{ secrets.DEV_HOOK }}
