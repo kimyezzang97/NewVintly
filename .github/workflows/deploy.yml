@@ -31,8 +31,8 @@ jobs:
 
       # 🛑 빌드/배포 실패 시 Jacoco Report 업로드
       - name: Upload Jacoco Report
-        if: failure() # 이전 단계가 실패한 경우 실행됨
-        uses: actions/upload-artifact@v2
+        if: ${{ failure() }}  # 이전 단계가 실패한 경우 실행됨
+        uses: actions/upload-artifact@v3
         with:
           name: jacoco-report-${{ env.TIMESTAMP }} # 결과물의 이름
           path: build/reports/jacoco/test/html # 업로드할 파일 경로
