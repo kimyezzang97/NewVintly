@@ -42,7 +42,7 @@ jobs:
         if: always()
         uses: Ilshidur/action-discord@master
         env:
-          DISCORD_WEBHOOK: ${{ secrets.dev_hook }}
+          DISCORD_WEBHOOK: ${{ secrets.DEV_HOOK }}
           DISCORD_USERNAME: "GitHub Actions"
           DISCORD_AVATAR: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
         with:
