@@ -16,7 +16,7 @@ jobs:
           username: ${{ secrets.DEV_BACK_USERNAME }}
           password: ${{ secrets.DEV_BACK_PASSWORD }}
           port: ${{ secrets.DEV_BACK_PORT }}
-          script_stop: false
+          script_stop: true
           script: |
             cd /NewVintly
             git pull origin dev
@@ -31,10 +31,9 @@ jobs:
 
 
 
-      # ✅ 성공/실패 상관없이 Discord 알림
+      # 성공/실패 상관없이 Discord 알림
       - name: Send Deployment Notification
-        if: always() #always()
-        #continue-on-error: true  # 실패하더라도 계속 진행
+        if: always()
         uses: Ilshidur/action-discord@master
         env:
           DISCORD_WEBHOOK: ${{ secrets.DEV_HOOK }}
