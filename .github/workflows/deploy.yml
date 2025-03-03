@@ -39,7 +39,7 @@ jobs:
 
       # ✅ 성공/실패 상관없이 Discord 알림
       - name: Send Deployment Notification
-        if: always()
+        #if: always()
         uses: Ilshidur/action-discord@master
         env:
           DISCORD_WEBHOOK: ${{ secrets.DEV_HOOK }}
