@@ -35,7 +35,7 @@ jobs:
           DISCORD_AVATAR: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
         with:
           args: |
-            ${{ job.status }} 🚀 **Dev 배포 완료!**
+            ${{ job.status == 'success' && '✅' || '❌' }} ${{ job.status == 'success' && '🚀 **Dev 배포 완료!**' || '🚨 **Dev 배포 실패!**' }}
             🔗 GitHub Actions 로그 확인하세요.
 
         
