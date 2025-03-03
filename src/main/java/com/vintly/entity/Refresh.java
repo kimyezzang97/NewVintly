@@ -18,7 +18,7 @@ public class Refresh {
     private Long id;
 
     @Column(name = "member_id")
-    private String memberId;
+    private Long memberId;
 
     @Column(name = "refresh_token")
     private String refreshToken;
@@ -26,7 +26,7 @@ public class Refresh {
     private Timestamp expiration;
 
     @Builder
-    public Refresh(String memberId, String refreshToken, Timestamp expiration){
+    public Refresh(Long memberId, String refreshToken, Timestamp expiration){
         this.memberId = memberId;
         this.refreshToken = refreshToken;
         this.expiration = expiration;

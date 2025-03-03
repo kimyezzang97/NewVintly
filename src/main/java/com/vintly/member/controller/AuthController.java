@@ -5,6 +5,7 @@ import com.vintly.common.exception.StatusEnum;
 import com.vintly.common.exception.memebr.NicknameValidException;
 import com.vintly.member.model.req.JoinReq;
 import com.vintly.member.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -98,8 +99,17 @@ public class AuthController {
             System.out.println(e.getMessage());
             System.out.println("\uD83D\uDD34 리다이렉트 중 오류 발생");
         }
-
     }
 
+    /**
+     * 토큰 재발급
+     * @param request
+     * @param response
+     * @return accessToken, refreshToken
+     */
+    @PostMapping("/reissue")
+    public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response){
+        return memberService.reissue(request, response);
+    }
 
 }

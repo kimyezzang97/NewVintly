@@ -1,7 +1,9 @@
 package com.vintly.common.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vintly.entity.Member;
 import com.vintly.entity.Refresh;
+import com.vintly.member.repository.MemberRepository;
 import com.vintly.member.repository.RefreshRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletInputStream;
@@ -14,11 +16,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.StreamUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Iterator;
@@ -30,11 +34,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
+    private final MemberRepository memberRepository;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, RefreshRepository refreshRepository) {
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, RefreshRepository refreshRepository,
+                       MemberRepository memberRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.refreshRepository = refreshRepository;
+        this.memberRepository = memberRepository;
     }
 
     // 로그인 정보를 Authentication Manager 에게 넘긴다. 이후 login 성공, 실패 판단
@@ -84,16 +91,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setStatus(HttpStatus.OK.value());
     }
 
-    private void addRefreshEntity(String username, String refresh, Long expiredMs) {
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(timestamp);
-        calendar.add(Calendar.SECOND, Integer.parseInt(String.valueOf(expiredMs / 1000)));
+    private void addRefreshEntity(String username, String refresh, long expiredMs) {
+        Timestamp newDate = Timestamp.from(Instant.now().plusMillis(expiredMs));
 
-        Timestamp newDate = new Timestamp(calendar.getTimeInMillis());
+        Member member = memberRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException(""));
 
         Refresh refreshEntity = Refresh.builder()
-                .memberId(username)
+                .memberId(member.getMemberId())
                 .refreshToken(refresh)
                 .expiration(newDate)
                 .build();
@@ -108,7 +113,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // 로그인 실패 시 refresh 쿠키 삭제
         Cookie cookie = new Cookie("refresh", null);
-        cookie.setMaxAge(0);
+        cookie.setMaxAge(0); // 쿠키 삭제
         cookie.setPath("/");
         response.addCookie(cookie);
     }
@@ -117,8 +122,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(24*60*60); // 24시간
         cookie.setHttpOnly(true); // XSS 방어, JS 접근 차단
+        cookie.setPath("/");
         //cookie.setSecure(true); // HTTPS 접근시만
-        //cookie.setPath("/"); 경로지정 필요시
 
         return cookie;
     }

@@ -4,6 +4,7 @@ import com.vintly.common.jwt.CustomLogoutFilter;
 import com.vintly.common.jwt.JWTFilter;
 import com.vintly.common.jwt.JWTUtil;
 import com.vintly.common.jwt.LoginFilter;
+import com.vintly.member.repository.MemberRepository;
 import com.vintly.member.repository.RefreshRepository;
 import jakarta.servlet.Filter;
 import org.springframework.context.annotation.Bean;
@@ -30,11 +31,14 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
+    private final MemberRepository memberRepository;
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, RefreshRepository refreshRepository) {
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtil jwtUtil, RefreshRepository refreshRepository,
+                          MemberRepository memberRepository) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
         this.refreshRepository = refreshRepository;
+        this.memberRepository = memberRepository;
     }
 
     @Bean
@@ -66,7 +70,7 @@ public class SecurityConfig {
                 /** JWT 설정 **/
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)
 
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository, memberRepository), UsernamePasswordAuthenticationFilter.class)
 
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class);
         return http.build();
