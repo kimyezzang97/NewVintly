@@ -20,13 +20,11 @@ jobs:
           script: |
             cd /NewVintly
             git pull origin dev
-            touch ./src/main/resources/application-dev.yml
-            echo "$PROPERTIES_DEV" > ./src/main/resources/application-dev.yml
+            echo "${{ secrets.PROPERTIES_DEV }}" > ./src/main/resources/application.yml
             ./gradlew clean build
             sudo fuser -k -n tcp 8080 || true
             nohup java -jar build/libs/*SNAPSHOT.jar > ./output.log 2>&1 &
-          env:
-            PROPERTIES_DEV: ${{ secrets.PROPERTIES_DEV }}
+        
               
 
         
