@@ -9,34 +9,21 @@ on:
     dev-job:
       runs-on: ubuntu-latest
       steps:
-        - uses: actions/checkout@v3 # Repository 로 부터 CI 수행 서버로 코드를 내려받는 Action
-        - name: Set up JDK 17 # step의 이름
-          uses: actions/setup-java@v3 # jdk 를 다운 받고 캐싱해주는 Action
-          with: # Action 에 전달하는 input을 정의하는 곳
-            java-version: 17
-            distribution: 'temurin' # jdk를 제공하는 vender 사 ex. MS, zulu
-
-        - uses: actions/cache@v3 # Github job은 매번 새로운 서버에서 실행됨, 제공해주는 캐싱을 이용해 성능 업
+        - name: SSH로 접속
+          uses: appleboy/ssh-action@v1.2.1
           with:
-            path: |
-              ~/.gradle/caches
-              ~/.gradle/wrapper
-            key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+            host: ${{ secrets.DEV_BACK_HOST }}
+            username: ${{ secrets.DEV_BACK_USERNAME }}
+            password: ${{ secrets.DEV_BACK_PASSWORD }}
+            port: ${{ secrets.DEV_BACK_PORT }}
+            script_stop: true
+            script: |
+              cd /NewVintly
+              git pull origin dev
+              ./gradlew clean build
+              sudo fuser -k -n tcp 8080 || true
+              nohup java -jar build/libs/*SNAPSHOT.jar > ./output.log 2>&1 &
+              
 
-        # gradlew 에 권한 부여
-        - name: Grant execute permission for gradlew
-          run: chmod +x gradlew
-
-        # Copy Properties files
-        - name: Make application-dev.yml
-          run : |
-            touch ./src/main/resources/application-dev.yml
-            echo "$PROPERTIES_DEV" > ./src/main/resources/application-dev.yml
-          # Make env file
-          env:
-            PROPERTIES_DEV: ${{ secrets.PROPERTIES_DEV }}
-
-        # gradle build
-        - name: Build with Gradle
-          run: ./gradlew clean build
+        
 
