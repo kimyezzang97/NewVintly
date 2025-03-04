@@ -37,6 +37,3 @@ jobs:
           args: |
             ${{ job.status == 'success' && '✅' || '❌' }} ${{ job.status == 'success' && '🚀 **Dev 배포 완료!**' || '🚨 **Dev 배포 실패!**' }}
             🔗 GitHub Actions 로그 확인하세요.
-
-        
-
