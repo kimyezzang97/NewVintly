@@ -58,7 +58,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         (auth) -> auth
                         .requestMatchers("/login", "/logout", "/api/v1/members/**", "/api/v1/auth/**",
-                                    "/members/verify/**").permitAll() // 모든 경로 허용
+                                    "/members/verify/**", "/boards").permitAll() // 모든 경로 허용
                         .requestMatchers("/admin").hasRole("ADMIN") // admin 권한자만 사용
                         .anyRequest().authenticated()
                 ) // 로그인한 사용자는 가능
