@@ -53,7 +53,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             ServletInputStream inputStream = request.getInputStream();
             String messageBody = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
 
-            Map<String, Object> map = objectMapper.readValue(messageBody, Map.class);
+            Map<String, String> map = objectMapper.readValue(messageBody, Map.class);
             username = String.valueOf(map.get("username"));
             password = String.valueOf(map.get("password"));
 
