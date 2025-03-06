@@ -22,8 +22,9 @@ jobs:
             git pull origin dev
             echo "${{ secrets.PROPERTIES_DEV }}" > ./src/main/resources/application.yml
             ./gradlew clean build
+            service redis-server restart
             sudo fuser -k -n tcp 8080 || true
-            nohup java -jar build/libs/*SNAPSHOT.jar > ./output.log 2>&1 &
+            nohup java -jar -Dspring.profiles.active=dev build/libs/*SNAPSHOT.jar > ./output.log 2>&1 &
 
       # ✅ 성공/실패 상관없이 Discord 알림!
       - name: Send Deployment Notification
