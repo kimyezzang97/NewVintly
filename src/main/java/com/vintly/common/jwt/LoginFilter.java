@@ -2,14 +2,13 @@ package com.vintly.common.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vintly.entity.Member;
-import com.vintly.entity.Refresh;
 import com.vintly.member.repository.MemberRepository;
-import com.vintly.member.repository.RefreshRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,25 +22,25 @@ import org.springframework.util.StreamUtils;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 // Login 클래스
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
-    private final RefreshRepository refreshRepository;
     private final MemberRepository memberRepository;
+    private final StringRedisTemplate redisTemplate;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil, RefreshRepository refreshRepository,
-                       MemberRepository memberRepository) {
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil,
+                       MemberRepository memberRepository, StringRedisTemplate redisTemplate) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-        this.refreshRepository = refreshRepository;
         this.memberRepository = memberRepository;
+        this.redisTemplate = redisTemplate;
     }
 
     // 로그인 정보를 Authentication Manager 에게 넘긴다. 이후 login 성공, 실패 판단
@@ -97,13 +96,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Member member = memberRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException(""));
 
-        Refresh refreshEntity = Refresh.builder()
-                .memberId(member.getMemberId())
-                .refreshToken(refresh)
-                .expiration(newDate)
-                .build();
-
-        refreshRepository.save(refreshEntity);
+        String key = "refresh:" + member.getEmail(); // ex) refresh:kyc@naver.com
+        redisTemplate.opsForValue().set(key, refresh, expiredMs, TimeUnit.MILLISECONDS);
     }
 
     // login 실패시
