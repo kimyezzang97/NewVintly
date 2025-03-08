@@ -1,0 +1,40 @@
+name: Deploy to Dev
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  dev-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH로 접속
+        uses: appleboy/ssh-action@v1.2.1
+        with:
+          host: ${{ secrets.DEV_BACK_HOST }}
+          username: ${{ secrets.DEV_BACK_USERNAME }}
+          password: ${{ secrets.DEV_BACK_PASSWORD }}
+          port: ${{ secrets.DEV_BACK_PORT }}
+          script_stop: true
+          script: |
+            cd /NewVintly
+            git pull origin dev
+            echo "${{ secrets.PROPERTIES_DEV }}" > ./src/main/resources/application.yml
+            ./gradlew clean build
+            service redis-server restart
+            sudo fuser -k -n tcp 8080 || true
+            nohup java -jar -Dspring.profiles.active=dev build/libs/*SNAPSHOT.jar > ./output.log 2>&1 &
+
+      # ✅ 성공/실패 상관없이 Discord 알림!
+      - name: Send Deployment Notification
+        if: always()
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.dev_hook }}
+          DISCORD_USERNAME: "GitHub Actions"
+          DISCORD_AVATAR: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+        with:
+          args: |
+            ${{ job.status == 'success' && '✅' || '❌' }} ${{ job.status == 'success' && '🚀 **Dev 배포 완료!**' || '🚨 **Dev 배포 실패!**' }}
+            🔗 GitHub Actions 로그 확인하세요.

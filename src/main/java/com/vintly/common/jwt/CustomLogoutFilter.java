@@ -1,6 +1,5 @@
 package com.vintly.common.jwt;
 
-import com.vintly.member.repository.RefreshRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,7 +8,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
@@ -17,11 +16,11 @@ import java.io.IOException;
 public class CustomLogoutFilter extends GenericFilterBean {
 
     private final JWTUtil jwtUtil;
-    private final RefreshRepository refreshRepository;
+    private final StringRedisTemplate redisTemplate;
 
-    public CustomLogoutFilter(JWTUtil jwtUtil, RefreshRepository refreshRepository) {
+    public CustomLogoutFilter(JWTUtil jwtUtil, StringRedisTemplate redisTemplate) {
         this.jwtUtil = jwtUtil;
-        this.refreshRepository = refreshRepository;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -71,15 +70,10 @@ public class CustomLogoutFilter extends GenericFilterBean {
             return;
         }
 
-        //DB에 저장되어 있는지 확인
-        if (!refreshRepository.existsByRefreshToken(refresh)) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST); // 400 code
-            return;
-        }
-
-        //로그아웃 진행
-        //Refresh 토큰 DB 에서 제거
-        refreshRepository.deleteByRefreshToken(refresh);
+        // [로그아웃] redis - refresh token 제거
+        String redisKey = "refresh:" + jwtUtil.getUsername(refresh);
+        System.out.println(redisKey);
+        redisTemplate.delete(redisKey);
 
         //Refresh 토큰 Cookie 값 0
         Cookie cookie = new Cookie("refresh", null);
