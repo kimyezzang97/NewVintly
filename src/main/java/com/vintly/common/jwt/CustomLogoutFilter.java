@@ -72,7 +72,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
         // [로그아웃] redis - refresh token 제거
         String redisKey = "refresh:" + jwtUtil.getUsername(refresh);
-        System.out.println(redisKey);
+        //System.out.println(redisKey);
         redisTemplate.delete(redisKey);
 
         //Refresh 토큰 Cookie 값 0
