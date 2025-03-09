@@ -1,0 +1,36 @@
+<configuration>
+    <property name="LOG_FILE" value="/logs/newVintly/application.log"/> <!-- 로그가 쌓일 경로 지정 (linux) -->
+
+    <!-- logback 설정 초기 log 끄기 -->
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+    <!-- 색깔 추가 -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+
+    <!-- 콘솔 출력 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- 날짜 : 파랑, [Log LEVEL] INFO : 초록, WARN : 노랑, ERROR : 빨강 -->
+            <pattern>%clr(%d{yyyy-MM-dd HH:mm:ss}){blue} %clr(%-5level) [%thread] %cyan(%logger{36}) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 파일 출력 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}</file> <!-- 상단 property name="LOG_FILE" 을 가져온다. -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>application.%d{yyyy-MM-dd}.log.gz</fileNamePattern> <!-- 1일마다 분기 로깅, gz으로 저장-->
+            <maxHistory>30</maxHistory> <!-- 30일까지 보관 -->
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Logger 설정 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+    </root>
+</configuration>
