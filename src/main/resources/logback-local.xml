@@ -7,6 +7,12 @@
     <!-- 색깔 추가 -->
     <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
 
+    <!-- Logstash 로 전송할 Appender -->
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>localhost:5044</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
+
     <!-- 콘솔 출력 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -32,5 +38,6 @@
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />
+        <appender-ref ref="LOGSTASH" />
     </root>
 </configuration>
