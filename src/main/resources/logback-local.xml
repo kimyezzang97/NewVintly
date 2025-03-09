@@ -1,5 +1,5 @@
 <configuration>
-    <property name="LOG_FILE" value="D:\logs\newVintly\back\application.log"/> <!-- 로그가 쌓일 경로 지정(window) -->
+    <property name="LOG_FILE" value="D:\logs\newVintly\back\application.log"/> <!-- 로그가 쌓일 경로 지정(window) --><!-- mac : /Users/kimyezzang/Documents/logs/newVintly/back -->
 
     <!-- logback 설정 초기 log 끄기 -->
     <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
