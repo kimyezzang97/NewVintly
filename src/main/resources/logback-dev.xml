@@ -1,5 +1,5 @@
 <configuration>
-    <property name="LOG_FILE" value="/newVintly/application.log"/> <!-- 로그가 쌓일 경로 지정 -->
+    <property name="LOG_FILE" value="/logs/newVintly/application.log"/> <!-- 로그가 쌓일 경로 지정 (linux) -->
 
     <!-- logback 설정 초기 log 끄기 -->
     <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
