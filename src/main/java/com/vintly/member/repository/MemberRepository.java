@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    // email 중복 확인
+    // email 중복 확인-
     Boolean existsByEmail(String email);
 
     // 닉네임 중복 확인
