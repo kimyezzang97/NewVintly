@@ -5,6 +5,8 @@ import com.vintly.common.jwt.JWTFilter;
 import com.vintly.common.jwt.JWTUtil;
 import com.vintly.common.jwt.LoginFilter;
 import com.vintly.member.repository.MemberRepository;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -12,12 +14,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration // Configuration 등록하기
 @EnableWebSecurity // 스프링 시큐리티 필터가 스프링 필터체인에 등록이 된다.
@@ -52,10 +56,10 @@ public class SecurityConfig {
                 // 경로 인증 인가 설정
                 .authorizeHttpRequests(
                         (auth) -> auth
-                        .requestMatchers("/login", "/logout", "/api/v1/members/**", "/api/v1/auth/**",
+                                .requestMatchers("/login", "/logout", "/api/v1/members/**", "/api/v1/auth/**",
                                     "/members/verify/**").permitAll() // 모든 경로 허용
-                        .requestMatchers("/admin").hasRole("ADMIN") // admin 권한자만 사용
-                        .anyRequest().authenticated()
+                                .requestMatchers("/admin").hasRole("ADMIN") // admin 권한자만 사용
+                                .anyRequest().authenticated()
                 ) // 로그인한 사용자는 가능
 
                 // 세션 없이 (stateless) / JWT 사용
@@ -82,6 +86,13 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
 
         return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "spring.h2.console.enabled",havingValue = "true")
+    public WebSecurityCustomizer configureH2ConsoleEnable() {
+        return web -> web.ignoring()
+                .requestMatchers(PathRequest.toH2Console());
     }
 }
 
