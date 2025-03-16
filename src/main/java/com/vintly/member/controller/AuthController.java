@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/v1/auth")
 @Validated
+@Slf4j
 public class AuthController {
 
     private final MemberService memberService;
@@ -96,8 +98,8 @@ public class AuthController {
                 res.sendRedirect("/members/verify/join/fail");
             }
         } catch (IOException e){
-            System.out.println(e.getMessage());
-            System.out.println("\uD83D\uDD34 리다이렉트 중 오류 발생");
+            log.warn("verifyMember {}", "\uD83D\uDD34 리다이렉트 중 오류 발생");
+            log.warn("verifyMember e: {}", e.getMessage());
         }
     }
 

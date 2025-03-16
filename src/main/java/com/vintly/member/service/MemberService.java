@@ -10,6 +10,7 @@ import com.vintly.member.repository.MemberRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -24,6 +25,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Slf4j
 public class MemberService {
 
     @Value("${company.address}")
@@ -125,27 +127,25 @@ public class MemberService {
 
         // refresh 토큰이 없으면 400 반환
         if (refresh == null) {
-            System.out.println("==================== refresh null ====================");
+            //System.out.println("==================== refresh null ====================");
             return new ResponseEntity<>("refresh token null", HttpStatus.BAD_REQUEST);
         }
 
         // Refresh 토큰 만료 확인
         if (jwtUtil.isExpired(refresh)) {
-            System.out.println("==================== refresh 토큰 만료 ====================");
+            log.info("refresh 토큰 만료 email : {}",jwtUtil.getUsername(refresh));
             return new ResponseEntity<>("refresh token expired", HttpStatus.BAD_REQUEST);
         }
 
         // Refresh 토큰인지 검증 (발급시 페이로드에 명시)
         String category = jwtUtil.getCategory(refresh);
         if (!category.equals("refresh")) {
-            System.out.println("==================== refresh 토큰인지 ====================");
             return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
         }
 
         // redis 에 refresh key 저장되어 있는지 확인
         String redisKey = "refresh:"+ jwtUtil.getUsername(refresh);
         if (!redisTemplate.hasKey(redisKey)) {
-            System.out.println("==================== refresh 존재여부 ====================");
             return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
         }
 
@@ -153,7 +153,7 @@ public class MemberService {
         String storedRefreshToken = redisTemplate.opsForValue().get(redisKey);
         if (storedRefreshToken == null || !storedRefreshToken.equals(refresh)) {
             redisTemplate.delete(redisKey);
-            System.out.println("==================== refresh 노일치 ====================");
+            log.info("refreshToken not equal {}", jwtUtil.getUsername(refresh));
             return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
         }
 
