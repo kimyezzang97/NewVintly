@@ -20,6 +20,7 @@ jobs:
           script: |
             cd /NewVintly
             git pull origin dev
+            echo "DEV_LOGSTASH_HOST=${{ secrets.DEV_LOGSTASH_HOST }}"
             echo "${{ secrets.PROPERTIES_DEV }}" > ./src/main/resources/application.yml
             ./gradlew clean build
             service redis-server restart
