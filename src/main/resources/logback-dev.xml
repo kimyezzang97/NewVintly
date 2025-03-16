@@ -9,7 +9,7 @@
 
     <!-- Logstash 로 전송할 Appender -->
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>${DEV_LOGSTASH_HOST}</destination>
+        <destination>http://elasticsearch:9200</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
 
