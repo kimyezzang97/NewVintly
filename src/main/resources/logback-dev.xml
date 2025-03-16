@@ -7,7 +7,7 @@
     <!-- 색깔 추가 -->
     <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
 
-    <!-- Logstash 로 전송할 Appender -->
+    <!-- Logstash 로 전송할 Appender. -->
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>http://elasticsearch:9200</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
