@@ -100,7 +100,7 @@ public class MemberService {
         Optional<Member> optionalMember = memberRepository.findByEmailCodeAndEmail(code, email);
 
         if(optionalMember.isEmpty()){
-            System.out.println("이메일 인증 실패");
+            log.info("이메일 인증 실패 {}", email);
             return false;
         }
 
