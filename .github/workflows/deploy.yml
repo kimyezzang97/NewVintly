@@ -24,7 +24,7 @@ jobs:
             echo "${{ secrets.PROPERTIES_DEV }}" > ./src/main/resources/application.yml
             ./gradlew clean build
             service redis-server restart
-            sudo fuser -k -n tcp 8080 || true
+            fuser -k -n tcp 8080 || true
             sleep 3
             nohup java -jar -Dspring.profiles.active=dev build/libs/*SNAPSHOT.jar &
 
