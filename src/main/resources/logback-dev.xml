@@ -9,7 +9,7 @@
 
     <!-- Logstash 로 전송할 Appender. -->
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>http://logstash:5044</destination>
+        <destination>logstash:5044</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
 
