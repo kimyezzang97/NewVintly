@@ -58,7 +58,9 @@ public class MemberService {
 
     // nickname 중복 체크
     @Transactional(readOnly = true)
-    public Boolean getChkNickname(String nickname){return memberRepository.existsByNickname(nickname);}
+    public Boolean getChkNickname(String nickname){
+        return memberRepository.existsByNickname(nickname);
+    }
 
     // 회원가입
     @Transactional(rollbackFor = Exception.class)
