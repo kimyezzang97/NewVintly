@@ -24,7 +24,7 @@ jobs:
             ./gradlew clean build
             service redis-server restart
             fuser -k -n tcp 8080 || true
-            nohup java -jar -Dspring.profiles.active=dev build/libs/*SNAPSHOT.jar &
+            setsid nohup java -jar -Dspring.profiles.active=dev build/libs/*SNAPSHOT.jar &
             disown -h %1
             exit
 
