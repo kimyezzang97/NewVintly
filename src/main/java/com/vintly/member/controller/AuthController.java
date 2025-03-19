@@ -43,11 +43,17 @@ public class AuthController {
     @GetMapping("/nickname/{nickname}")
     public ResponseEntity<?> getChkNickname(@PathVariable("nickname") @NotBlank String nickname){
         if (!nickname.matches("^[가-힣A-Za-z0-9_-]{2,10}$")) throw new NicknameValidException();
-
+        if(memberService.getChkNickname(nickname)){
+            return ResponseEntity.ok(ApiResponse.builder()
+                    .status(StatusEnum.JOIN_CONFLICT)
+                    .msg("이미 사용중인 닉네임 입니다.")
+                    .data("")
+                    .build());
+        }
         return ResponseEntity.ok(ApiResponse.builder()
                 .status(StatusEnum.OK)
                 .msg("사용 가능한 닉네임입니다.")
-                .data(memberService.getChkNickname(nickname))
+                .data("")
                 .build());
     }
 
@@ -58,10 +64,17 @@ public class AuthController {
      */
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getChkEmail(@PathVariable("email") @NotBlank @Email @Size(max = 64) String email){
+        if(memberService.getChkEmail(email)){
+            return ResponseEntity.ok(ApiResponse.builder()
+                    .status(StatusEnum.JOIN_CONFLICT)
+                    .msg("이미 사용중인 email 입니다.")
+                    .data("")
+                    .build());
+        }
         return ResponseEntity.ok(ApiResponse.builder()
                 .status(StatusEnum.OK)
                 .msg("사용 가능한 이메일입니다.")
-                .data(memberService.getChkEmail(email))
+                .data("")
                 .build());
     }
 
