@@ -108,6 +108,7 @@ public class SecurityConfig {
         corsConfiguration.setAllowedOriginPatterns(Arrays.asList("*")); // 전체 URL 허용
         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(Arrays.asList("*"));
+        corsConfiguration.setExposedHeaders(Arrays.asList("access", "Cache-Control", "Content-Type"));
         corsConfiguration.setAllowCredentials(true); // 쿠키 인증 허용
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", corsConfiguration);
