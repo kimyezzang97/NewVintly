@@ -101,6 +101,7 @@ public class SecurityConfig {
                 .requestMatchers(PathRequest.toH2Console());
     }
 
+    // CORS 설정
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
@@ -113,9 +114,3 @@ public class SecurityConfig {
         return source;
     }
 }
-
-
-
-// 이전 사용 cors 설정
-// cors 기본 값은 모든 origin, 헤더, HTTP 메서드(GET, POST..), 자격 증명 허용, Preflight 요청의 최대 수명을 설정하지 않음
-// .cors(Customizer.withDefaults())
