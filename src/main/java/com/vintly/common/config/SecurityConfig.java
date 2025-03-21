@@ -76,7 +76,8 @@ public class SecurityConfig {
 
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, memberRepository, redisTemplate), UsernamePasswordAuthenticationFilter.class)
 
-                .addFilterBefore(new CustomLogoutFilter(jwtUtil, redisTemplate), LogoutFilter.class);
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, redisTemplate), LogoutFilter.class)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())); // 최신 방식으로 CORS 설정
         return http.build();
     }
 
