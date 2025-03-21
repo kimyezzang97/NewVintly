@@ -10,8 +10,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("*") //  “*“같은 와일드카드를 사용
-                //.allowedOrigins("*")
+                //.allowedOriginPatterns("*") //  “*“같은 와일드카드를 사용
+                .allowedOrigins("http://localhost:8080")
                 .allowedMethods("GET", "POST", "PUT","DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .exposedHeaders("*")
