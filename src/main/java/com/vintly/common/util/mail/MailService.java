@@ -1,9 +1,11 @@
 package com.vintly.common.util.mail;
 
 import com.vintly.common.exception.memebr.ConflictMemberException;
+import com.vintly.common.exception.memebr.EmailSendException;
 import com.vintly.common.util.mail.model.MailDto;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,6 +18,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 @Service
+@Slf4j
 public class MailService {
 
     private final JavaMailSender mailSender;
@@ -56,9 +59,9 @@ public class MailService {
             mailSender.send(message);
 
         } catch (Exception e){
-            System.out.println("\uD83D\uDCE7 메일 발송 실패! 회원가입 롤백됨");
-            e.printStackTrace();
-            throw new ConflictMemberException();
+            log.warn("mailSend-1 {}", "\uD83D\uDCE7 메일 발송 실패! 회원가입 롤백됨");
+            log.warn("mailSend-2 {}", e.getMessage());
+            throw new EmailSendException();
         }
     }
 }

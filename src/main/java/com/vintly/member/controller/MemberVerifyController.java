@@ -15,7 +15,7 @@ public class MemberVerifyController {
      */
     @GetMapping("/join/success")
     public String emailConfirmationSuccess() {
-        return "verify-fail";
+        return "verify-success";
     }
 
     /**
