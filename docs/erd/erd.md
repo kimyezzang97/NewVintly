@@ -20,10 +20,9 @@ erDiagram
     VINTAGE_SHOP {
         BIGINT vintage_shop_id PK "AUTO INCREMENT"
         VARCHAR name "빈티지 매장 이름"
-        VARCHAR state "ex) 경기도, 강원도 or N (없다)"
-        VARCHAR district "ex) 군포시, 안양시, 서울시"
-        VARCHAR town "ex) 석수2동, 성수동"
-        VARCHAR addr "상세 주소"
+        VARCHAR state "ex) 경기도, 서울특별시"
+        VARCHAR district "ex) 군포시, 안양시, 강동구(서울일 경우)"
+        VARCHAR detail_addr "ex) 아차산로 302"
         DECIMAL lat "DECIMAL(9,6) 위도 ex) 37.566535"
         DECIMAL lon "DECIMAL(9,6) 경도 ex) 126.977969"
         BIGINT vintage_shop_image_id FK "대표 이미지 ID"
