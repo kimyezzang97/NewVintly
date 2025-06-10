@@ -52,7 +52,7 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 
 	// mariadb
-	runtimeOnly 'com.mysql:mysql-connector-j'
+	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 
 	// redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
