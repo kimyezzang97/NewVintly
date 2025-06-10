@@ -1,7 +1,7 @@
 version: '3'
 services:
-  mysql:
-    image: mysql:8.0
+  mariadb:
+    image: mariadb:11.3
     ports:
       - "3306:3306"
     environment:
@@ -9,7 +9,12 @@ services:
       - MYSQL_USER=application
       - MYSQL_PASSWORD=application
       - MYSQL_DATABASE=vintly
+      - TZ=Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+
 
 networks:
   default:
-    driver: bridge
+    driver: bridge # bridge network 안에서는 컨테이너 이름으로 통신할 수 있다.
