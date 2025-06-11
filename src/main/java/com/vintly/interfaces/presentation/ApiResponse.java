@@ -1,19 +1,6 @@
 package com.vintly.interfaces.presentation;
 
-import com.vintly.interfaces.member.exception.StatusEnum;
-import lombok.Builder;
-import lombok.Getter;
+// [record] private final, equals(), toString(), hashCode(), getter 자동 생성
+public record ApiResponse<T>(boolean success, int code, String msg, T data) {
 
-@Getter
-public class ApiResponse<T> {
-    private StatusEnum status;
-    private String msg;
-    private T data;
-
-    @Builder
-    public ApiResponse(StatusEnum status, String msg, T data){
-        this.status = status;
-        this.msg = msg;
-        this.data = data;
-    }
 }
