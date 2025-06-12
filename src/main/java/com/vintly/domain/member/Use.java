@@ -1,4 +1,4 @@
-package com.vintly.domain.member.model.constant;
+package com.vintly.domain.member;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

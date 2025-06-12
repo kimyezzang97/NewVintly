@@ -1,12 +1,12 @@
 package com.vintly.domain.member.service;
 
 import com.vintly.domain.mail.entity.Mail;
-import com.vintly.interfaces.member.exception.ConflictMemberException;
+import com.vintly.domain.member.Use;
+import com.vintly.interfaces.member.MemberException;
+import com.vintly.interfaces.member.MemberRequest;
 import com.vintly.infra.config.jwt.JWTUtil;
 import com.vintly.domain.mail.service.MailService;
-import com.vintly.domain.mail.entity.MailDto;
 import com.vintly.domain.member.entity.Member;
-import com.vintly.interfaces.member.req.JoinReq;
 import com.vintly.domain.member.repo.MemberRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -65,34 +66,41 @@ public class MemberService {
 
     // 회원가입
     @Transactional(rollbackFor = Exception.class)
-    public void createMember(JoinReq joinReq) {
+    public void createMember(MemberRequest.JoinMember join) {
         // 중복체크
-        if(getChkEmail(joinReq.getEmail()) || getChkNickname(joinReq.getNickname())) throw new ConflictMemberException();
+        if(getChkEmail(join.email()) || getChkNickname(join.nickname())) throw new MemberException.ConflictMemberException();
 
         // 비밀번호 암호화
-        String encodePassword = bCryptPasswordEncoder.encode(joinReq.getPassword());
-        joinReq.encPassword(encodePassword);
+        String encodePassword = bCryptPasswordEncoder.encode(join.password());
+
+        // email code random 6자리
+        String emailCode = "" + ThreadLocalRandom.current().nextInt(100000, 1000000);
+
+        // 회원의 권한
+        String role = "ROLE_USER";
 
         // 회원정보 저장
-        String code = memberRepository.save(joinReq.to()).getEmailCode();
+        Member member = memberRepository.save(new Member(
+                null, join.email(), encodePassword, join.nickname(), emailCode, role, Use.K, null)
+                );
 
         // 인증메일 발송
-        mailSend(joinReq, code);
+        mailSend(member);
     }
 
     // 회원가입 인증 메일 발송
-    public void mailSend(JoinReq joinReq, String code) {
+    public void mailSend(Member member) {
         Mail mail = Mail.builder()
-                .address(joinReq.getEmail())
+                .address(member.getEmail())
                 .title("회원가입")
                 .message("회원가입 메시지")
                 .build();
 
         HashMap<String, Object> emailValues = new HashMap<>();
-        emailValues.put("nickname", joinReq.getNickname());
+        emailValues.put("nickname", member.getNickname());
 
         emailValues.put("url", "http://" + serverAddress + ":" + serverPort +
-                "/api/v1/auth/verify?code=" + code + "&email=" + joinReq.getEmail());
+                "/api/v1/auth/verify?code=" + member.getEmailCode() + "&email=" + member.getEmail());
 
         mailService.mailSend(mail, emailValues,"join");
     }

@@ -1,7 +1,7 @@
 package com.vintly.domain.mail.service;
 
 import com.vintly.domain.mail.entity.Mail;
-import com.vintly.interfaces.member.exception.EmailSendException;
+import com.vintly.interfaces.member.MemberException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class MailService {
         } catch (Exception e){
             log.warn("mailSend-1 {}", "\uD83D\uDCE7 메일 발송 실패! 회원가입 롤백됨");
             log.warn("mailSend-2 {}", e.getMessage());
-            throw new EmailSendException();
+            throw new MemberException.EmailSendException();
         }
     }
 }

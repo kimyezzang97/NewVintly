@@ -1,4 +1,4 @@
-package com.vintly.interfaces.member.exception;
+package com.vintly.interfaces.auth;
 
 import lombok.Getter;
 
