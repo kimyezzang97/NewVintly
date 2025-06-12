@@ -1,6 +1,6 @@
 package com.vintly.application.Member;
 
-import com.vintly.domain.member.model.constant.Use;
+import com.vintly.domain.member.Use;
 import com.vintly.domain.member.repo.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -26,6 +26,6 @@ public class MemberScheduler {
     @Scheduled(cron = "0 0 23 * * *") // 매일 23시 실행
     public void deleteExpiredId(){
         LocalDateTime oneDayBefore = LocalDateTime.now().minusDays(1);
-        int i = memberRepository.deleteByCreateDateBeforeAndUseYn(oneDayBefore, Use.K);
+        int i = memberRepository.deleteByCreatedAtBeforeAndUseYn(oneDayBefore, Use.K);
     }
 }

@@ -7,19 +7,14 @@ import jakarta.validation.constraints.Pattern;
 
 public class MemberRequest {
 
-    // [record] private final, equals(), toString(), hashCode(), getter 자동 생성
-
-    /**
-     * Join
-     */
-    public record Join (
-       // 닉네임
+    public record JoinMember (
+        // 닉네임
        @NotBlank(message = "닉네임을 공백없이 입력해주세요.")
-       @Pattern(regexp = "^[가-힣A-Za-z0-9_-]{2,10}$", message = "영어,한글 혹은 '-','_' 으로 2~10자로 입력해주세요.")
+       @Pattern(regexp = "^[가-힣A-Za-z0-9_-]{2,10}$", message = "닉네임은 영어,한글 혹은 '-','_' 으로 2~10자로 입력해주세요.")
        String nickname,
 
        // 이메일
-       @Email
+       @Email(message = "이메일을 형식에 맞게 입력해주세요.")
        @NotBlank(message = "이메일을 공백없이 입력해주세요")
        @Pattern(regexp = "^.{5,64}$", message = "64자 이하 이메일 형식으로 입력해주세요.")
        String email,
@@ -30,18 +25,10 @@ public class MemberRequest {
             " 사용하여 8~20자로 입력해주세요.")
        String password
     ){
-        // DTO to Entity
-        public Member to(){
-            return Member.builder()
-                    .nickname(nickname)
-                    .email(email)
-                    .password(password)
-                    .build();
+        @Override
+        public String toString() {
+            return "JoinMember[nickname=%s, email=%s]".formatted(nickname, email);
         }
     }
-
-    /**
-     *
-     */
 
 }

@@ -1,7 +1,7 @@
 package com.vintly.domain.member.repo;
 
 import com.vintly.domain.member.entity.Member;
-import com.vintly.domain.member.model.constant.Use;
+import com.vintly.domain.member.Use;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -17,11 +17,13 @@ public interface MemberRepository {
     Boolean existsByNickname(String nickname);
 
     // 인증기간 지난 ID 삭제
-    Integer deleteByCreateDateBeforeAndUseYn(LocalDateTime today, Use use);
+    Integer deleteByCreatedAtBeforeAndUseYn(LocalDateTime today, Use use);
 
     // 이메일 코드, 이메일로 Member 엔티티 가져오기
     Optional<Member> findByEmailCodeAndEmail(String code, String email);
 
     // login 시 email(ID로 씀) 로 유저 정보 가져오기
     Optional<Member> findByEmail(String email);
+
+    Member save(Member member);
 }

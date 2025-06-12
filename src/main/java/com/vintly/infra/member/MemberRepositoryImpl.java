@@ -1,7 +1,7 @@
 package com.vintly.infra.member;
 
 import com.vintly.domain.member.entity.Member;
-import com.vintly.domain.member.model.constant.Use;
+import com.vintly.domain.member.Use;
 import com.vintly.domain.member.repo.MemberRepository;
 import org.springframework.stereotype.Repository;
 
@@ -28,8 +28,8 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
-    public Integer deleteByCreateDateBeforeAndUseYn(LocalDateTime today, Use use) {
-        return memberJpaRepository.deleteByCreateDateBeforeAndUseYn(today, use);
+    public Integer deleteByCreatedAtBeforeAndUseYn(LocalDateTime today, Use use) {
+        return memberJpaRepository.deleteByCreatedAtBeforeAndUseYn(today, use);
     }
 
     @Override
@@ -40,5 +40,10 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Override
     public Optional<Member> findByEmail(String email) {
         return memberJpaRepository.findByEmail(email);
+    }
+
+    @Override
+    public Member save(Member member) {
+        return memberJpaRepository.save(member);
     }
 }

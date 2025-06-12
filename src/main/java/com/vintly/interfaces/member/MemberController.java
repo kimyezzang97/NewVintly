@@ -1,6 +1,11 @@
 package com.vintly.interfaces.member;
 
 import com.vintly.domain.member.service.MemberService;
+import com.vintly.interfaces.presentation.ApiResponse;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -17,4 +22,27 @@ public class MemberController {
         this.memberService = memberService;
     }
 
+     // nickname 중복 체크
+    @GetMapping("/nickname/{nickname}")
+    public ApiResponse<?> getChkNickname(@PathVariable("nickname") @NotBlank String nickname){
+        if (!nickname.matches("^[가-힣A-Za-z0-9_-]{2,10}$")) throw new MemberException.NicknameValidException();
+        if (memberService.getChkNickname(nickname)) return new ApiResponse<>(false, 409, "이미 사용중인 닉네임입니다.", null);
+
+        return new ApiResponse<>(true, 200, "사용 가능한 닉네임입니다.", null);
+    }
+
+    // email 중복 체크
+    @GetMapping("/email/{email}")
+    public ApiResponse<?> getChkEmail(@PathVariable("email") @NotBlank @Email @Size(max = 64) String email){
+        if (memberService.getChkEmail(email)) return new ApiResponse<>(false, 409, "이미 사용중인 이메일입니다.", null);
+
+        return new ApiResponse<>(true, 200, "사용 가능한 이메일입니다.", null);
+    }
+
+     // 회원가입
+    @PostMapping("/join")
+    public ApiResponse<?> createMember(@Valid @RequestBody MemberRequest.JoinMember join){
+        memberService.createMember(join);
+        return new ApiResponse<>(true, 200, "회원가입에 성공하였습니다. 이메일 인증을 완료 해주세요.", null);
+    }
 }

@@ -1,7 +1,7 @@
 package com.vintly.interfaces.filter.jwt;
 
 import com.vintly.infra.config.jwt.JWTUtil;
-import com.vintly.interfaces.member.exception.AccessExpiredException;
+import com.vintly.interfaces.auth.AccessExpiredException;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.service.CustomUserDetails;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -52,10 +52,9 @@ public class JWTFilter extends OncePerRequestFilter {
         String username = jwtUtil.getUsername(accessToken);
         String role = jwtUtil.getRole(accessToken);
 
-        Member member = Member.builder()
-                .email(username)
-                .role(role)
-                .build();
+        // email, role 만 생성
+        Member member = new Member(null, username, null, null,
+                null, role, null, null);
 
         CustomUserDetails customUserDetails = new CustomUserDetails(member);
 
