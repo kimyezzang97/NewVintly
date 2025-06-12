@@ -3,6 +3,7 @@ package com.vintly.interfaces.member;
 import com.vintly.domain.member.service.MemberService;
 import com.vintly.infra.config.swagger.api.SwaggerMemberApi;
 import com.vintly.interfaces.presentation.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -34,7 +35,9 @@ public class MemberController implements SwaggerMemberApi {
 
     // email 중복 체크
     @GetMapping("/email/{email}")
-    public ApiResponse<?> getChkEmail(@PathVariable("email") @NotBlank @Email @Size(max = 64) String email){
+    public ApiResponse<?> getChkEmail(
+
+            @PathVariable("email") @NotBlank @Email @Size(max = 64) String email){
         if (memberService.getChkEmail(email)) return new ApiResponse<>(false, 409, "이미 사용중인 이메일입니다.", null);
 
         return new ApiResponse<>(true, 200, "사용 가능한 이메일입니다.", null);
