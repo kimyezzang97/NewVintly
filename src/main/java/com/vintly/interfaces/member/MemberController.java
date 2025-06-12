@@ -1,6 +1,7 @@
 package com.vintly.interfaces.member;
 
 import com.vintly.domain.member.service.MemberService;
+import com.vintly.infra.config.swagger.api.SwaggerMemberApi;
 import com.vintly.interfaces.presentation.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/members")
 @Validated
-public class MemberController {
+public class MemberController implements SwaggerMemberApi {
 
     private final MemberService memberService;
 

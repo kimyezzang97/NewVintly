@@ -38,6 +38,7 @@ dependencies {
 
 	// mail
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
 	// thymeleaf
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
@@ -53,6 +54,9 @@ dependencies {
 
 	// mariadb
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+
+	// swagger
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 
 	// redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
