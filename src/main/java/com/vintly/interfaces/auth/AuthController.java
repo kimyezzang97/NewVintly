@@ -27,13 +27,7 @@ public class AuthController {
         return "test";
     }
 
-    /**
-     * 이메일 인증
-     * @param code
-     * @param email
-     * @param res
-     * @throws IOException
-     */
+    // 이메일 인증
     @GetMapping("/verify")
     public void verifyMember(@RequestParam String code, @RequestParam String email, HttpServletResponse res){
         Boolean isVerified = memberService.verifyEmail(code, email);
@@ -49,12 +43,7 @@ public class AuthController {
         }
     }
 
-    /**
-     * 토큰 재발급
-     * @param request
-     * @param response
-     * @return accessToken, refreshToken
-     */
+    // 토큰 재발급
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response){
         return memberService.reissue(request, response);
