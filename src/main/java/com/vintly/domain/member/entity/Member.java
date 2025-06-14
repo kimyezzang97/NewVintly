@@ -8,7 +8,7 @@ import org.hibernate.annotations.Comment;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.ThreadLocalRandom;
+
 
 @Getter
 @AllArgsConstructor
@@ -50,16 +50,6 @@ public class Member extends BaseEntity {
     @Comment("계정 삭제 날짜")
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-//    @Builder
-//    public Member(String email, String password, String nickname, String role){
-//        this.email = email;
-//        this.password = password;
-//        this.nickname = nickname;
-//        this.emailCode = "" + ThreadLocalRandom.current().nextInt(100000, 1000000); // 메일 코드 6자리 생성
-//        this.useYn = Use.K; // 대기
-//        if(role == null || role.isEmpty()) this.role = "ROLE_USER";
-//    }
 
     public void enableMember(){
         this.useYn = Use.Y;

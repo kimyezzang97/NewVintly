@@ -1,5 +1,6 @@
 package com.vintly.interfaces.auth;
 
+import com.vintly.domain.auth.service.AuthService;
 import com.vintly.domain.member.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,9 +18,11 @@ import java.io.IOException;
 public class AuthController {
 
     private final MemberService memberService;
+    private final AuthService authService;
 
-    public AuthController(MemberService memberService){
+    public AuthController(MemberService memberService, AuthService authService) {
         this.memberService = memberService;
+        this.authService = authService;
     }
 
     @GetMapping("/test")
@@ -46,7 +49,7 @@ public class AuthController {
     // 토큰 재발급
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response){
-        return memberService.reissue(request, response);
+        return authService.reissue(request, response);
     }
 
 }

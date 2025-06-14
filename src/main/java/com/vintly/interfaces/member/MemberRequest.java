@@ -31,7 +31,7 @@ public class MemberRequest {
     ){
         @Override
         public String toString() {
-            return "JoinMember[nickname=%s, email=%s]".formatted(nickname, email);
+            return "MemberRequest-JoinMember[nickname=%s, email=%s]".formatted(nickname, email);
         }
     }
 
