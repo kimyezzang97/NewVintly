@@ -54,4 +54,14 @@ public class Member extends BaseEntity {
     public void enableMember(){
         this.useYn = Use.Y;
     }
+
+    public void leaveMember(LocalDateTime deletedAt){
+        this.deletedAt = deletedAt;
+        this.useYn = Use.N;
+    }
+
+    public void vanMember(LocalDateTime deletedAt){
+        this.deletedAt = deletedAt;
+        this.useYn = Use.X;
+    }
 }
