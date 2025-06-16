@@ -22,22 +22,14 @@ import java.util.concurrent.ThreadLocalRandom;
 @Slf4j
 public class MemberService {
 
-    @Value("${company.address}")
-    private String serverAddress;
-
-    @Value("${company.port}")
-    private String serverPort;
-
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-    private final MailService mailService;
 
 
     @Autowired
-    public MemberService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder, MailService mailService) {
+    public MemberService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.memberRepository = memberRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.mailService = mailService;
     }
 
     // email 중복 체크
@@ -52,9 +44,8 @@ public class MemberService {
         return memberRepository.existsByNickname(nickname);
     }
 
-    // 회원가입
-    @Transactional(rollbackFor = Exception.class)
-    public void createMember(MemberRequest.JoinMember join) {
+    // 회원가입 return : emailCode
+    public String createMember(MemberRequest.JoinMember join) {
         // 중복체크
         if(getChkEmail(join.email()) || getChkNickname(join.nickname())) throw new MemberException.ConflictMemberException();
 
@@ -72,37 +63,6 @@ public class MemberService {
                 null, join.email(), encodePassword, join.nickname(), emailCode, role, Use.K, null)
                 );
 
-        // 인증메일 발송
-        mailSend(member);
+        return emailCode;
     }
-
-    // 회원가입 인증 메일 발송
-    public void mailSend(Member member) {
-        Mail mail = new Mail(member.getEmail(), "회원가입", "회원가입 메시지");
-
-        HashMap<String, Object> emailValues = new HashMap<>();
-        emailValues.put("nickname", member.getNickname());
-
-        emailValues.put("url", "http://" + serverAddress + ":" + serverPort +
-                "/api/v1/auth/verify?code=" + member.getEmailCode() + "&email=" + member.getEmail());
-
-        mailService.mailSend(mail, emailValues,"join");
-    }
-
-    // 계정 인증
-    @Transactional(rollbackFor = Exception.class)
-    public Boolean verifyEmail(String code, String email){
-        Optional<Member> optionalMember = memberRepository.findByEmailCodeAndEmail(code, email);
-
-        if(optionalMember.isEmpty()){
-            log.info("이메일 인증 실패 {}", email);
-            return false;
-        }
-
-        Member member = optionalMember.get();
-        member.enableMember();
-
-        return true;
-    }
-
 }

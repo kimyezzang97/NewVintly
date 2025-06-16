@@ -1,5 +1,6 @@
 package com.vintly.interfaces.member;
 
+import com.vintly.application.Member.MemberFacade;
 import com.vintly.domain.member.service.MemberService;
 import com.vintly.infra.config.swagger.api.SwaggerMemberApi;
 import com.vintly.interfaces.presentation.ApiResponse;
@@ -18,10 +19,12 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController implements SwaggerMemberApi {
 
     private final MemberService memberService;
+    private final MemberFacade memberFacade;
 
     @Autowired
-    public MemberController(MemberService memberService){
+    public MemberController(MemberService memberService, MemberFacade memberFacade) {
         this.memberService = memberService;
+        this.memberFacade = memberFacade;
     }
 
      // nickname 중복 체크
@@ -35,9 +38,7 @@ public class MemberController implements SwaggerMemberApi {
 
     // email 중복 체크
     @GetMapping("/email/{email}")
-    public ApiResponse<?> getChkEmail(
-
-            @PathVariable("email") @NotBlank @Email @Size(max = 64) String email){
+    public ApiResponse<?> getChkEmail(@PathVariable("email") @NotBlank @Email @Size(max = 64) String email){
         if (memberService.getChkEmail(email)) return new ApiResponse<>(false, 409, "이미 사용중인 이메일입니다.", null);
 
         return new ApiResponse<>(true, 200, "사용 가능한 이메일입니다.", null);
@@ -46,7 +47,7 @@ public class MemberController implements SwaggerMemberApi {
      // 회원가입
     @PostMapping("/join")
     public ApiResponse<?> createMember(@Valid @RequestBody MemberRequest.JoinMember join){
-        memberService.createMember(join);
+        memberFacade.joinMember(join);
         return new ApiResponse<>(true, 200, "회원가입에 성공하였습니다. 이메일 인증을 완료 해주세요.", null);
     }
 }
