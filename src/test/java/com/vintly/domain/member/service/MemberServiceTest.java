@@ -102,7 +102,7 @@ public class MemberServiceTest {
         assertNotNull(emailCode);
         assertEquals(6, emailCode.length());
 
-        // 검증
+        // 호출 확인
         Mockito.verify(memberRepository).existsByEmail(join.email());
         Mockito.verify(memberRepository).existsByNickname(join.nickname());
         Mockito.verify(bCryptPasswordEncoder).encode(join.password());
