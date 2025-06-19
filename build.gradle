@@ -36,6 +36,12 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	// test container
+	testImplementation("org.testcontainers:junit-jupiter")
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:mariadb:1.19.1'
+	testImplementation("com.redis.testcontainers:testcontainers-redis:1.6.4") // redis
+
 	// mail
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
