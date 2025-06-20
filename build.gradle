@@ -35,6 +35,8 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation("org.awaitility:awaitility:4.2.0") // async test
+	testImplementation 'org.mockito:mockito-core:4.11.0'  // 예시 버전
 
 	// test container
 	testImplementation("org.testcontainers:junit-jupiter")
