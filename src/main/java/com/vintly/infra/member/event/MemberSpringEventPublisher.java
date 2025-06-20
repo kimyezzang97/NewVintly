@@ -2,10 +2,12 @@ package com.vintly.infra.member.event;
 
 import com.vintly.domain.event.MemberEvent;
 import com.vintly.domain.event.MemberEventPublisher;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class MemberSpringEventPublisher implements MemberEventPublisher {
 
     private final ApplicationEventPublisher applicationEventPublisher;
