@@ -4,12 +4,14 @@ import com.vintly.domain.event.MemberEvent;
 import com.vintly.domain.event.MemberEventPublisher;
 import com.vintly.domain.member.service.MemberService;
 import com.vintly.interfaces.member.MemberRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@Slf4j
 public class MemberFacade {
 
     private MemberService memberService;
