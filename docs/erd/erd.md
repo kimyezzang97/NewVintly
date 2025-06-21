@@ -67,10 +67,48 @@ erDiagram
     }
 
     NOTICE_LIKE {
-        BIGINT NOTICE_like_id PK "AUTO INCREMENT"
+        BIGINT notice_like_id PK "AUTO INCREMENT"
         BIGINT notice_id FK "NOTICE 외래 키"
         BIGINT member_id FK "MEMBER 외래 키"
-        DATETIME created_at "좋아요 생성 날짜"
+        DATETIME created_at "좋아요 생성 시간"
+    }
+
+    POST {
+        BIGINT post_id PK "AUTO INCREMENT"
+        BIGINT member_id FK "MEMBER 외래 키"
+        VARCHAR title "제목"
+        TEXT content "본문 내용"
+        INT view_count "조회수"
+        DATETIME created_at "생성 시간"
+        DATETIME updated_at "수정 시간"
+        DATETIME deleted_at "삭제 시간"
+        VARCHAR del_status "[삭제자] 작성자 : W, 관리자 : S, 삭제 안됨 : N"
+    }
+
+    POST_IMAGE {
+        BIGINT post_image_id PK "AUTO INCREMENT"
+        BIGINT post_id FK "게시글 ID"
+        TEXT image_url "이미지 URL"
+        INT sort_order "정렬 순서"
+    }
+
+    POST_LIKE {
+        BIGINT post_like_id PK "AUTO INCREMENT"
+        BIGINT post_id FK "게시글 ID"
+        BIGINT member_id FK "MEMBER 외래 키"
+        DATETIME created_at "좋아요 생성 시간"
+    }
+
+    POST_COMMENT {
+        BIGINT post_comment_id PK "AUTO INCREMENT"
+        BIGINT post_id FK "게시글 ID"
+        BIGINT member_id FK "MEMBER 외래 키"
+        BIGINT parent_id FK "상위 댓글 (0이면 최상위) default 0"
+        TEXT content "댓글 내용"
+        DATETIME created_at "작성 시간"
+        DATETIME updated_at "수정 시간"
+        DATETIME deleted_at "삭제 시간"
+        VARCHAR del_status "[삭제자] 작성자 : W, 관리자 : S, 삭제 안됨 : N"
     }
 
     VINTAGE_SHOP ||--o{ VINTAGE_SHOP_IMAGE : "1:N"
@@ -82,6 +120,11 @@ erDiagram
     MEMBER ||--o{ VINTAGE_SHOP_LIKE : "1:N"
     NOTICE ||--o{ NOTICE_LIKE : "1:N"
     NOTICE ||--o{ MEMBER : "1:N"
-    
-    
+
+    MEMBER ||--o{ POST : "1:N"
+    POST ||--o{ POST_IMAGE : "1:N"
+    POST ||--o{ POST_LIKE : "1:N"
+    MEMBER ||--o{ POST_LIKE : "1:N"
+    POST ||--o{ POST_COMMENT : "1:N"
+    MEMBER ||--o{ POST_COMMENT : "1:N"
 ```
