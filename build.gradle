@@ -37,6 +37,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testImplementation("org.awaitility:awaitility:4.2.0") // async test
 	testImplementation 'org.mockito:mockito-core:4.11.0'  // 예시 버전
+	testImplementation("com.icegreen:greenmail-junit5:2.0.1") // 가짜 테스트 메일
 
 	// test container
 	testImplementation("org.testcontainers:junit-jupiter")

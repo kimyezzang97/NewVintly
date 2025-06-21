@@ -1,5 +1,7 @@
 package com.vintly.domain.auth.service;
 
+import com.vintly.domain.member.entity.Member;
+import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.infra.config.jwt.JWTUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,7 +11,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -18,10 +22,28 @@ public class AuthService {
 
     private final JWTUtil jwtUtil;
     private final StringRedisTemplate redisTemplate;
+    private final MemberRepository memberRepository;
 
-    public AuthService(JWTUtil jwtUtil, StringRedisTemplate redisTemplate) {
+    public AuthService(JWTUtil jwtUtil, StringRedisTemplate redisTemplate, MemberRepository memberRepository) {
         this.jwtUtil = jwtUtil;
         this.redisTemplate = redisTemplate;
+        this.memberRepository = memberRepository;
+    }
+
+    // 계정 인증
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean verifyEmail(String code, String email){
+        Optional<Member> optionalMember = memberRepository.findByEmailCodeAndEmail(code, email);
+
+        if(optionalMember.isEmpty()){
+            log.info("이메일 인증 실패 {}", email);
+            return false;
+        }
+
+        Member member = optionalMember.get();
+        member.enableMember();
+
+        return true;
     }
 
     // refresh 토큰으로 재발급

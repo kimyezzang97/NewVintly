@@ -17,37 +17,37 @@ erDiagram
         DATETIME deleted_at "계정 삭제 날짜"
     }
     
-    VINTAGE_SHOP {
-        BIGINT vintage_shop_id PK "AUTO INCREMENT"
+    VINTAGE {
+        BIGINT vintage_id PK "AUTO INCREMENT"
         VARCHAR name "빈티지 매장 이름"
         VARCHAR state "ex) 경기도, 서울특별시"
         VARCHAR district "ex) 군포시, 안양시, 강동구(서울일 경우)"
         VARCHAR detail_addr "ex) 아차산로 302"
         DECIMAL lat "DECIMAL(9,6) 위도 ex) 37.566535"
         DECIMAL lon "DECIMAL(9,6) 경도 ex) 126.977969"
-        BIGINT vintage_shop_image_id FK "대표 이미지 ID"
+        BIGINT vintage_image_id FK "대표 이미지 ID"
         DATETIME created_at "빈티지 매장 생성 날짜"
         DATETIME updated_at "빈티지 매장 수정 날짜"
     }
     
-    VINTAGE_SHOP_IMAGE {
-        BIGINT vintage_shop_image_id PK  "AUTO INCREMENT"
-        BIGINT vintage_shop_id FK "SHOP 테이블과 연결된 외래 키"
+    VINTAGE_IMAGE {
+        BIGINT vintage_image_id PK  "AUTO INCREMENT"
+        BIGINT vintage_id FK "SHOP 테이블과 연결된 외래 키"
         VARCHAR image_path "이미지경로"
         DATETIME created_at "이미지 생성 날짜"
         DATETIME updated_at "이미지 수정 날짜"
     }
 
-    VINTAGE_SHOP_LIKE {
-        BIGINT vintage_shop_like_id PK "AUTO INCREMENT"
-        BIGINT vintage_shop_id FK "SHOP 외래 키"
+    VINTAGE_LIKE {
+        BIGINT vintage_like_id PK "AUTO INCREMENT"
+        BIGINT vintage_id FK "SHOP 외래 키"
         BIGINT member_id FK "MEMBER 외래 키"
         DATETIME created_at "좋아요 생성 날짜"
     }
     
-    VINTAGE_SHOP_COMMENT {
-        BIGINT vintage_shop_comment_id PK "AUTO INCREMENT"
-        BIGINT vintage_shop_id FK "SHOP 외래 키"
+    VINTAGE_COMMENT {
+        BIGINT vintage_comment_id PK "AUTO INCREMENT"
+        BIGINT vintage_id FK "SHOP 외래 키"
         BIGINT member_id FK "MEMBER 외래 키"
         BIGINT parent_comment_id FK "상위 댓글 (0이면 최상위) default 0"
         TEXT cotent "댓글 내용"
@@ -67,21 +67,64 @@ erDiagram
     }
 
     NOTICE_LIKE {
-        BIGINT NOTICE_like_id PK "AUTO INCREMENT"
+        BIGINT notice_like_id PK "AUTO INCREMENT"
         BIGINT notice_id FK "NOTICE 외래 키"
         BIGINT member_id FK "MEMBER 외래 키"
-        DATETIME created_at "좋아요 생성 날짜"
+        DATETIME created_at "좋아요 생성 시간"
     }
 
-    VINTAGE_SHOP ||--o{ VINTAGE_SHOP_IMAGE : "1:N"
-    VINTAGE_SHOP_IMAGE ||--|| VINTAGE_SHOP : "1:1(대표 이미지)"
-    VINTAGE_SHOP ||--o{ VINTAGE_SHOP_LIKE : "1:N"
-    VINTAGE_SHOP ||--o{ MEMBER : "1:N"
-    VINTAGE_SHOP ||--o{ VINTAGE_SHOP_COMMENT : "1:N"
-    MEMBER ||--o{ VINTAGE_SHOP_COMMENT : "1:N"
-    MEMBER ||--o{ VINTAGE_SHOP_LIKE : "1:N"
+    POST {
+        BIGINT post_id PK "AUTO INCREMENT"
+        BIGINT member_id FK "MEMBER 외래 키"
+        VARCHAR title "제목"
+        TEXT content "본문 내용"
+        INT view_count "조회수"
+        DATETIME created_at "생성 시간"
+        DATETIME updated_at "수정 시간"
+        DATETIME deleted_at "삭제 시간"
+        VARCHAR del_status "[삭제자] 작성자 : W, 관리자 : S, 삭제 안됨 : N"
+    }
+
+    POST_IMAGE {
+        BIGINT post_image_id PK "AUTO INCREMENT"
+        BIGINT post_id FK "게시글 ID"
+        TEXT image_url "이미지 URL"
+        INT sort_order "정렬 순서"
+    }
+
+    POST_LIKE {
+        BIGINT post_like_id PK "AUTO INCREMENT"
+        BIGINT post_id FK "게시글 ID"
+        BIGINT member_id FK "MEMBER 외래 키"
+        DATETIME created_at "좋아요 생성 시간"
+    }
+
+    POST_COMMENT {
+        BIGINT post_comment_id PK "AUTO INCREMENT"
+        BIGINT post_id FK "게시글 ID"
+        BIGINT member_id FK "MEMBER 외래 키"
+        BIGINT parent_id FK "상위 댓글 (0이면 최상위) default 0"
+        TEXT content "댓글 내용"
+        DATETIME created_at "작성 시간"
+        DATETIME updated_at "수정 시간"
+        DATETIME deleted_at "삭제 시간"
+        VARCHAR del_status "[삭제자] 작성자 : W, 관리자 : S, 삭제 안됨 : N"
+    }
+
+    VINTAGE ||--o{ VINTAGE_IMAGE : "1:N"
+    VINTAGE_IMAGE ||--|| VINTAGE : "1:1(대표 이미지)"
+    VINTAGE ||--o{ VINTAGE_LIKE : "1:N"
+    VINTAGE ||--o{ MEMBER : "1:N"
+    VINTAGE ||--o{ VINTAGE_COMMENT : "1:N"
+    MEMBER ||--o{ VINTAGE_COMMENT : "1:N"
+    MEMBER ||--o{ VINTAGE_LIKE : "1:N"
     NOTICE ||--o{ NOTICE_LIKE : "1:N"
     NOTICE ||--o{ MEMBER : "1:N"
-    
-    
+
+    MEMBER ||--o{ POST : "1:N"
+    POST ||--o{ POST_IMAGE : "1:N"
+    POST ||--o{ POST_LIKE : "1:N"
+    MEMBER ||--o{ POST_LIKE : "1:N"
+    POST ||--o{ POST_COMMENT : "1:N"
+    MEMBER ||--o{ POST_COMMENT : "1:N"
 ```

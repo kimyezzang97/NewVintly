@@ -17,11 +17,9 @@ import java.io.IOException;
 @Slf4j
 public class AuthController {
 
-    private final MemberService memberService;
     private final AuthService authService;
 
-    public AuthController(MemberService memberService, AuthService authService) {
-        this.memberService = memberService;
+    public AuthController(AuthService authService) {
         this.authService = authService;
     }
 
@@ -33,7 +31,7 @@ public class AuthController {
     // 이메일 인증
     @GetMapping("/verify")
     public void verifyMember(@RequestParam String code, @RequestParam String email, HttpServletResponse res){
-        Boolean isVerified = memberService.verifyEmail(code, email);
+        Boolean isVerified = authService.verifyEmail(code, email);
         try {
             if (isVerified){
                 res.sendRedirect("/members/verify/join/success");
