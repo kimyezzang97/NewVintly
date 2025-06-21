@@ -4,6 +4,7 @@ import com.vintly.domain.mail.entity.Mail;
 import com.vintly.interfaces.member.MemberException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -13,6 +14,7 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -31,7 +33,7 @@ public class MailService {
     }
 
     // 메일 전송
-    public void mailSend(Mail mail, HashMap<String, Object> values, String htmlName) {
+    public void mailSend(Mail mail, Map<String, Object> values, String htmlName) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -54,11 +56,16 @@ public class MailService {
             helper.setText(html, true);
 
             mailSender.send(message);
-
+            log.info("메일 발송 성공 - To:{}, Title:{}, Template:{}",
+                    mail.getAddress(), mail.getTitle(), htmlName);
         } catch (Exception e){
-            log.warn("mailSend-1 {}", "\uD83D\uDCE7 메일 발송 실패! 회원가입 롤백됨");
-            log.warn("mailSend-2 {}", e.getMessage());
-            throw new MemberException.EmailSendException();
+            // 오류시 더욱 상세하게 로그 남깁니다.
+            log.error("메일 발송 실패 - To:{}, Title:{}, Template:{}, Exception:{}, Stacktrace:{}}",
+                    mail.getAddress(),
+                    mail.getTitle(),
+                    htmlName,
+                    e.toString(),
+                    ExceptionUtils.getStackTrace(e)); // ExceptionUtils는 Apache Commons Lang의 유틸
         }
     }
 }
