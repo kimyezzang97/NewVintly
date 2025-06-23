@@ -25,15 +25,15 @@ erDiagram
         VARCHAR detail_addr "ex) 아차산로 302"
         DECIMAL lat "DECIMAL(9,6) 위도 ex) 37.566535"
         DECIMAL lon "DECIMAL(9,6) 경도 ex) 126.977969"
-        BIGINT vintage_image_id FK "대표 이미지 ID"
+        BIGINT vintage_img_id FK "대표 이미지 ID"
         DATETIME created_at "빈티지 매장 생성 날짜"
         DATETIME updated_at "빈티지 매장 수정 날짜"
     }
     
-    VINTAGE_IMAGE {
-        BIGINT vintage_image_id PK  "AUTO INCREMENT"
-        BIGINT vintage_id FK "SHOP 테이블과 연결된 외래 키"
-        VARCHAR image_path "이미지경로"
+    VINTAGE_IMG {
+        BIGINT vintage_img_id PK  "AUTO INCREMENT"
+        BIGINT vintage_id FK "SHOP 외래 키"
+        VARCHAR img_path "이미지경로"
         DATETIME created_at "이미지 생성 날짜"
         DATETIME updated_at "이미지 수정 날짜"
     }
@@ -85,10 +85,10 @@ erDiagram
         VARCHAR del_status "[삭제자] 작성자 : W, 관리자 : S, 삭제 안됨 : N"
     }
 
-    POST_IMAGE {
-        BIGINT post_image_id PK "AUTO INCREMENT"
+    POST_IMG {
+        BIGINT post_img_id PK "AUTO INCREMENT"
         BIGINT post_id FK "게시글 ID"
-        TEXT image_url "이미지 URL"
+        TEXT img_path "이미지 경로"
         INT sort_order "정렬 순서"
     }
 
@@ -111,8 +111,8 @@ erDiagram
         VARCHAR del_status "[삭제자] 작성자 : W, 관리자 : S, 삭제 안됨 : N"
     }
 
-    VINTAGE ||--o{ VINTAGE_IMAGE : "1:N"
-    VINTAGE_IMAGE ||--|| VINTAGE : "1:1(대표 이미지)"
+    VINTAGE ||--o{ VINTAGE_IMG : "1:N"
+    VINTAGE_IMG ||--|| VINTAGE : "1:1(대표 이미지)"
     VINTAGE ||--o{ VINTAGE_LIKE : "1:N"
     VINTAGE ||--o{ MEMBER : "1:N"
     VINTAGE ||--o{ VINTAGE_COMMENT : "1:N"
@@ -122,7 +122,7 @@ erDiagram
     NOTICE ||--o{ MEMBER : "1:N"
 
     MEMBER ||--o{ POST : "1:N"
-    POST ||--o{ POST_IMAGE : "1:N"
+    POST ||--o{ POST_IMG : "1:N"
     POST ||--o{ POST_LIKE : "1:N"
     MEMBER ||--o{ POST_LIKE : "1:N"
     POST ||--o{ POST_COMMENT : "1:N"
