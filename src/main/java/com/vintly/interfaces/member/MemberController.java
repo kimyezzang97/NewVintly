@@ -1,10 +1,9 @@
 package com.vintly.interfaces.member;
 
-import com.vintly.application.Member.MemberFacade;
+import com.vintly.application.member.MemberFacade;
 import com.vintly.domain.member.service.MemberService;
 import com.vintly.infra.config.swagger.api.SwaggerMemberApi;
 import com.vintly.interfaces.presentation.ApiResponse;
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

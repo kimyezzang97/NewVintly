@@ -13,7 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class) // JPA 생성 시간 자동 적용
-@Entity(name = "vintage_shop")
+@Entity(name = "vintage")
 public class Vintage extends BaseEntity {
 
     @Id

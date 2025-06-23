@@ -1,4 +1,4 @@
-package com.vintly.application.Member;
+package com.vintly.application.member;
 
 import com.vintly.domain.member.Use;
 import com.vintly.domain.member.repo.MemberRepository;

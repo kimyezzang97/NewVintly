@@ -1,7 +1,7 @@
 package com.vintly.domain.member.integration;
 
 import com.vintly.TestContainerConfig;
-import com.vintly.application.Member.MemberFacade;
+import com.vintly.application.member.MemberFacade;
 import com.vintly.domain.mail.service.MailService;
 import com.vintly.domain.member.Use;
 import com.vintly.domain.member.entity.Member;
@@ -21,11 +21,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
