@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -38,15 +41,28 @@ public class Vintage extends BaseEntity {
     private String detailAddr;
 
     @Comment("위도 ex) 37.566535")
-    @Column(nullable = false)
-    private double lat;
+    @Column(nullable = false, precision = 9, scale = 6) // precision : 전체 자리수, scale : 소수점 이하 자리수
+    private BigDecimal lat;
 
     @Comment("경도 ex) 126.977969")
-    @Column(nullable = false)
-    private double lon;
+    @Column(nullable = false, precision = 9, scale = 6)
+    private BigDecimal  lon;
 
     @Comment("대표 이미지 ID (FK)")
     @Column(name = "vintage_imgae_id")
     private Long vintageImageId;
 
+    // 생성자 대신 정적 팩토리 메서드
+    public static Vintage create(String name, String state, String district, String detailAddr,
+                                 BigDecimal lat, BigDecimal lon, Long vintageImageId) {
+        Vintage vintage = new Vintage();
+        vintage.name = name;
+        vintage.state = state;
+        vintage.district = district;
+        vintage.detailAddr = detailAddr;
+        vintage.lat = lat;
+        vintage.lon = lon;
+        vintage.vintageImageId = vintageImageId;
+        return vintage;
+    }
 }
