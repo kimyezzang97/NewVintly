@@ -29,5 +29,13 @@ public class VintageImg extends BaseEntity {
     private Vintage vintage;
 
     @Comment("이미지 경로")
-    private String img_path;
+    @Column(name = "img_path")
+    private String imgPath;
+
+    public static VintageImg create(Vintage vintage, String imgPath) {
+        VintageImg vintageImg = new VintageImg();
+        vintageImg.vintage = vintage;
+        vintageImg.imgPath = imgPath;
+        return vintageImg;
+    }
 }

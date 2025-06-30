@@ -65,4 +65,12 @@ public class Vintage extends BaseEntity {
         vintage.vintageImageId = vintageImageId;
         return vintage;
     }
+
+    // 대표 이미지 적용
+    public void updateThumbnail(Long newThumbnailId) {
+        if (newThumbnailId == null) {
+            throw new IllegalArgumentException("대표 이미지 ID는 null일 수 없습니다.");
+        }
+        this.vintageImageId = newThumbnailId;
+    }
 }
