@@ -2,6 +2,7 @@ package com.vintly.interfaces.presentation;
 
 import com.vintly.interfaces.member.MemberException;
 import com.vintly.interfaces.auth.AccessExpiredException;
+import com.vintly.interfaces.vintage.VintageException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -54,5 +55,15 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<?> AccessExpired(AccessExpiredException exception) {
         return ResponseEntity.status(401).build();
     }
+
+    /**
+     * [vintage]
+     */
+
+    @ExceptionHandler(VintageException.VintageCreateException.class)
+    protected ApiResponse<?> emailSendError(VintageException.VintageCreateException e) {
+        return new ApiResponse<>(false, 500, e.getMessage(), null);
+    }
+
 }
 
