@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface VintageImgJpaRepository extends JpaRepository<VintageImg, Long> {
 
-    void saveAll(List<VintageImg> vintageImgList);
+
 }
