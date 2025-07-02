@@ -1,27 +1,32 @@
 package com.vintly.interfaces.vintage;
 
+import com.vintly.application.vintage.VintageFacade;
 import com.vintly.domain.vintage.service.VintageService;
+import com.vintly.infra.config.swagger.api.SwaggerVintageApi;
 import com.vintly.interfaces.presentation.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/vintages")
 @Validated
-public class VintageController {
+public class VintageController implements SwaggerVintageApi {
 
     private final VintageService vintageService;
+    private final VintageFacade vintageFacade;
 
     @Autowired
-    public VintageController(VintageService vintageService) {
+    public VintageController(VintageService vintageService, VintageFacade vintageFacade) {
         this.vintageService = vintageService;
+        this.vintageFacade = vintageFacade;
     }
 
     // 빈티지 매장 등록
-    @PostMapping()
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<?> createVintage(@ModelAttribute VintageRequest.CreateVintage createVintage){
-        vintageService.createVintage(createVintage);
+        vintageFacade.createVintage(createVintage);
 
         return new ApiResponse<>(true, 200, "빈티지 매장 등록에 성공하였습니다.", null);
     }
