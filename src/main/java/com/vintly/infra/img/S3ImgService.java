@@ -10,6 +10,8 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -64,11 +66,12 @@ public class S3ImgService implements ImgService {
     }
 
     private String buildFileName(String path, String extension) {
-        LocalDate now = LocalDate.now();
+        String now = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_")); // 날짜+시간 포맷
         return String.format("images/%s/%s%s",
                 path,           // ex) vintage, board, notice
-                now.toString(), // 예: 2025-06-25
-                UUID.randomUUID(), // 중복 방지를 위한 고유 식별자
+                now, // ex) 20250625_145922
+                UUID.randomUUID().toString().substring(0, 8), // UUID 일부, // 중복 방지를 위한 고유 식별자
                 extension); // .jpg, .png 등
     }
 
