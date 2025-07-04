@@ -1,20 +1,29 @@
 package com.vintly.infra.vintage;
 
+import com.vintly.domain.vintage.dto.VintageInfo;
 import com.vintly.domain.vintage.entity.Vintage;
 import com.vintly.domain.vintage.repo.VintageRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public class VintageRepositoryImpl implements VintageRepository {
 
     private final VintageJpaRepository vintageJpaRepository;
-
-    public VintageRepositoryImpl(VintageJpaRepository vintageJpaRepository) {
+    private final VintageQueryDslRepository vintageQueryDslRepository;
+    public VintageRepositoryImpl(VintageJpaRepository vintageJpaRepository, VintageQueryDslRepository vintageQueryDslRepository) {
         this.vintageJpaRepository = vintageJpaRepository;
+        this.vintageQueryDslRepository = vintageQueryDslRepository;
     }
 
     @Override
     public void save(Vintage vintage) {
         vintageJpaRepository.save(vintage);
+    }
+
+    @Override
+    public List<VintageInfo.Vintage> getVintageList() {
+        return vintageQueryDslRepository.getAllVintageList();
     }
 }

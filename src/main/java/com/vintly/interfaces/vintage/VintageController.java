@@ -33,11 +33,11 @@ public class VintageController implements SwaggerVintageApi {
 
     // 빈티지 매장 전체 조회
     @GetMapping()
-    public ApiResponse<?> getAllVintages(){
-        return null;
+    public ApiResponse<?> getVintageList(){
+        return new ApiResponse<>(true, 200, "", vintageService.getVintageList());
     }
 
-    // 빈티지 매장 단건 조회
+    // 빈티지 매장 상세 조회
     @GetMapping("/{id}")
     public ApiResponse<?> getVintage(@PathVariable Long id) {
         return null;

@@ -44,9 +44,7 @@ public class VintageRequest {
             @NotNull(message = "이미지는 필수입니다.")
             @Size(min = 1, max = 10, message = "이미지는 1장 이상 10장 이하만 업로드 가능합니다.")
             List<MultipartFile> images
-    ){
-
-    }
+    ){}
 
 
 }
