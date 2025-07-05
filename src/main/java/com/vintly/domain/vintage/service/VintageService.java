@@ -34,10 +34,11 @@ public class VintageService {
     }
 
     // 빈티지 매장 전체 조회
-    public List<VintageResponse.getVintageList> getVintageList() {
+    @Transactional(readOnly = true)
+    public List<VintageResponse.VintageList> getVintageList() {
 
         return vintageRepository.getVintageList().stream()
-                .map(v -> new VintageResponse.getVintageList(
+                .map(v -> new VintageResponse.VintageList(
                         v.vintageId(),
                         v.name(),
                         v.state(),
