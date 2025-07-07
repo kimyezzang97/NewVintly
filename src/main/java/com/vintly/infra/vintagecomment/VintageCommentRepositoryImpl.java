@@ -1,0 +1,25 @@
+package com.vintly.infra.vintagecomment;
+
+import com.vintly.domain.vintage.dto.VintageInfo;
+import com.vintly.domain.vintagecomment.repo.VintageCommentRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public class VintageCommentRepositoryImpl implements VintageCommentRepository {
+
+    private final VintageCommentJpaRepository jpaRepository;
+    private final VintageCommentQueryDslRepository dslRepository;
+
+    public VintageCommentRepositoryImpl(VintageCommentJpaRepository jpaRepository, VintageCommentQueryDslRepository dslRepository) {
+        this.jpaRepository = jpaRepository;
+        this.dslRepository = dslRepository;
+    }
+
+    // 빈티지 매장에 달린 댓글 리스트 조회 (최신순 정렬)
+    @Override
+    public List<VintageInfo.Comment> findCommentsByVintageId(Long vintageId) {
+        return dslRepository.findCommentsByVintageId(vintageId);
+    }
+}

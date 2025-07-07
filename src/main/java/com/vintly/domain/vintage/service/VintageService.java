@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -34,10 +35,11 @@ public class VintageService {
     }
 
     // 빈티지 매장 전체 조회
-    public List<VintageResponse.getVintageList> getVintageList() {
+    @Transactional(readOnly = true)
+    public List<VintageResponse.VintageList> getVintageList() {
 
         return vintageRepository.getVintageList().stream()
-                .map(v -> new VintageResponse.getVintageList(
+                .map(v -> new VintageResponse.VintageList(
                         v.vintageId(),
                         v.name(),
                         v.state(),
@@ -48,4 +50,10 @@ public class VintageService {
                         v.thumbnailPath()
                 )).toList();
     }
+
+    // 빈티지 기본 정보 조회
+    public Optional<Vintage> findBasicInfoById(Long vintageId) {
+        return vintageRepository.findBasicInfoById(vintageId);
+    }
+
 }

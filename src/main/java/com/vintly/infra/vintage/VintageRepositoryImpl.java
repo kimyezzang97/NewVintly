@@ -6,6 +6,7 @@ import com.vintly.domain.vintage.repo.VintageRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class VintageRepositoryImpl implements VintageRepository {
@@ -22,8 +23,16 @@ public class VintageRepositoryImpl implements VintageRepository {
         vintageJpaRepository.save(vintage);
     }
 
+    // 빈티지 매장 리스트 조회
     @Override
     public List<VintageInfo.Vintage> getVintageList() {
         return vintageQueryDslRepository.getAllVintageList();
     }
+
+    // 빈티지 기본 정보 조회
+    @Override
+    public Optional<Vintage> findBasicInfoById(Long vintageId) {
+        return vintageQueryDslRepository.findBasicInfoById(vintageId); //
+    }
+
 }

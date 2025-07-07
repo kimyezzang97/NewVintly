@@ -3,13 +3,19 @@ package com.vintly.infra.vintage;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.vintly.domain.vintage.dto.VintageInfo;
+import com.vintly.domain.vintage.entity.Vintage;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
+import static com.vintly.domain.member.entity.QMember.member;
 import static com.vintly.domain.vintage.entity.QVintage.vintage;
+import static com.vintly.domain.vintagecomment.entity.QVintageComment.vintageComment;
 import static com.vintly.domain.vintageimg.entity.QVintageImg.vintageImg;
+import static com.vintly.domain.vintagelike.entity.QVintageLike.vintageLike;
 
 @Repository
 @RequiredArgsConstructor
@@ -17,6 +23,7 @@ public class VintageQueryDslRepository {
 
     private final JPAQueryFactory queryFactory;
 
+    // 빈티지 매장 리스트 조회
     public List<VintageInfo.Vintage> getAllVintageList() {
         return queryFactory
                 .select(Projections.constructor(
@@ -38,4 +45,16 @@ public class VintageQueryDslRepository {
                 )
                 .fetch();
     }
+
+    // 빈티지 매장 기본 정보 (단일 엔티티) 조회
+    public Optional<Vintage> findBasicInfoById(Long vintageId) {
+        return Optional.ofNullable(
+                queryFactory
+                        .selectFrom(vintage)
+                        .where(vintage.vintageId.eq(vintageId))
+                        .fetchOne()
+        );
+    }
+
+
 }
