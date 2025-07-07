@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.vintly.domain.member.entity.QMember.member;
 import static com.vintly.domain.vintage.entity.QVintage.vintage;
@@ -22,6 +23,7 @@ public class VintageQueryDslRepository {
 
     private final JPAQueryFactory queryFactory;
 
+    // 빈티지 매장 리스트 조회
     public List<VintageInfo.Vintage> getAllVintageList() {
         return queryFactory
                 .select(Projections.constructor(
@@ -44,69 +46,15 @@ public class VintageQueryDslRepository {
                 .fetch();
     }
 
-    public VintageInfo.VintageDetail getVintage(Long vintageId, Long memberId) {
-        // 1. 이미지 리스트
-        List<String> imagePaths = queryFactory
-                .select(vintageImg.imgPath)
-                .from(vintageImg)
-                .where(vintageImg.vintage.vintageId.eq(vintageId))
-                .fetch();
-
-        // 2. 좋아요 수
-        Integer likeCount = queryFactory
-                .select(vintageLike.count().intValue())
-                .from(vintageLike)
-                .where(vintageLike.vintage.vintageId.eq(vintageId))
-                .fetchOne();
-
-        // 3. 사용자의 좋아요 여부
-        boolean liked = queryFactory
-                .selectOne()
-                .from(vintageLike)
-                .where(
-                        vintageLike.vintage.vintageId.eq(vintageId),
-                        vintageLike.member.memberId.eq(memberId)
-                )
-                .fetchFirst() != null;
-
-        // 4. 댓글 목록
-        List<VintageInfo.Comment> comments = queryFactory
-                .select(Projections.constructor(
-                        VintageInfo.Comment.class,
-                        vintageComment.vintageCommentId,
-                        member.memberId,
-                        member.nickname,
-                        vintageComment.content,
-                        vintageComment.createdAt
-                ))
-                .from(vintageComment)
-                .join(vintageComment.member, member)
-                .where(vintageComment.vintage.vintageId.eq(vintageId))
-                .orderBy(vintageComment.createdAt.desc())
-                .fetch();
-
-        // 5. 매장 기본 정보
-        Vintage baseVintage = queryFactory
-                .selectFrom(vintage)
-                .where(vintage.vintageId.eq(vintageId))
-                .fetchOne();
-
-        if (baseVintage == null) {
-            throw new EntityNotFoundException("해당 빈티지 매장을 찾을 수 없습니다.");
-        }
-
-        return new VintageInfo.VintageDetail(
-                baseVintage.getVintageId(),
-                baseVintage.getName(),
-                baseVintage.getState(),
-                baseVintage.getDistrict(),
-                baseVintage.getDetailAddr(),
-                baseVintage.getLat(),
-                baseVintage.getLon(),
-                imagePaths,
-                likeCount != null ? likeCount : 0,
-                liked,
-                comments
+    // 빈티지 매장 기본 정보 (단일 엔티티) 조회
+    public Optional<Vintage> findBasicInfoById(Long vintageId) {
+        return Optional.ofNullable(
+                queryFactory
+                        .selectFrom(vintage)
+                        .where(vintage.vintageId.eq(vintageId))
+                        .fetchOne()
         );
     }
+
+
 }
