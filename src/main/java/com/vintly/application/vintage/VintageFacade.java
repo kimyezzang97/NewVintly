@@ -1,6 +1,8 @@
 package com.vintly.application.vintage;
 
 import com.vintly.domain.img.service.ImgService;
+import com.vintly.domain.member.entity.Member;
+import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.domain.member.service.CustomUserDetails;
 import com.vintly.domain.vintage.dto.VintageInfo;
 import com.vintly.domain.vintage.entity.Vintage;
@@ -12,6 +14,7 @@ import com.vintly.domain.vintageimg.repo.VintageImgRepository;
 import com.vintly.domain.vintageimg.service.VintageImgService;
 import com.vintly.domain.vintagelike.repo.VintageLikeRepository;
 import com.vintly.domain.vintagelike.service.VintageLikeService;
+import com.vintly.infra.util.SecurityUtil;
 import com.vintly.interfaces.vintage.VintageException;
 import com.vintly.interfaces.vintage.VintageRequest;
 import com.vintly.interfaces.vintage.VintageResponse;
@@ -28,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Component
@@ -42,6 +46,7 @@ public class VintageFacade {
     private final VintageImgService vintageImgService;
     private final VintageCommentService vintageCommentService;
     private final VintageService vintageService;
+    private final MemberRepository memberRepository;
 
 
     // 빈티지 매장 등록
@@ -100,33 +105,33 @@ public class VintageFacade {
         int likeCount = vintageLikeService.countLikesByVintageId(vintageId);
 
         // 4. 사용자 좋아요 여부 확인
+        String email = SecurityUtil.getCurrentEmail();
+        Optional<Member> optMember = memberRepository.findByEmail(email);
+        Long memberId = optMember.map(Member::getMemberId).orElse(null);
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
+        boolean liked = false;
+        if (memberId != null) {
+            liked = vintageLikeService.existsLikeByVintageIdAndMemberId(vintageId, memberId);
+        }
 
-        System.out.println("email : " + email);
+        // 5. 댓글 리스트 조회
+        List<VintageInfo.Comment> result  = vintageCommentService.findCommentsByVintageId(vintageId);
 
-//        boolean liked = vintageLikeService.existsLikeByVintageIdAndMemberId(vintageId, memberId);
-//
-//        // 5. 댓글 리스트 조회
-//        List<VintageInfo.Comment> comments = vintageCommentService.findCommentsByVintageId(vintageId);
-//
-//        // 결과 조합 및 반환
-//        return new VintageInfo.VintageDetail(
-//                vintage.getVintageId(),
-//                vintage.getName(),
-//                vintage.getState(),
-//                vintage.getDistrict(),
-//                vintage.getDetailAddr(),
-//                vintage.getLat(),
-//                vintage.getLon(),
-//                imagePaths,
-//                likeCount,
-//                liked,
-//                comments
-//        );
+        // 6. 내부 전용 DTO → 응답용 DTO로 매핑 후 반환
+        VintageInfo.VintageDetail detail = new VintageInfo.VintageDetail(
+                vintage.getVintageId(),
+                vintage.getName(),
+                vintage.getState(),
+                vintage.getDistrict(),
+                vintage.getDetailAddr(),
+                vintage.getLat(),
+                vintage.getLon(),
+                imagePaths,
+                likeCount,
+                liked,
+                result
+        );
 
-        return null;
+        return VintageResponse.Vintage.from(detail);
     }
 }
