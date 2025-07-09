@@ -41,7 +41,8 @@ public class VintageController implements SwaggerVintageApi {
     // 빈티지 매장 상세 조회
     @GetMapping("/{id}")
     public ApiResponse<?> getVintage(@PathVariable Long id) {
-        return null;
+
+        return new ApiResponse<>(true, 200, "", vintageFacade.getVintage(id));
     }
 
     // 빈티지 매장 수정 (PATCH)

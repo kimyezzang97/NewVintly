@@ -1,5 +1,6 @@
 package com.vintly.interfaces.vintage;
 
+import com.vintly.domain.vintage.dto.VintageInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -75,7 +76,25 @@ public class VintageResponse {
 
             @Schema(description = "댓글 목록")
             List<Comment> comments
-    ){}
+    ){
+        public static Vintage from(VintageInfo.VintageDetail info) {
+            return new Vintage(
+                    info.vintageId(),
+                    info.name(),
+                    info.state(),
+                    info.district(),
+                    info.detailAddr(),
+                    info.lat(),
+                    info.lon(),
+                    info.imagePathList(),
+                    info.likeCount(),
+                    info.liked(),
+                    info.comments().stream()
+                            .map(Comment::from)
+                            .toList()
+            );
+        }
+    }
 
     public record Comment(
             @Schema(description = "댓글 ID")
@@ -92,5 +111,17 @@ public class VintageResponse {
 
             @Schema(description = "댓글 작성일")
             LocalDateTime createdAt
-    ) {}
+    ) {
+        public static Comment from(VintageInfo.Comment info) {
+            return new Comment(
+                    info.commentId(),
+                    info.memberId(),
+                    info.nickname(),
+                    info.content(),
+                    info.createdAt()
+            );
+        }
+    }
+
+
 }
