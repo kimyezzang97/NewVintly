@@ -47,13 +47,15 @@ public class VintageController implements SwaggerVintageApi {
 
     // 빈티지 매장 수정 (PATCH)
     @PatchMapping("/{id}")
-    public ApiResponse<?> updateVintage(@PathVariable Long id, @RequestBody VintageRequest request) {
+    public ApiResponse<?> updateVintage(@PathVariable Long id, @ModelAttribute VintageRequest.UpdateVintage request) {
+
         return null;
     }
 
     // 빈티지 매장 삭제
     @DeleteMapping("/{id}")
     public ApiResponse<?> deleteVintage(@PathVariable Long id) {
+
         return null;
     }
 
