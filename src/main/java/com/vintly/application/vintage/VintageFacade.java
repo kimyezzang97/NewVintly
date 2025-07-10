@@ -99,7 +99,7 @@ public class VintageFacade {
                 .orElseThrow(() -> new EntityNotFoundException("해당 빈티지 매장을 찾을 수 없습니다."));
 
         // 2. 이미지 리스트 조회
-        List<String> imagePaths = vintageImgService.findImagePathListByVintageId(vintageId);
+        List<VintageInfo.Image> imgList = vintageImgService.findImgListByVintageId(vintageId);
 
         // 3. 좋아요 수 조회
         int likeCount = vintageLikeService.countLikesByVintageId(vintageId);
@@ -126,7 +126,7 @@ public class VintageFacade {
                 vintage.getDetailAddr(),
                 vintage.getLat(),
                 vintage.getLon(),
-                imagePaths,
+                imgList,
                 likeCount,
                 liked,
                 result

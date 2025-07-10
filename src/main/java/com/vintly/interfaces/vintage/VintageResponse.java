@@ -65,8 +65,8 @@ public class VintageResponse {
             @Schema(description = "경도")
             BigDecimal lon,
 
-            @Schema(description = "이미지 경로 리스트")
-            List<String> imgPathList,
+            @Schema(description = "이미지 리스트")
+            List<Image> imgList,
 
             @Schema(description = "좋아요 수")
             int likeCount,
@@ -86,12 +86,29 @@ public class VintageResponse {
                     info.detailAddr(),
                     info.lat(),
                     info.lon(),
-                    info.imagePathList(),
+                    info.imgList().stream()
+                            .map(Image::from)
+                            .toList(),
                     info.likeCount(),
                     info.liked(),
                     info.comments().stream()
                             .map(Comment::from)
                             .toList()
+            );
+        }
+    }
+
+    public record Image(
+            @Schema(description = "이미지 ID")
+            Long vintageImgId,
+
+            @Schema(description = "이미지 URL")
+            String imgPath
+    ){
+        public static Image from(VintageInfo.Image info) {
+            return new Image(
+                    info.vintageImgId(),
+                    info.imgPath()
             );
         }
     }

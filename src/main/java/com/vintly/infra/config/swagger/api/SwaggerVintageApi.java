@@ -14,4 +14,7 @@ public interface SwaggerVintageApi {
 
     @Operation(summary = "빈티지 매장 전체 조회", description = "빈티지 매장 전체 리스트 정보를 조회합니다.")
     public ApiResponse<?> getVintageList();
+
+    @Operation(summary = "빈티지 매장 상세 조회", description = "빈티지 매장 상세 조회")
+    public ApiResponse<?> getVintage(Long id);
 }
