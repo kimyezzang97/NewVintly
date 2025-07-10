@@ -58,7 +58,7 @@ public class VintageInfo {
             BigDecimal lon,
 
             // 이미지 리스트
-            List<String> imagePathList,
+            List<Image> imgList,
 
             // 좋아요 수
             int likeCount,
@@ -86,4 +86,12 @@ public class VintageInfo {
             // 댓글 작성일
             LocalDateTime createdAt
     ) {}
+
+    public record Image(
+            // 이미지 ID
+            Long vintageImgId,
+
+            // 이미지 URL
+            String imgPath
+    ){}
 }

@@ -1,9 +1,11 @@
 package com.vintly.infra.vintageimg;
 
+import com.vintly.domain.vintage.dto.VintageInfo;
 import com.vintly.domain.vintageimg.entity.VintageImg;
 import com.vintly.domain.vintageimg.repo.VintageImgRepository;
 import com.vintly.infra.vintage.VintageJpaRepository;
 import com.vintly.infra.vintage.VintageQueryDslRepository;
+import com.vintly.interfaces.vintage.VintageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -35,6 +37,12 @@ public class VintageImgRepositoryImpl implements VintageImgRepository {
     @Override
     public List<String> findImagePathListByVintageId(Long vintageId) {
         return queryDslRepository.findImagePathListByVintageId(vintageId);
+    }
+
+    // 해당 빈티지 매장의 (이미지 경로, 이미지 id) 리스트 조회
+    @Override
+    public List<VintageInfo.Image> findImgListByVintageId(Long vintageId) {
+        return queryDslRepository.findImgListByVintageId(vintageId);
     }
 
 }
