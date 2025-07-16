@@ -65,4 +65,8 @@ public class MemberService {
 
         return emailCode;
     }
+
+    public Optional<Member> findByEmail(String email) {
+        return memberRepository.findByEmail(email);
+    }
 }

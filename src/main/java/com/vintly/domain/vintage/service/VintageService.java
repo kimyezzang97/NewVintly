@@ -56,4 +56,18 @@ public class VintageService {
         return vintageRepository.findBasicInfoById(vintageId);
     }
 
+    // 빈티지 매장 기본 정보 등록
+    public Vintage createVintage(VintageRequest.CreateVintage createVintage){
+        Vintage vintage = Vintage.create(
+                createVintage.name(),
+                createVintage.state(),
+                createVintage.district(),
+                createVintage.detailAddr(),
+                createVintage.lat(),
+                createVintage.lon(),
+                null // 나중에 대표 이미지 ID 세팅
+        );
+
+        return vintageRepository.save(vintage);
+    }
 }

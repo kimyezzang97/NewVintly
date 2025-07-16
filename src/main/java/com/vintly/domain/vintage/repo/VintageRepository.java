@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface VintageRepository {
 
-    void save(Vintage vintage);
+    Vintage save(Vintage vintage);
 
     // 빈티지 매장 리스트 조회
     List<VintageInfo.Vintage> getVintageList();

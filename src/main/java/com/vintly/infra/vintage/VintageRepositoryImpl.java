@@ -19,8 +19,8 @@ public class VintageRepositoryImpl implements VintageRepository {
     }
 
     @Override
-    public void save(Vintage vintage) {
-        vintageJpaRepository.save(vintage);
+    public Vintage save(Vintage vintage) {
+        return vintageJpaRepository.save(vintage);
     }
 
     // 빈티지 매장 리스트 조회
