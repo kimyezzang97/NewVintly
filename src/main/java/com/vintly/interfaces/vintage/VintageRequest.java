@@ -72,8 +72,11 @@ public class VintageRequest {
                 @DecimalMax(value = "180.0", message = "경도는 180 이하이어야 합니다.")
                 BigDecimal lon,
 
+                @Schema(description = "유지할 이미지 ID 목록") List<Long> remainImgList,
+
+                @Schema(description = "새로 업로드할 이미지들 (1MB 이하 권장)")
                 @Size(min = 1, max = 10, message = "이미지는 1장 이상 10장 이하만 업로드 가능합니다.")
-                List<MultipartFile> images
+                List<MultipartFile> imgList
         ){}
 
 

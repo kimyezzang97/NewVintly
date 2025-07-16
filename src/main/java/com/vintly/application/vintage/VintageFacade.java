@@ -4,6 +4,7 @@ import com.vintly.domain.img.service.ImgService;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.domain.member.service.CustomUserDetails;
+import com.vintly.domain.member.service.MemberService;
 import com.vintly.domain.vintage.dto.VintageInfo;
 import com.vintly.domain.vintage.entity.Vintage;
 import com.vintly.domain.vintage.repo.VintageRepository;
@@ -40,13 +41,12 @@ import java.util.Optional;
 public class VintageFacade {
 
     private final ImgService imgService;
-    private final VintageRepository vintageRepository;
-    private final VintageImgRepository vintageImgRepository;
     private final VintageLikeService vintageLikeService;
     private final VintageImgService vintageImgService;
     private final VintageCommentService vintageCommentService;
     private final VintageService vintageService;
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
+
 
 
     // 빈티지 매장 등록
@@ -55,31 +55,14 @@ public class VintageFacade {
         try {
             List<MultipartFile> files = createVintage.images();
 
-            // 모든 이미지 업로드
+            // S3 모든 이미지 업로드
             List<String> imgUrls = imgService.uploadImgList(files, "vintage"); // /vintages/ 경로에
 
-            // Vintage 매장 생성
-            // 대표 이미지 ID는 저장 후 가져옴
-            Vintage vintage = Vintage.create(
-                    createVintage.name(),
-                    createVintage.state(),
-                    createVintage.district(),
-                    createVintage.detailAddr(),
-                    createVintage.lat(),
-                    createVintage.lon(),
-                    null // 나중에 대표 이미지 ID 세팅
-            );
-
-            vintageRepository.save(vintage);
+            // Vintage 매장 생성 - 대표 이미지 ID는 저장 후 가져옴
+            Vintage vintage = vintageService.createVintage(createVintage);
 
             // 이미지 엔티티 생성
-            List<VintageImg> vintageImgList = new ArrayList<>();
-            for (String imgUrl : imgUrls) {
-                VintageImg vintageImg = VintageImg.create(vintage, imgUrl);
-                vintageImgList.add(vintageImg);
-            }
-
-            vintageImgRepository.saveAll(vintageImgList);
+            List<VintageImg> vintageImgList = vintageImgService.saveImgList(imgUrls, vintage);
 
             // 대표 이미지 등록
             vintage.updateThumbnail(vintageImgList.get(0).getVintageImgId());
@@ -106,7 +89,7 @@ public class VintageFacade {
 
         // 4. 사용자 좋아요 여부 확인
         String email = SecurityUtil.getCurrentEmail();
-        Optional<Member> optMember = memberRepository.findByEmail(email);
+        Optional<Member> optMember = memberService.findByEmail(email);
         Long memberId = optMember.map(Member::getMemberId).orElse(null);
 
         boolean liked = false;
@@ -134,4 +117,53 @@ public class VintageFacade {
 
         return VintageResponse.Vintage.from(detail);
     }
+
+//    // 빈티지 매장 수정
+//    @Transactional
+//    public void updateVintage(Long vintageId, VintageRequest.UpdateVintage request) {
+//        Vintage vintage = vintageService.findByIdOrThrow(vintageId);
+//
+//        // 1. 기본 정보 수정
+//        vintage.updateInfo(
+//                request.name(),
+//                request.state(),
+//                request.district(),
+//                request.detailAddr(),
+//                request.lat(),
+//                request.lon()
+//        );
+//
+//        // 2. 기존 이미지 중 삭제 대상 찾기
+//        List<VintageImg> currentImages = vintageImgRepository.findByVintage(vintage);
+//        List<Long> remainIds = Optional.ofNullable(request.remainImageIds()).orElse(List.of());
+//
+//        List<VintageImg> toDelete = currentImages.stream()
+//                .filter(img -> !remainIds.contains(img.getVintageImgId()))
+//                .toList();
+//
+//        toDelete.forEach(img -> {
+//            vintageImgService.delete(img.getImgPath()); // S3 삭제
+//            vintageImgRepository.delete(img);
+//        });
+//
+//        // 3. 새 이미지 업로드
+//        List<String> newImgPaths = vintageImgService.uploadList(request.newImages(), "vintage");
+//        List<VintageImg> newImgs = newImgPaths.stream()
+//                .map(path -> VintageImg.create(vintage, path))
+//                .toList();
+//        vintageImgRepository.saveAll(newImgs);
+//
+//        // 4. 대표 이미지 재설정
+//        List<Long> updatedImgIds = Stream.concat(
+//                currentImages.stream()
+//                        .filter(img -> remainIds.contains(img.getVintageImgId()))
+//                        .map(VintageImg::getVintageImgId),
+//                newImgs.stream()
+//                        .map(VintageImg::getVintageImgId)
+//        ).toList();
+//
+//        if (!updatedImgIds.isEmpty()) {
+//            vintage.updateThumbnail(updatedImgIds.get(0));
+//        }
+//    }
 }

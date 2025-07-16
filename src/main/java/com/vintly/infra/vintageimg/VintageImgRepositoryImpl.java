@@ -29,8 +29,8 @@ public class VintageImgRepositoryImpl implements VintageImgRepository {
     }
 
     @Override
-    public void saveAll(List<VintageImg> vintageImgList) {
-        vintageImgJpaRepository.saveAll(vintageImgList);
+    public List<VintageImg> saveAll(List<VintageImg> vintageImgList) {
+        return vintageImgJpaRepository.saveAll(vintageImgList);
     }
 
     // 빈티지 매장 이미지 경로 리스트 조회
