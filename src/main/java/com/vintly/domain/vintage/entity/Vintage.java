@@ -73,4 +73,15 @@ public class Vintage extends BaseEntity {
         }
         this.vintageImageId = newThumbnailId;
     }
+
+    // 매장 정보 수정
+    public void updateInfo(String name, String state, String district, String detailAddr,
+                           BigDecimal lat, BigDecimal lon) {
+        this.name = name;
+        this.state = state;
+        this.district = district;
+        this.detailAddr = detailAddr;
+        this.lat = lat;
+        this.lon = lon;
+    }
 }

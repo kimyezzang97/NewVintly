@@ -118,52 +118,56 @@ public class VintageFacade {
         return VintageResponse.Vintage.from(detail);
     }
 
-//    // 빈티지 매장 수정
-//    @Transactional
-//    public void updateVintage(Long vintageId, VintageRequest.UpdateVintage request) {
-//        Vintage vintage = vintageService.findByIdOrThrow(vintageId);
-//
-//        // 1. 기본 정보 수정
-//        vintage.updateInfo(
-//                request.name(),
-//                request.state(),
-//                request.district(),
-//                request.detailAddr(),
-//                request.lat(),
-//                request.lon()
-//        );
-//
-//        // 2. 기존 이미지 중 삭제 대상 찾기
-//        List<VintageImg> currentImages = vintageImgRepository.findByVintage(vintage);
-//        List<Long> remainIds = Optional.ofNullable(request.remainImageIds()).orElse(List.of());
-//
-//        List<VintageImg> toDelete = currentImages.stream()
-//                .filter(img -> !remainIds.contains(img.getVintageImgId()))
-//                .toList();
-//
-//        toDelete.forEach(img -> {
-//            vintageImgService.delete(img.getImgPath()); // S3 삭제
-//            vintageImgRepository.delete(img);
-//        });
-//
-//        // 3. 새 이미지 업로드
-//        List<String> newImgPaths = vintageImgService.uploadList(request.newImages(), "vintage");
-//        List<VintageImg> newImgs = newImgPaths.stream()
-//                .map(path -> VintageImg.create(vintage, path))
-//                .toList();
-//        vintageImgRepository.saveAll(newImgs);
-//
-//        // 4. 대표 이미지 재설정
-//        List<Long> updatedImgIds = Stream.concat(
-//                currentImages.stream()
-//                        .filter(img -> remainIds.contains(img.getVintageImgId()))
-//                        .map(VintageImg::getVintageImgId),
-//                newImgs.stream()
-//                        .map(VintageImg::getVintageImgId)
-//        ).toList();
-//
-//        if (!updatedImgIds.isEmpty()) {
-//            vintage.updateThumbnail(updatedImgIds.get(0));
-//        }
-//    }
+    // 빈티지 매장 수정
+    @Transactional
+    public void updateVintage(Long vintageId, VintageRequest.UpdateVintage request) {
+        Vintage vintage = vintageService.findBasicInfoById(vintageId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 빈티지 매장을 찾을 수 없습니다."));
+
+        // 1. 기본 정보 수정
+        vintage.updateInfo(
+                request.name(),
+                request.state(),
+                request.district(),
+                request.detailAddr(),
+                request.lat(),
+                request.lon()
+        );
+    }
+
+    private void updateVintageImg(Vintage vintage, VintageRequest.UpdateVintage request) {
+        // 삭제하지 않고 남기기로 한 이미지 리스트
+        List<Long> remainImgList = Optional.ofNullable(request.remainImageIdList()).orElse(List.of());
+
+        // 기존 이미지 조회
+        List<VintageImg> existingImgList = vintageImgService.findImgEntityListByVintage(vintage);
+
+        // 삭제 원하는 이미지들 선별
+        List<VintageImg> toDelete = existingImgList.stream()
+                .filter(img -> !remainImgList.contains(img.getVintageImgId()))
+                .toList();
+
+        // DB 삭제
+        vintageImgService.deleteAll(toDelete);
+
+        // 내부적으로 S3 삭제
+
+
+        // 새 이미지 업로드 및 저장
+        List<VintageImg> newImages = vintageImgService.uploadAndSaveAll(vintage, request.newImages());
+
+        // 대표 이미지 갱신
+        List<Long> updatedImageIds = Stream.concat(
+                existingImages.stream()
+                        .filter(img -> remainIds.contains(img.getVintageImgId()))
+                        .map(VintageImg::getVintageImgId),
+                newImages.stream()
+                        .map(VintageImg::getVintageImgId)
+        ).toList();
+
+        if (!updatedImageIds.isEmpty()) {
+            vintage.updateThumbnail(updatedImageIds.get(0));
+        }
+    }
+
 }

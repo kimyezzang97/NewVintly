@@ -38,4 +38,14 @@ public class VintageImgService {
 
         return vintageImgRepository.saveAll(vintageImgList);
     }
+
+    // 해당 빈티지 매장의 이미지 엔티티 리스트 조회
+    public List<VintageImg> findImgEntityListByVintage(Vintage vintage) {
+        return vintageImgRepository.findImgEntityListByVintageId(vintage.getVintageId());
+    }
+
+    // 빈티지
+    public void deleteAll(List<VintageImg> list) {
+        vintageImgRepository.deleteAll(list);
+    }
 }

@@ -37,4 +37,13 @@ public class VintageImgQueryDslRepository {
                 .where(vintageImg.vintage.vintageId.eq(vintageId))
                 .fetch();
     }
+
+    // 해당 빈티지 매장의 이미지 엔티티 리스트 조회
+    public List<VintageImg> findImgEntityListByVintageId(Long vintageId) {
+        return queryFactory
+                .selectFrom(vintageImg)
+                .where(vintageImg.vintage.vintageId.eq(vintageId))
+                .fetch();
+    }
+
 }

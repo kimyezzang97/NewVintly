@@ -19,4 +19,10 @@ public interface VintageImgRepository {
 
     // 해당 빈티지 매장의 (이미지 경로, 이미지 id) 리스트 조회
     List<VintageInfo.Image> findImgListByVintageId(Long vintageId);
+
+    // 해당 빈티지 매장의 이미지 엔티티 리스트 조회
+    List<VintageImg> findImgEntityListByVintageId(Long vintageId);
+
+    // 빈티지 이미지 리스트 삭제
+    void deleteAll(List<VintageImg> list);
 }
