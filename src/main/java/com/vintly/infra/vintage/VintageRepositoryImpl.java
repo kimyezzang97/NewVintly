@@ -35,4 +35,9 @@ public class VintageRepositoryImpl implements VintageRepository {
         return vintageQueryDslRepository.findBasicInfoById(vintageId); //
     }
 
+    @Override
+    public void delete(Vintage vintage) {
+        vintageJpaRepository.delete(vintage);
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.vintly.infra.vintagecomment;
 
 import com.vintly.domain.vintage.dto.VintageInfo;
+import com.vintly.domain.vintage.entity.Vintage;
 import com.vintly.domain.vintagecomment.repo.VintageCommentRepository;
 import org.springframework.stereotype.Repository;
 
@@ -21,5 +22,10 @@ public class VintageCommentRepositoryImpl implements VintageCommentRepository {
     @Override
     public List<VintageInfo.Comment> findCommentsByVintageId(Long vintageId) {
         return dslRepository.findCommentsByVintageId(vintageId);
+    }
+
+    @Override
+    public void deleteAllCommentsByVintageId(Vintage vintage) {
+        jpaRepository.deleteAllByVintage(vintage);
     }
 }

@@ -17,4 +17,6 @@ public interface VintageRepository {
 
     // 빈티지 기본 정보 조회
     Optional<Vintage> findBasicInfoById(Long vintageId);
+
+    void delete(Vintage vintage);
 }
