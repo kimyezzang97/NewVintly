@@ -49,14 +49,15 @@ public class VintageController implements SwaggerVintageApi {
     @PatchMapping("/{id}")
     public ApiResponse<?> updateVintage(@PathVariable Long id, @ModelAttribute VintageRequest.UpdateVintage request) {
 
-        return null;
+        vintageFacade.updateVintage(id, request);
+        return new ApiResponse<>(true, 200, "", "");
     }
 
     // 빈티지 매장 삭제
     @DeleteMapping("/{id}")
     public ApiResponse<?> deleteVintage(@PathVariable Long id) {
-
-        return null;
+        vintageFacade.deleteVintage(id);
+        return new ApiResponse<>(true, 200, "", "");
     }
 
     // 빈티지 매장 지역으로 검색 ex) 시(도)/시(구)

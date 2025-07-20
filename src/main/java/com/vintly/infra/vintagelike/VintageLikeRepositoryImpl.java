@@ -1,5 +1,6 @@
 package com.vintly.infra.vintagelike;
 
+import com.vintly.domain.vintage.entity.Vintage;
 import com.vintly.domain.vintagelike.repo.VintageLikeRepository;
 import org.springframework.stereotype.Repository;
 
@@ -24,5 +25,10 @@ public class VintageLikeRepositoryImpl implements VintageLikeRepository {
     @Override
     public boolean existsLikeByVintageIdAndMemberId(Long vintageId, Long memberId) {
         return dslRepository.existsLikeByVintageIdAndMemberId(vintageId, memberId);
+    }
+
+    @Override
+    public void deleteAllLikesByVintage(Vintage vintage) {
+        jpaRepository.deleteAllByVintage(vintage);
     }
 }

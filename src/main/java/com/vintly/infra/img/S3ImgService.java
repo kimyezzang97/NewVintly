@@ -75,4 +75,21 @@ public class S3ImgService implements ImgService {
                 extension); // .jpg, .png 등
     }
 
+    @Override
+    public void deleteImgList(List<String> imgList) {
+        for (String fullUrl : imgList) {
+            try {
+                // s3Domain 제거하여 S3 내부 key 추출
+                String key = fullUrl.replace(s3Domain + "/", "");
+
+                s3Client.deleteObject(builder -> builder
+                        .bucket(bucket)
+                        .key(key)
+                        .build());
+
+            } catch (Exception e) {
+                log.error("S3 이미지 삭제 실패: {}", fullUrl, e);
+            }
+        }
+    }
 }

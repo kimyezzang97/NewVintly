@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 
 @Component
@@ -118,52 +119,83 @@ public class VintageFacade {
         return VintageResponse.Vintage.from(detail);
     }
 
-//    // 빈티지 매장 수정
-//    @Transactional
-//    public void updateVintage(Long vintageId, VintageRequest.UpdateVintage request) {
-//        Vintage vintage = vintageService.findByIdOrThrow(vintageId);
-//
-//        // 1. 기본 정보 수정
-//        vintage.updateInfo(
-//                request.name(),
-//                request.state(),
-//                request.district(),
-//                request.detailAddr(),
-//                request.lat(),
-//                request.lon()
-//        );
-//
-//        // 2. 기존 이미지 중 삭제 대상 찾기
-//        List<VintageImg> currentImages = vintageImgRepository.findByVintage(vintage);
-//        List<Long> remainIds = Optional.ofNullable(request.remainImageIds()).orElse(List.of());
-//
-//        List<VintageImg> toDelete = currentImages.stream()
-//                .filter(img -> !remainIds.contains(img.getVintageImgId()))
-//                .toList();
-//
-//        toDelete.forEach(img -> {
-//            vintageImgService.delete(img.getImgPath()); // S3 삭제
-//            vintageImgRepository.delete(img);
-//        });
-//
-//        // 3. 새 이미지 업로드
-//        List<String> newImgPaths = vintageImgService.uploadList(request.newImages(), "vintage");
-//        List<VintageImg> newImgs = newImgPaths.stream()
-//                .map(path -> VintageImg.create(vintage, path))
-//                .toList();
-//        vintageImgRepository.saveAll(newImgs);
-//
-//        // 4. 대표 이미지 재설정
-//        List<Long> updatedImgIds = Stream.concat(
-//                currentImages.stream()
-//                        .filter(img -> remainIds.contains(img.getVintageImgId()))
-//                        .map(VintageImg::getVintageImgId),
-//                newImgs.stream()
-//                        .map(VintageImg::getVintageImgId)
-//        ).toList();
-//
-//        if (!updatedImgIds.isEmpty()) {
-//            vintage.updateThumbnail(updatedImgIds.get(0));
-//        }
-//    }
+    // 빈티지 매장 수정
+    @Transactional
+    public void updateVintage(Long vintageId, VintageRequest.UpdateVintage request) {
+        Vintage vintage = vintageService.findBasicInfoById(vintageId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 빈티지 매장을 찾을 수 없습니다."));
+
+        // 1. 기본 정보 수정
+        vintage.updateInfo(
+                request.name(),
+                request.state(),
+                request.district(),
+                request.detailAddr(),
+                request.lat(),
+                request.lon()
+        );
+
+        updateVintageImg(vintage, request);
+    }
+
+    // 빈티지 매장 이미지 수정(DB, S3)
+    private void updateVintageImg(Vintage vintage, VintageRequest.UpdateVintage request) {
+        // 삭제하지 않고 남기기로 한 이미지 리스트
+        List<Long> remainImgList = Optional.ofNullable(request.remainImageIdList()).orElse(List.of());
+
+        // 기존 이미지 조회
+        List<VintageImg> existingImgList = vintageImgService.findImgEntityListByVintage(vintage);
+
+        // 삭제 원하는 이미지들 선별
+        List<VintageImg> toDelete = existingImgList.stream()
+                .filter(img -> !remainImgList.contains(img.getVintageImgId()))
+                .toList();
+
+        // DB 삭제
+        vintageImgService.deleteAll(toDelete);
+
+        // S3 삭제
+        List<String> deleteImgPaths = toDelete.stream()
+                .map(VintageImg::getImgPath)
+                .toList();
+        imgService.deleteImgList(deleteImgPaths);
+
+        // 새 이미지 S3 업로드
+        List<String> uploadedImgPathList = imgService.uploadImgList(request.imgList(), "vintage"); // /vintages/ 경로에
+
+        // 엔티티 생성 및 저장
+        List<VintageImg> vintageImgList = vintageImgService.saveImgList(uploadedImgPathList, vintage);
+
+        // 대표 이미지 갱신
+        if (!vintageImgList.isEmpty()) {
+            vintage.updateThumbnail(vintageImgList.get(0).getVintageImgId());
+        }
+    }
+
+    // 빈티지 매장
+    public void deleteVintage(Long vintageId){
+        // 1. 빈티지 조회
+        Vintage vintage = vintageService.findBasicInfoById(vintageId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 빈티지 매장을 찾을 수 없습니다."));
+
+        // 2. 댓글 삭제
+        vintageCommentService.deleteAllCommentsByVintage(vintage);
+
+        // 3. 좋아요 삭제
+        vintageLikeService.deleteAllLikesByVintage(vintage);
+
+        // 4. 이미지 처리
+        List<VintageImg> vintageImgList = vintageImgService.findImgEntityListByVintage(vintage);
+
+        List<String> imgPathList = vintageImgList.stream()
+                .map(VintageImg::getImgPath)
+                .toList();
+
+        imgService.deleteImgList(imgPathList); // S3
+        vintageImgService.deleteAll(vintageImgList); // DB
+
+        // 5. 빈티지 삭제
+        vintageService.delete(vintage);
+    }
+
 }

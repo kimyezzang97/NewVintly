@@ -70,4 +70,9 @@ public class VintageService {
 
         return vintageRepository.save(vintage);
     }
+
+    public void delete(Vintage vintage){
+
+    }
+
 }

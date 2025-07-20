@@ -1,5 +1,6 @@
 package com.vintly.domain.vintagelike.service;
 
+import com.vintly.domain.vintage.entity.Vintage;
 import com.vintly.domain.vintagelike.repo.VintageLikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,5 +21,7 @@ public class VintageLikeService {
         return vintageLikeRepository.existsLikeByVintageIdAndMemberId(vintageId, memberId);
     }
 
-
+    public void deleteAllLikesByVintage(Vintage vintage){
+        vintageLikeRepository.deleteAllLikesByVintage(vintage);
+    }
 }

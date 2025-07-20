@@ -45,4 +45,16 @@ public class VintageImgRepositoryImpl implements VintageImgRepository {
         return queryDslRepository.findImgListByVintageId(vintageId);
     }
 
+    // 해당 빈티지 매장의 이미지 엔티티 리스트 조회
+    @Override
+    public List<VintageImg> findImgEntityListByVintageId(Long vintageId) {
+        return queryDslRepository.findImgEntityListByVintageId(vintageId);
+    }
+
+    // 빈티지 이미지 리스트 삭제
+    @Override
+    public void deleteAll(List<VintageImg> list) {
+        vintageImgJpaRepository.deleteAll(list);
+    }
+
 }
