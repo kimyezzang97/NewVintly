@@ -72,7 +72,7 @@ public class VintageService {
     }
 
     public void delete(Vintage vintage){
-
+        vintageRepository.delete(vintage);
     }
 
 }
