@@ -75,4 +75,19 @@ public class VintageService {
         vintageRepository.delete(vintage);
     }
 
+    public List<VintageResponse.VintageList> findByLocation(String state, String district) {
+        List<Vintage> vintageList = vintageRepository.findByLocation(state, district);
+
+        return vintageRepository.getVintageList().stream()
+                .map(v -> new VintageResponse.VintageList(
+                        v.vintageId(),
+                        v.name(),
+                        v.state(),
+                        v.district(),
+                        v.detailAddr(),
+                        v.lat(),
+                        v.lon(),
+                        v.thumbnailPath()
+                )).toList();
+    }
 }
