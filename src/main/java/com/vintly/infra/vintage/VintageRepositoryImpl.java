@@ -40,4 +40,9 @@ public class VintageRepositoryImpl implements VintageRepository {
         vintageJpaRepository.delete(vintage);
     }
 
+    @Override
+    public List<Vintage> findByLocation(String state, String district) {
+        return List.of();
+    }
+
 }

@@ -63,6 +63,7 @@ public class VintageController implements SwaggerVintageApi {
     // 빈티지 매장 지역으로 검색 ex) 시(도)/시(구)
     @GetMapping("/search")
     public ApiResponse<?> searchByLocation(@RequestParam String state, @RequestParam String district) {
+
         return null;
     }
 

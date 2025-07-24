@@ -1,12 +1,14 @@
 package com.vintly.infra.vintage;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.vintly.domain.vintage.dto.VintageInfo;
 import com.vintly.domain.vintage.entity.Vintage;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,5 +58,22 @@ public class VintageQueryDslRepository {
         );
     }
 
+    public List<VintageInfo.Vintage> findByLocation(String state, String district){
+        return queryFactory
+                .selectFrom(vintage)
+                .where(
+                        eqState(state),
+                        eqDistrict(district)
+                )
+                .fetch();
+    }
+
+    private BooleanExpression eqState(String state) {
+        return StringUtils.hasText(state) ? vintage.state.eq(state) : null;
+    }
+
+    private BooleanExpression eqDistrict(String district) {
+        return StringUtils.hasText(district) ? vintage.district.eq(district) : null;
+    }
 
 }
