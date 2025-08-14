@@ -75,10 +75,10 @@ public class VintageService {
         vintageRepository.delete(vintage);
     }
 
+    @Transactional(readOnly = true)
     public List<VintageResponse.VintageList> findByLocation(String state, String district) {
-        List<Vintage> vintageList = vintageRepository.findByLocation(state, district);
 
-        return vintageRepository.getVintageList().stream()
+        return vintageRepository.findByLocation(state, district).stream()
                 .map(v -> new VintageResponse.VintageList(
                         v.vintageId(),
                         v.name(),
@@ -89,5 +89,6 @@ public class VintageService {
                         v.lon(),
                         v.thumbnailPath()
                 )).toList();
+
     }
 }

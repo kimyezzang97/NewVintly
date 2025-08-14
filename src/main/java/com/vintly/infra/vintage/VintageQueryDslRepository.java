@@ -60,7 +60,23 @@ public class VintageQueryDslRepository {
 
     public List<VintageInfo.Vintage> findByLocation(String state, String district){
         return queryFactory
-                .selectFrom(vintage)
+                .select(Projections.constructor(
+                        VintageInfo.Vintage.class,
+                        vintage.vintageId,
+                        vintage.name,
+                        vintage.state,
+                        vintage.district,
+                        vintage.detailAddr,
+                        vintage.lat,
+                        vintage.lon,
+                        vintageImg.imgPath
+                ))
+                .from(vintage)
+                .leftJoin(vintageImg)
+                .on(
+                        vintageImg.vintage.vintageId.eq(vintage.vintageId)
+                                .and(vintageImg.vintageImgId.eq(vintage.vintageImageId))
+                )
                 .where(
                         eqState(state),
                         eqDistrict(district)
