@@ -41,8 +41,8 @@ public class VintageRepositoryImpl implements VintageRepository {
     }
 
     @Override
-    public List<Vintage> findByLocation(String state, String district) {
-        return List.of();
+    public List<VintageInfo.Vintage> findByLocation(String state, String district) {
+        return vintageQueryDslRepository.findByLocation(state, district);
     }
 
 }
