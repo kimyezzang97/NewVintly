@@ -29,10 +29,10 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 
 // @Transactional async 테스트를 위해 주석 처리
-@EnableAsync
-@SpringBootTest
-@Import({TestContainerConfig.class, MemberEventListener.class})
-@ActiveProfiles("test")
+//@EnableAsync
+//@SpringBootTest
+//@Import({TestContainerConfig.class, MemberEventListener.class})
+//@ActiveProfiles("test")
 public class MemberIntegrationTest {
 
     @Autowired
