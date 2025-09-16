@@ -67,5 +67,5 @@ public class VintageController implements SwaggerVintageApi {
         return new ApiResponse<>(true, 200, "", vintageService.findByLocation(state, district));
     }
 
-    // 위치 기반 검색 (추후) /api/vintages/nearby?lat=37.5&lon=127.0&radius=3 (km 단위)
+    // 위치 기반 검색 (추후) /api/vintages/nearby?lat=37.5&lon=127.0&radius=3 (km 단위) d
 }
