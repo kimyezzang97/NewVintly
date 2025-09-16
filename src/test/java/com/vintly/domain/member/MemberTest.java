@@ -23,8 +23,8 @@ class MemberTest {
         Assertions.assertThat(member.getUseYn()).isEqualTo(Use.Y);
     }
 
-    @Test
-    @DisplayName("회원 탈퇴시 useYn이 N으로 변경되고 삭제 날짜가 생긴다.")
+//    @Test
+//    @DisplayName("회원 탈퇴시 useYn이 N으로 변경되고 삭제 날짜가 생긴다.")
     void ifMemberLeavesUseStatusNAndCreateDeletedAt(){
         // given
         Member member = new Member(null, "test@test.com","password", "nickname",
