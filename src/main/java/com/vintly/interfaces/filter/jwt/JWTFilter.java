@@ -51,9 +51,10 @@ public class JWTFilter extends OncePerRequestFilter {
         // username, role 값을 획득
         String username = jwtUtil.getUsername(accessToken);
         String role = jwtUtil.getRole(accessToken);
+        Long memberId   = jwtUtil.getMemberId(accessToken);  // ← claim에서 꺼내기
 
         // email, role 만 생성
-        Member member = new Member(null, username, null, null,
+        Member member = new Member(memberId, username, null, null,
                 null, role, null, null);
 
         CustomUserDetails customUserDetails = new CustomUserDetails(member);

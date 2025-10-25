@@ -3,6 +3,7 @@ package com.vintly.interfaces.filter.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
+import com.vintly.domain.member.service.CustomUserDetails;
 import com.vintly.infra.config.jwt.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletInputStream;
@@ -73,14 +74,18 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         //유저 정보
         String username = authentication.getName();
 
+        CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
+        Long memberId   = principal.getMemberId();     // PK
+        System.out.println("successfulAuthentication memberId :: " + memberId); // 잘 찍힘
+
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
         //토큰 생성
-        String access = jwtUtil.createJwt("access", username, role, 600000L); // 10분
-        String refresh = jwtUtil.createJwt("refresh", username, role, 86400000L); // 24시간
+        String access = jwtUtil.createJwt("access", username, role, memberId, 86400000L); // 10분 600000L
+        String refresh = jwtUtil.createJwt("refresh", username, role, memberId, 86400000L); // 24시간
 
         //Refresh 토큰 저장
         addRefreshEntity(username, refresh, 86400000L); // 24시간
@@ -89,6 +94,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setHeader("access", access); // header 는 access 토큰
         response.addCookie(createCookie("refresh", refresh)); // cookie 는 refresh 토큰
         response.setStatus(HttpStatus.OK.value());
+
     }
 
     private void addRefreshEntity(String username, String refresh, long expiredMs) {

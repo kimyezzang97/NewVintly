@@ -95,8 +95,9 @@ public class AuthService {
         // 새로운 JWT 발급
         String username = jwtUtil.getUsername(refresh);
         String role = jwtUtil.getRole(refresh);
-        String newAccess = jwtUtil.createJwt("access", username, role, 86400000L); // 10분 600000L
-        String newRefresh = jwtUtil.createJwt("refresh", username, role, 86400000L); // 24시간
+        Long memberId = jwtUtil.getMemberId(refresh);
+        String newAccess = jwtUtil.createJwt("access", username, role, memberId, 86400000L); // 10분 600000L
+        String newRefresh = jwtUtil.createJwt("refresh", username, role, memberId, 86400000L); // 24시간
 
         // redis 새 Refresh 토큰 저장
         redisTemplate.opsForValue().set(redisKey, newRefresh, 86400000L, TimeUnit.MILLISECONDS);
