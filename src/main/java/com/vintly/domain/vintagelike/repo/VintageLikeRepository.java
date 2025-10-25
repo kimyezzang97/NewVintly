@@ -1,6 +1,9 @@
 package com.vintly.domain.vintagelike.repo;
 
+import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.vintage.entity.Vintage;
+import com.vintly.domain.vintageimg.entity.VintageImg;
+import com.vintly.domain.vintagelike.entity.VintageLike;
 
 public interface VintageLikeRepository {
 
@@ -11,4 +14,8 @@ public interface VintageLikeRepository {
     boolean existsLikeByVintageIdAndMemberId(Long vintageId, Long memberId);
 
     void deleteAllLikesByVintage(Vintage vintage);
+
+    void save(VintageLike vintageLike);
+
+    long deleteByVintageAndMember(Vintage vintage, Member member);
 }

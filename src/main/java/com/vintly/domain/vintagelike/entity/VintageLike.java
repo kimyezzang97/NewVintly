@@ -34,4 +34,12 @@ public class VintageLike extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)) // FK 제약 X
     private Member member;
 
+    public static VintageLike create(Vintage vintage, Member member) {
+        VintageLike vintageLike = new VintageLike();
+        vintageLike.vintage = vintage;
+        vintageLike.member = member;
+
+        return vintageLike;
+    }
+
 }

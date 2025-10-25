@@ -2,6 +2,7 @@ package com.vintly.domain.member.repo;
 
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.Use;
+import com.vintly.domain.vintage.entity.Vintage;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -28,4 +29,7 @@ public interface MemberRepository {
     Member save(Member member);
 
     void deleteAll();
+
+    // 조회 쿼리 없이 프록시로 참조만 걸기
+    Member getReferenceById(Long memberId);
 }
