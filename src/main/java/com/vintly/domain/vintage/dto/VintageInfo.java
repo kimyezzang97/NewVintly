@@ -74,6 +74,9 @@ public class VintageInfo {
             // 댓글 ID
             Long commentId,
 
+            // 상위 댓글 ID (0이면 최상위 댓글)
+            Long parentCommentId,
+
             // 댓글 작성자 id
             Long memberId,
 
