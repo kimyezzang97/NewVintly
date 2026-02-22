@@ -87,7 +87,10 @@ public class VintageInfo {
             String content,
 
             // 댓글 작성일
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+
+            // 수정 여부
+            boolean edited
     ) {}
 
     public record Image(

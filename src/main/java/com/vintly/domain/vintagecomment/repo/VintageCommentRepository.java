@@ -18,4 +18,10 @@ public interface VintageCommentRepository {
     VintageComment save(VintageComment entity);
 
     Optional<VintageComment> findById(Long vintageCommentId);
+
+    // 댓글 삭제
+    void deleteById(Long vintageCommentId);
+
+    // 부모 댓글 ID로 대댓글 삭제
+    void deleteAllByParentCommentId(Long parentCommentId);
 }

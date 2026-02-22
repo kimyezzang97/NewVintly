@@ -130,7 +130,10 @@ public class VintageResponse {
             String content,
 
             @Schema(description = "댓글 작성일")
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+
+            @Schema(description = "수정 여부")
+            boolean edited
     ) {
         public static Comment from(VintageInfo.Comment info) {
             return new Comment(
@@ -139,7 +142,8 @@ public class VintageResponse {
                     info.memberId(),
                     info.nickname(),
                     info.content(),
-                    info.createdAt()
+                    info.createdAt(),
+                    info.edited()
             );
         }
     }

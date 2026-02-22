@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface VintageCommentJpaRepository extends JpaRepository<VintageComment, Long> {
 
     void deleteAllByVintage(Vintage vintage);
+
+    void deleteAllByParentCommentId(Long parentCommentId);
 }

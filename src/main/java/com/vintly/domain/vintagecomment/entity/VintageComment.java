@@ -51,6 +51,11 @@ public class VintageComment extends BaseEntity {
         return c;
     }
 
+    // 댓글 내용 수정
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
     // ✅ 대댓글
     public static VintageComment createReply(Vintage vintage, Member member, Long parentCommentId, String content) {
         if (parentCommentId == null || parentCommentId <= 0)

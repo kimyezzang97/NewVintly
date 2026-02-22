@@ -40,4 +40,14 @@ public class VintageCommentRepositoryImpl implements VintageCommentRepository {
     public Optional<VintageComment> findById(Long vintageCommentId) {
         return jpaRepository.findById(vintageCommentId);
     }
+
+    @Override
+    public void deleteById(Long vintageCommentId) {
+        jpaRepository.deleteById(vintageCommentId);
+    }
+
+    @Override
+    public void deleteAllByParentCommentId(Long parentCommentId) {
+        jpaRepository.deleteAllByParentCommentId(parentCommentId);
+    }
 }

@@ -22,4 +22,19 @@ public class VintageCommentController {
         Long parentId = req.parentCommentId() != null ? req.parentCommentId() : 0L;
         return new ApiResponse<>(true, 200, "", new VintageCommentResponse.Create(commentId, parentId));
     }
+
+    @PutMapping("/{commentId}")
+    public ApiResponse<?> updateComment(@PathVariable Long vintageId,
+                                        @PathVariable Long commentId,
+                                        @RequestBody @Validated VintageCommentRequest.Update req) {
+        vintageCommentService.update(commentId, SecurityUtil.getCurrentMemberId(), req.comment());
+        return new ApiResponse<>(true, 200, "댓글이 수정되었습니다.", null);
+    }
+
+    @DeleteMapping("/{commentId}")
+    public ApiResponse<?> deleteComment(@PathVariable Long vintageId,
+                                        @PathVariable Long commentId) {
+        vintageCommentService.delete(commentId, SecurityUtil.getCurrentMemberId());
+        return new ApiResponse<>(true, 200, "댓글이 삭제되었습니다.", null);
+    }
 }
