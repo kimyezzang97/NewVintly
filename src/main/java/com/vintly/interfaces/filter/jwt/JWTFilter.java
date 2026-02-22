@@ -1,14 +1,15 @@
 package com.vintly.interfaces.filter.jwt;
 
 import com.vintly.infra.config.jwt.JWTUtil;
-import com.vintly.interfaces.auth.AccessExpiredException;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.service.CustomUserDetails;
 import io.jsonwebtoken.ExpiredJwtException;
+import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
@@ -40,13 +42,19 @@ public class JWTFilter extends OncePerRequestFilter {
         try {
             jwtUtil.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
-           throw new AccessExpiredException();
+            log.warn("access token expired - URI: {}, IP: {}", request.getRequestURI(), request.getRemoteAddr());
+            sendUnauthorized(response, "access token expired");
+            return;
         }
 
         // 토큰이 access 인지 확인 (발급시 페이로드에 명시)
         String category = jwtUtil.getCategory(accessToken);
 
-        if (!category.equals("access")) throw new AccessExpiredException();
+        if (!category.equals("access")) {
+            log.warn("invalid access token (category: {}) - URI: {}, IP: {}", category, request.getRequestURI(), request.getRemoteAddr());
+            sendUnauthorized(response, "invalid access token");
+            return;
+        }
 
         // username, role 값을 획득
         String username = jwtUtil.getUsername(accessToken);
@@ -63,5 +71,12 @@ public class JWTFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
+    }
+
+    private void sendUnauthorized(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write("{\"success\":false,\"code\":401,\"msg\":\"" + message + "\",\"data\":null}");
     }
 }

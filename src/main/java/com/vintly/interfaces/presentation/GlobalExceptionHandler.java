@@ -1,10 +1,8 @@
 package com.vintly.interfaces.presentation;
 
 import com.vintly.interfaces.member.MemberException;
-import com.vintly.interfaces.auth.AccessExpiredException;
 import com.vintly.interfaces.vintage.VintageException;
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,12 +46,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MemberException.EmailSendException.class)
     protected ApiResponse<?> emailSendError(MemberException.EmailSendException e) {
         return new ApiResponse<>(false, 500, e.getMessage(), null);
-    }
-
-    // 로그인 - access 토큰 만료
-    @ExceptionHandler(AccessExpiredException.class)
-    protected ResponseEntity<?> AccessExpired(AccessExpiredException exception) {
-        return ResponseEntity.status(401).build();
     }
 
     /**

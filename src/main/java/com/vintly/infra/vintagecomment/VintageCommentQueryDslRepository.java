@@ -23,6 +23,7 @@ public class VintageCommentQueryDslRepository {
                 .select(Projections.constructor(
                         VintageInfo.Comment.class,
                         vintageComment.vintageCommentId,
+                        vintageComment.parentCommentId,
                         member.memberId,
                         member.nickname,
                         vintageComment.content,

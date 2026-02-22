@@ -117,6 +117,9 @@ public class VintageResponse {
             @Schema(description = "댓글 ID")
             Long commentId,
 
+            @Schema(description = "상위 댓글 ID (0이면 최상위 댓글)")
+            Long parentCommentId,
+
             @Schema(description = "댓글 작성자 id")
             Long memberId,
 
@@ -132,6 +135,7 @@ public class VintageResponse {
         public static Comment from(VintageInfo.Comment info) {
             return new Comment(
                     info.commentId(),
+                    info.parentCommentId(),
                     info.memberId(),
                     info.nickname(),
                     info.content(),

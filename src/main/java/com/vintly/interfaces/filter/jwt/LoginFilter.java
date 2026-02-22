@@ -84,11 +84,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = auth.getAuthority();
 
         //토큰 생성
-        String access = jwtUtil.createJwt("access", username, role, memberId, 86400000L); // 10분 600000L
-        String refresh = jwtUtil.createJwt("refresh", username, role, memberId, 86400000L); // 24시간
+        String access = jwtUtil.createJwt("access", username, role, memberId, 1800000L); // 30분 1800000L
+        String refresh = jwtUtil.createJwt("refresh", username, role, memberId, 259_200_000L); // 3일
 
         //Refresh 토큰 저장
-        addRefreshEntity(username, refresh, 86400000L); // 24시간
+        addRefreshEntity(username, refresh, 259_200_000L); // 3일
 
         //응답 설정
         response.setHeader("access", access); // header 는 access 토큰
