@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.StreamUtils;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -70,7 +71,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     // login 성공시
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
         //유저 정보
         String username = authentication.getName();
 
@@ -95,6 +96,19 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.addCookie(createCookie("refresh", refresh)); // cookie 는 refresh 토큰
         response.setStatus(HttpStatus.OK.value());
 
+        // body에 회원 정보 내려주기
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        Member member = memberRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException(""));
+
+        Map<String, Object> body = Map.of(
+                "memberId", memberId,
+                "nickname", member.getNickname(),
+                "role", role
+        );
+        new ObjectMapper().writeValue(response.getWriter(), body);
     }
 
     private void addRefreshEntity(String username, String refresh, long expiredMs) {

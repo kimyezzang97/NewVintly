@@ -43,6 +43,12 @@ public class GlobalExceptionHandler {
         return new ApiResponse<>(false, 409, e.getMessage(), null);
     }
 
+    // 회원 정보를 찾을 수 없음
+    @ExceptionHandler(MemberException.MemberNotFoundException.class)
+    protected ApiResponse<?> memberNotFound(MemberException.MemberNotFoundException e) {
+        return new ApiResponse<>(false, 404, e.getMessage(), null);
+    }
+
     // 회원가입 - 이메일 발송 실패
     @ExceptionHandler(MemberException.EmailSendException.class)
     protected ApiResponse<?> emailSendError(MemberException.EmailSendException e) {
