@@ -36,7 +36,7 @@ infra/        → JPA 구현체, QueryDSL, AWS S3, Redis, Security, Swagger 설�
 ./gradlew bootRun
 ```
 
-프로파일: `local`, `dev`, `real`, `test`
+프로파일: `local`, `dev`, `prd`, `test`
 
 ## Key Dependencies
 
@@ -87,7 +87,7 @@ JWT 기반 Stateless 인증:
 
 - 감사 필드: `BaseEntity`의 `createdAt`, `updatedAt` 자동 관리
 - QueryDSL: `BooleanExpression` 빌더로 동적 쿼리, `Projections.constructor`로 DTO 매핑
-- DDL: dev/real은 `update`, test는 `create-drop`
+- DDL: dev/prd은 `update`, test는 `create-drop`
 
 ## Testing
 
