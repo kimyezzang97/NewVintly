@@ -46,10 +46,11 @@ public class JWTUtil {
                 .before(new Date());
     }
 
-    public String createJwt(String category, String username, String role, Long expiredMs) {
+    public String createJwt(String category, String username, String role, Long memberId, Long expiredMs) {
         return Jwts.builder()
                 .claim("category", category)
                 .claim("username", username)
+                .claim("memberId", memberId)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
@@ -62,5 +63,14 @@ public class JWTUtil {
                 .parseSignedClaims(token)
                 .getPayload()
                 .get("category", String.class);
+    }
+
+    public Long getMemberId(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("memberId", Long.class);
     }
 }

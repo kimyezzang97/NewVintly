@@ -38,5 +38,9 @@ out/
 
 ### yml ###
 /src/main/resources/application.yml
+/src/main/resources/application-local.yml
+/src/main/resources/application-dev.yml
+/src/main/resources/application-prd.yml
+/src/main/resources/application-test.yml
 D:\logs\newVintly\back\application.log
 *.log

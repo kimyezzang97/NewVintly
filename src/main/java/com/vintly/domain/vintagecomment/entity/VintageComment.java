@@ -41,4 +41,30 @@ public class VintageComment extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
+    // ✅ 최상위 댓글
+    public static VintageComment createRoot(Vintage vintage, Member member, String content) {
+        VintageComment c = new VintageComment();
+        c.vintage = vintage;
+        c.member = member;
+        c.parentCommentId = 0L;
+        c.content = content;
+        return c;
+    }
+
+    // 댓글 내용 수정
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    // ✅ 대댓글
+    public static VintageComment createReply(Vintage vintage, Member member, Long parentCommentId, String content) {
+        if (parentCommentId == null || parentCommentId <= 0)
+            throw new IllegalArgumentException("parentCommentId는 0보다 커야 합니다.");
+        VintageComment c = new VintageComment();
+        c.vintage = vintage;
+        c.member = member;
+        c.parentCommentId = parentCommentId;
+        c.content = content;
+        return c;
+    }
 }

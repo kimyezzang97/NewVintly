@@ -1,10 +1,9 @@
 package com.vintly.interfaces.presentation;
 
 import com.vintly.interfaces.member.MemberException;
-import com.vintly.interfaces.auth.AccessExpiredException;
 import com.vintly.interfaces.vintage.VintageException;
+import com.vintly.interfaces.vintageComment.VintageCommentException;
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -44,16 +43,16 @@ public class GlobalExceptionHandler {
         return new ApiResponse<>(false, 409, e.getMessage(), null);
     }
 
+    // 회원 정보를 찾을 수 없음
+    @ExceptionHandler(MemberException.MemberNotFoundException.class)
+    protected ApiResponse<?> memberNotFound(MemberException.MemberNotFoundException e) {
+        return new ApiResponse<>(false, 404, e.getMessage(), null);
+    }
+
     // 회원가입 - 이메일 발송 실패
     @ExceptionHandler(MemberException.EmailSendException.class)
     protected ApiResponse<?> emailSendError(MemberException.EmailSendException e) {
         return new ApiResponse<>(false, 500, e.getMessage(), null);
-    }
-
-    // 로그인 - access 토큰 만료
-    @ExceptionHandler(AccessExpiredException.class)
-    protected ResponseEntity<?> AccessExpired(AccessExpiredException exception) {
-        return ResponseEntity.status(401).build();
     }
 
     /**
@@ -63,6 +62,40 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(VintageException.VintageCreateException.class)
     protected ApiResponse<?> emailSendError(VintageException.VintageCreateException e) {
         return new ApiResponse<>(false, 500, e.getMessage(), null);
+    }
+
+    /**
+     * [vintageComment]
+     */
+
+    // 부모 댓글이 존재하지 않음
+    @ExceptionHandler(VintageCommentException.ParentCommentNotFoundException.class)
+    protected ApiResponse<?> parentCommentNotFound(VintageCommentException.ParentCommentNotFoundException e) {
+        return new ApiResponse<>(false, 404, e.getMessage(), null);
+    }
+
+    // 부모 댓글이 다른 매장에 속해 있음
+    @ExceptionHandler(VintageCommentException.ParentCommentMismatchException.class)
+    protected ApiResponse<?> parentCommentMismatch(VintageCommentException.ParentCommentMismatchException e) {
+        return new ApiResponse<>(false, 400, e.getMessage(), null);
+    }
+
+    // 대댓글에 대댓글 불가
+    @ExceptionHandler(VintageCommentException.ReplyDepthExceededException.class)
+    protected ApiResponse<?> replyDepthExceeded(VintageCommentException.ReplyDepthExceededException e) {
+        return new ApiResponse<>(false, 400, e.getMessage(), null);
+    }
+
+    // 댓글이 존재하지 않음
+    @ExceptionHandler(VintageCommentException.CommentNotFoundException.class)
+    protected ApiResponse<?> commentNotFound(VintageCommentException.CommentNotFoundException e) {
+        return new ApiResponse<>(false, 404, e.getMessage(), null);
+    }
+
+    // 본인의 댓글이 아님
+    @ExceptionHandler(VintageCommentException.CommentNotOwnedException.class)
+    protected ApiResponse<?> commentNotOwned(VintageCommentException.CommentNotOwnedException e) {
+        return new ApiResponse<>(false, 403, e.getMessage(), null);
     }
 
 }

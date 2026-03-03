@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import com.vintly.interfaces.presentation.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -60,43 +61,48 @@ public class AuthService {
             }
         }
 
-        // refresh 토큰이 없으면 400 반환
+        // refresh 토큰이 없으면 401 반환
         if (refresh == null) {
-            //System.out.println("==================== refresh null ====================");
-            return new ResponseEntity<>("refresh token null", HttpStatus.BAD_REQUEST);
+            log.warn("reissue 실패 - refresh token 없음, URI: {}, IP: {}", request.getRequestURI(), request.getRemoteAddr());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, 401, "refresh token null", null));
         }
 
         // Refresh 토큰 만료 확인
         if (jwtUtil.isExpired(refresh)) {
             log.info("refresh 토큰 만료 email : {}",jwtUtil.getUsername(refresh));
-            return new ResponseEntity<>("refresh token expired", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, 401, "refresh token expired", null));
         }
 
         // Refresh 토큰인지 검증 (발급시 페이로드에 명시)
         String category = jwtUtil.getCategory(refresh);
         if (!category.equals("refresh")) {
-            return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
+            log.warn("reissue 실패 - 유효하지 않은 토큰 category: {}, IP: {}", category, request.getRemoteAddr());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, 401, "invalid refresh token", null));
         }
 
         // redis 에 refresh key 저장되어 있는지 확인
         String redisKey = "refresh:"+ jwtUtil.getUsername(refresh);
         if (!redisTemplate.hasKey(redisKey)) {
-            return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
+            log.warn("reissue 실패 - Redis에 refresh token 없음, email: {}, IP: {}", jwtUtil.getUsername(refresh), request.getRemoteAddr());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, 401, "invalid refresh token", null));
         }
 
-        // refreshKey 는 있으나 일치하지 않으면 제거 후 400 return
+        // refreshKey 는 있으나 일치하지 않으면 제거 후 401 return
         String storedRefreshToken = redisTemplate.opsForValue().get(redisKey);
         if (storedRefreshToken == null || !storedRefreshToken.equals(refresh)) {
             redisTemplate.delete(redisKey);
             log.info("refreshToken not equal {}", jwtUtil.getUsername(refresh));
-            return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, 401, "invalid refresh token", null));
         }
+
+        log.info("reissue 성공 - email: {}, IP: {}", jwtUtil.getUsername(refresh), request.getRemoteAddr());
 
         // 새로운 JWT 발급
         String username = jwtUtil.getUsername(refresh);
         String role = jwtUtil.getRole(refresh);
-        String newAccess = jwtUtil.createJwt("access", username, role, 600000L); // 10분
-        String newRefresh = jwtUtil.createJwt("refresh", username, role, 86400000L); // 24시간
+        Long memberId = jwtUtil.getMemberId(refresh);
+        String newAccess = jwtUtil.createJwt("access", username, role, memberId, 86400000L); // 10분 600000L
+        String newRefresh = jwtUtil.createJwt("refresh", username, role, memberId, 86400000L); // 24시간
 
         // redis 새 Refresh 토큰 저장
         redisTemplate.opsForValue().set(redisKey, newRefresh, 86400000L, TimeUnit.MILLISECONDS);

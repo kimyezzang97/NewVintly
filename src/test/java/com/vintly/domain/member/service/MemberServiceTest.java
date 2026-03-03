@@ -14,6 +14,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -109,4 +111,37 @@ public class MemberServiceTest {
         Mockito.verify(memberRepository).save(ArgumentMatchers.any(Member.class));
     }
 
+    @Test
+    @DisplayName("이메일로 회원을 조회하면 회원 정보를 반환한다")
+    void shouldReturnMemberWhenEmailExists() {
+        // Arrange
+        String email = "test@example.com";
+        Member member = new Member(1L, email, "password", "닉네임",
+                "code", "ROLE_USER", Use.Y, null);
+        Mockito.when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+
+        // Act
+        Optional<Member> result = memberService.findByEmail(email);
+
+        // Assert
+        assertThat(result).isPresent();
+        assertThat(result.get().getMemberId()).isEqualTo(1L);
+        assertThat(result.get().getEmail()).isEqualTo(email);
+        assertThat(result.get().getNickname()).isEqualTo("닉네임");
+        assertThat(result.get().getRole()).isEqualTo("ROLE_USER");
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 이메일로 조회하면 빈 Optional을 반환한다")
+    void shouldReturnEmptyWhenEmailNotExists() {
+        // Arrange
+        String email = "unknown@example.com";
+        Mockito.when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        // Act
+        Optional<Member> result = memberService.findByEmail(email);
+
+        // Assert
+        assertThat(result).isEmpty();
+    }
 }

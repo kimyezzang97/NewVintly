@@ -22,4 +22,11 @@ public class MemberException {
             super("규칙을 지켜 확인해주세요.");
         }
     }
+
+    // 회원 정보를 찾을 수 없음
+    public static class MemberNotFoundException extends RuntimeException {
+        public MemberNotFoundException() {
+            super("회원 정보를 찾을 수 없습니다.");
+        }
+    }
 }

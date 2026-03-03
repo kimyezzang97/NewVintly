@@ -45,4 +45,9 @@ public class VintageRepositoryImpl implements VintageRepository {
         return vintageQueryDslRepository.findByLocation(state, district);
     }
 
+    @Override
+    public Vintage getReferenceById(Long vintageId) {
+        return vintageJpaRepository.getReferenceById(vintageId);
+    }
+
 }

@@ -60,11 +60,19 @@ public class SecurityConfig {
                 // 경로 인증 인가 설정
                 .authorizeHttpRequests(
                         (auth) -> auth
-                                .requestMatchers("/login", "/logout", "/api/v1/members/**", "/api/v1/auth/**",
-                                    "/members/verify/**","/api/v1/vintages/**", "/","/**").permitAll() // 모든 경로 허용
-                                .requestMatchers("/admin").hasRole("ADMIN") // admin 권한자만 사용
+                                // 인증 없이 허용
+                                .requestMatchers("/login", "/logout").permitAll()
+                                .requestMatchers("/api/v1/members/nickname/**", "/api/v1/members/email/**", "/api/v1/members/join").permitAll()
+                                .requestMatchers("/api/v1/auth/**").permitAll()
+                                .requestMatchers("/members/verify/**").permitAll()
+                                //.requestMatchers("/api/v1/vintages/**").permitAll()
+                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                .requestMatchers("/").permitAll()
+                                // ADMIN 전용
+                                .requestMatchers("/admin").hasRole("ADMIN")
+                                // 나머지는 인증 필수
                                 .anyRequest().authenticated()
-                ) // 로그인한 사용자는 가능
+                )
 
                 // 세션 없이 (stateless) / JWT 사용
                 .sessionManagement((sessionManagement) -> sessionManagement

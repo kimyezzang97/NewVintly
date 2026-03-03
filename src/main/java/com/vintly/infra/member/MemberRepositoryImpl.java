@@ -51,4 +51,9 @@ public class MemberRepositoryImpl implements MemberRepository {
     public void deleteAll() {
         memberJpaRepository.deleteAll();
     }
+
+    @Override
+    public Member getReferenceById(Long memberId) {
+        return memberJpaRepository.getReferenceById(memberId);
+    }
 }

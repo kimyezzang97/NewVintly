@@ -74,6 +74,9 @@ public class VintageInfo {
             // 댓글 ID
             Long commentId,
 
+            // 상위 댓글 ID (0이면 최상위 댓글)
+            Long parentCommentId,
+
             // 댓글 작성자 id
             Long memberId,
 
@@ -84,7 +87,10 @@ public class VintageInfo {
             String content,
 
             // 댓글 작성일
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+
+            // 수정 여부
+            boolean edited
     ) {}
 
     public record Image(

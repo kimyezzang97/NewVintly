@@ -22,4 +22,7 @@ public interface VintageRepository {
 
     // 지역 명으로 빈티지 매장 리스트 조회
     List<VintageInfo.Vintage> findByLocation(String state, String district);
+
+    // 조회 쿼리 없이 프록시로 참조만 걸기
+    Vintage getReferenceById(Long vintageId);
 }

@@ -2,8 +2,10 @@ package com.vintly.domain.vintagecomment.repo;
 
 import com.vintly.domain.vintage.dto.VintageInfo;
 import com.vintly.domain.vintage.entity.Vintage;
+import com.vintly.domain.vintagecomment.entity.VintageComment;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface VintageCommentRepository {
 
@@ -11,4 +13,15 @@ public interface VintageCommentRepository {
     List<VintageInfo.Comment> findCommentsByVintageId(Long vintageId);
 
     void deleteAllCommentsByVintageId(Vintage vintage);
+
+    // 저장
+    VintageComment save(VintageComment entity);
+
+    Optional<VintageComment> findById(Long vintageCommentId);
+
+    // 댓글 삭제
+    void deleteById(Long vintageCommentId);
+
+    // 부모 댓글 ID로 대댓글 삭제
+    void deleteAllByParentCommentId(Long parentCommentId);
 }
