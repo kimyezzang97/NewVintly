@@ -36,4 +36,11 @@ public class MemberException {
             super("현재 비밀번호가 일치하지 않습니다.");
         }
     }
+
+    // 닉네임 변경 - 닉네임 중복
+    public static class ConflictNicknameException extends RuntimeException {
+        public ConflictNicknameException() {
+            super("이미 사용 중인 닉네임입니다.");
+        }
+    }
 }

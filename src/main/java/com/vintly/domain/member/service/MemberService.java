@@ -73,7 +73,7 @@ public class MemberService {
     // 닉네임 변경
     @Transactional(rollbackFor = Exception.class)
     public void updateNickname(Member member, String nickname) {
-        if (memberRepository.existsByNickname(nickname)) throw new MemberException.ConflictMemberException();
+        if (memberRepository.existsByNickname(nickname)) throw new MemberException.ConflictNicknameException();
         member.changeNickname(nickname);
     }
 

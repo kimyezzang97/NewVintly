@@ -162,7 +162,7 @@ public class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("닉네임이 중복이면 ConflictMemberException이 발생한다.")
+    @DisplayName("닉네임이 중복이면 ConflictNicknameException이 발생한다.")
     void shouldThrowWhenNicknameDuplicated() {
         // Arrange
         Member member = new Member(1L, "test@example.com", "encoded", "oldNick",
@@ -171,7 +171,7 @@ public class MemberServiceTest {
 
         // Act & Assert
         org.junit.jupiter.api.Assertions.assertThrows(
-                MemberException.ConflictMemberException.class,
+                MemberException.ConflictNicknameException.class,
                 () -> memberService.updateNickname(member, "dupNick")
         );
     }

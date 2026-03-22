@@ -43,6 +43,12 @@ public class GlobalExceptionHandler {
         return new ApiResponse<>(false, 409, e.getMessage(), null);
     }
 
+    // 닉네임 변경 - 닉네임 중복
+    @ExceptionHandler(MemberException.ConflictNicknameException.class)
+    protected ApiResponse<?> conflictNickname(MemberException.ConflictNicknameException e) {
+        return new ApiResponse<>(false, 409, e.getMessage(), null);
+    }
+
     // 회원 정보를 찾을 수 없음
     @ExceptionHandler(MemberException.MemberNotFoundException.class)
     protected ApiResponse<?> memberNotFound(MemberException.MemberNotFoundException e) {
