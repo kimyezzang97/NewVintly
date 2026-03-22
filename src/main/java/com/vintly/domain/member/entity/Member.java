@@ -55,6 +55,14 @@ public class Member extends BaseEntity {
         this.useYn = Use.Y;
     }
 
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
     public void leaveMember(LocalDateTime deletedAt){
         this.deletedAt = deletedAt;
         this.useYn = Use.N;

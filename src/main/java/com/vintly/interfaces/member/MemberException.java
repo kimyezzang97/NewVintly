@@ -29,4 +29,11 @@ public class MemberException {
             super("회원 정보를 찾을 수 없습니다.");
         }
     }
+
+    // 현재 비밀번호 불일치
+    public static class PasswordNotMatchException extends RuntimeException {
+        public PasswordNotMatchException() {
+            super("현재 비밀번호가 일치하지 않습니다.");
+        }
+    }
 }

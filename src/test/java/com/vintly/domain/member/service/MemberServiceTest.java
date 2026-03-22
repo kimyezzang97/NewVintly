@@ -3,6 +3,7 @@ package com.vintly.domain.member.service;
 import com.vintly.domain.member.Use;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
+import com.vintly.interfaces.member.MemberException;
 import com.vintly.interfaces.member.MemberRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -143,5 +144,81 @@ public class MemberServiceTest {
 
         // Assert
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("닉네임 중복이 없으면 닉네임이 변경된다.")
+    void shouldUpdateNicknameWhenNotDuplicated() {
+        // Arrange
+        Member member = new Member(1L, "test@example.com", "encoded", "oldNick",
+                "code", "ROLE_USER", Use.Y, null);
+        Mockito.when(memberRepository.existsByNickname("newNick")).thenReturn(false);
+
+        // Act
+        memberService.updateNickname(member, "newNick");
+
+        // Assert
+        assertThat(member.getNickname()).isEqualTo("newNick");
+    }
+
+    @Test
+    @DisplayName("닉네임이 중복이면 ConflictMemberException이 발생한다.")
+    void shouldThrowWhenNicknameDuplicated() {
+        // Arrange
+        Member member = new Member(1L, "test@example.com", "encoded", "oldNick",
+                "code", "ROLE_USER", Use.Y, null);
+        Mockito.when(memberRepository.existsByNickname("dupNick")).thenReturn(true);
+
+        // Act & Assert
+        org.junit.jupiter.api.Assertions.assertThrows(
+                MemberException.ConflictMemberException.class,
+                () -> memberService.updateNickname(member, "dupNick")
+        );
+    }
+
+    @Test
+    @DisplayName("현재 비밀번호가 일치하면 새 비밀번호로 변경된다.")
+    void shouldUpdatePasswordWhenCurrentPasswordMatches() {
+        // Arrange
+        Member member = new Member(1L, "test@example.com", "oldEncoded", "nickname",
+                "code", "ROLE_USER", Use.Y, null);
+        Mockito.when(bCryptPasswordEncoder.matches("currentPw", "oldEncoded")).thenReturn(true);
+        Mockito.when(bCryptPasswordEncoder.encode("newPw")).thenReturn("newEncoded");
+
+        // Act
+        memberService.updatePassword(member, "currentPw", "newPw");
+
+        // Assert
+        assertThat(member.getPassword()).isEqualTo("newEncoded");
+    }
+
+    @Test
+    @DisplayName("현재 비밀번호가 틀리면 PasswordNotMatchException이 발생한다.")
+    void shouldThrowWhenCurrentPasswordNotMatch() {
+        // Arrange
+        Member member = new Member(1L, "test@example.com", "oldEncoded", "nickname",
+                "code", "ROLE_USER", Use.Y, null);
+        Mockito.when(bCryptPasswordEncoder.matches("wrongPw", "oldEncoded")).thenReturn(false);
+
+        // Act & Assert
+        org.junit.jupiter.api.Assertions.assertThrows(
+                MemberException.PasswordNotMatchException.class,
+                () -> memberService.updatePassword(member, "wrongPw", "newPw")
+        );
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴시 useYn이 N으로 변경된다.")
+    void shouldWithdrawMember() {
+        // Arrange
+        Member member = new Member(1L, "test@example.com", "encoded", "nickname",
+                "code", "ROLE_USER", Use.Y, null);
+
+        // Act
+        memberService.withdrawMember(member);
+
+        // Assert
+        assertThat(member.getUseYn()).isEqualTo(Use.N);
+        assertThat(member.getDeletedAt()).isNotNull();
     }
 }

@@ -60,4 +60,34 @@ public class MemberController implements SwaggerMemberApi {
         memberFacade.joinMember(join);
         return new ApiResponse<>(true, 200, "회원가입에 성공하였습니다. 이메일 인증을 완료 해주세요.", null);
     }
+
+    // 닉네임 변경
+    @PatchMapping("/me/nickname")
+    public ApiResponse<?> updateNickname(@Valid @RequestBody MemberRequest.ChangeNickname request) {
+        String email = SecurityUtil.getCurrentEmail();
+        Member member = memberService.findByEmail(email)
+                .orElseThrow(MemberException.MemberNotFoundException::new);
+        memberService.updateNickname(member, request.nickname());
+        return new ApiResponse<>(true, 200, "닉네임이 변경되었습니다.", null);
+    }
+
+    // 비밀번호 변경
+    @PatchMapping("/me/password")
+    public ApiResponse<?> updatePassword(@Valid @RequestBody MemberRequest.ChangePassword request) {
+        String email = SecurityUtil.getCurrentEmail();
+        Member member = memberService.findByEmail(email)
+                .orElseThrow(MemberException.MemberNotFoundException::new);
+        memberService.updatePassword(member, request.currentPassword(), request.newPassword());
+        return new ApiResponse<>(true, 200, "비밀번호가 변경되었습니다.", null);
+    }
+
+    // 회원 탈퇴
+    @DeleteMapping("/me")
+    public ApiResponse<?> withdrawMember() {
+        String email = SecurityUtil.getCurrentEmail();
+        Member member = memberService.findByEmail(email)
+                .orElseThrow(MemberException.MemberNotFoundException::new);
+        memberService.withdrawMember(member);
+        return new ApiResponse<>(true, 200, "회원 탈퇴가 완료되었습니다.", null);
+    }
 }

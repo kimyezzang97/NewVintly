@@ -69,4 +69,26 @@ public class MemberService {
     public Optional<Member> findByEmail(String email) {
         return memberRepository.findByEmail(email);
     }
+
+    // 닉네임 변경
+    @Transactional(rollbackFor = Exception.class)
+    public void updateNickname(Member member, String nickname) {
+        if (memberRepository.existsByNickname(nickname)) throw new MemberException.ConflictMemberException();
+        member.changeNickname(nickname);
+    }
+
+    // 비밀번호 변경
+    @Transactional(rollbackFor = Exception.class)
+    public void updatePassword(Member member, String currentPassword, String newPassword) {
+        if (!bCryptPasswordEncoder.matches(currentPassword, member.getPassword())) {
+            throw new MemberException.PasswordNotMatchException();
+        }
+        member.changePassword(bCryptPasswordEncoder.encode(newPassword));
+    }
+
+    // 회원 탈퇴
+    @Transactional(rollbackFor = Exception.class)
+    public void withdrawMember(Member member) {
+        member.leaveMember(java.time.LocalDateTime.now());
+    }
 }
