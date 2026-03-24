@@ -6,7 +6,7 @@ import com.vintly.domain.vintage.entity.Vintage;
 import com.vintly.domain.vintage.repo.VintageRepository;
 import com.vintly.domain.vintagelike.entity.VintageLike;
 import com.vintly.domain.vintagelike.repo.VintageLikeRepository;
-import com.vintly.infra.config.security.SecurityUtil;
+import com.vintly.infra.util.SecurityUtil;
 import com.vintly.interfaces.vintagelike.VintageLikeResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,9 +43,7 @@ public class VintageLikeService {
     @Transactional
     public VintageLikeResponse.VintageLike like(Long vintageId) {
 
-        //String email = SecurityUtil.getCurrentUsername();
         Long memberId = SecurityUtil.getCurrentMemberId();
-        System.out.println(" currentUsername :: " + SecurityUtil.getCurrentUsername());
 
         // 이미 있으면 멱등 처리
         if (!vintageLikeRepository.existsLikeByVintageIdAndMemberId(vintageId, memberId)) {
