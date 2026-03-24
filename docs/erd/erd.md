@@ -11,10 +11,11 @@ erDiagram
         VARCHAR nickname UK "닉네임[최대10자]"
         VARCHAR email_code "이메일 인증 번호"
         VARCHAR role "권한 (ROLE_USER, ROLE_ADMIN)"
-        VARCHAR use_yn "[사용 유무] 사용 : Y, 탈퇴 : N, 추방 : X, 대기 : K"
+        ENUM use_status "[계정 이용 상태] 사용: Y, 추방: X, 대기: K"
         DATETIME created_at "계정 생성 날짜"
         DATETIME updated_at "계정 수정 날짜"
-        DATETIME deleted_at "계정 삭제 날짜"
+        DATETIME deleted_at "계정 삭제 날짜 (추방 시)"
+        DATETIME nickname_updated_at "닉네임 최종 변경 일시"
     }
     
     VINTAGE {
