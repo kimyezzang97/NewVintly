@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
 
 class MemberTest {
 
-    @DisplayName("회원 활성화시 useYn이 Y로 변경된다.")
+    @DisplayName("회원 활성화시 useStatus가 Y로 변경된다.")
     @Test
-    void ifEnableMemberUseYnStatusToY() {
+    void ifEnableMemberUseStatusToY() {
         //given
         Member member = new Member(null, "test@test.com","password", "nickname",
                 "123456", "ROLE_USER", Use.K, null, null);
@@ -20,7 +20,7 @@ class MemberTest {
         member.enableMember();
 
         //then
-        Assertions.assertThat(member.getUseYn()).isEqualTo(Use.Y);
+        Assertions.assertThat(member.getUseStatus()).isEqualTo(Use.Y);
     }
 
     @Test
@@ -69,7 +69,7 @@ class MemberTest {
     }
 
     @Test
-    @DisplayName("회원 추방시 useYn이 X로 변경되고 삭제 날짜가 생긴다.")
+    @DisplayName("회원 추방시 useStatus가 X로 변경되고 삭제 날짜가 생긴다.")
     void ifMemberVanUseStatusNAndCreateDeletedAt(){
         // given
         Member member = new Member(null, "test@test.com","password", "nickname",
@@ -80,7 +80,7 @@ class MemberTest {
         member.vanMember(deletedTime);
 
         // then
-        Assertions.assertThat(member.getUseYn()).isEqualTo(Use.X);
+        Assertions.assertThat(member.getUseStatus()).isEqualTo(Use.X);
         Assertions.assertThat(member.getDeletedAt()).isBefore(LocalDateTime.now());
     }
 }

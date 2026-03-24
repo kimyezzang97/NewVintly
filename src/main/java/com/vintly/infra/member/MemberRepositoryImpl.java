@@ -28,8 +28,8 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
-    public Integer deleteByCreatedAtBeforeAndUseYn(LocalDateTime today, Use use) {
-        return memberJpaRepository.deleteByCreatedAtBeforeAndUseYn(today, use);
+    public Integer deleteByCreatedAtBeforeAndUseStatus(LocalDateTime today, Use use) {
+        return memberJpaRepository.deleteByCreatedAtBeforeAndUseStatus(today, use);
     }
 
     @Override

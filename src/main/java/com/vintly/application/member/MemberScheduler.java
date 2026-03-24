@@ -26,6 +26,6 @@ public class MemberScheduler {
     @Scheduled(cron = "0 0 23 * * *") // 매일 23시 실행
     public void deleteExpiredId(){
         LocalDateTime oneDayBefore = LocalDateTime.now().minusDays(1);
-        int i = memberRepository.deleteByCreatedAtBeforeAndUseYn(oneDayBefore, Use.K);
+        int i = memberRepository.deleteByCreatedAtBeforeAndUseStatus(oneDayBefore, Use.K);
     }
 }

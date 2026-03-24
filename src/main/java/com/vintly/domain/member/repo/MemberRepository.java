@@ -18,7 +18,7 @@ public interface MemberRepository {
     Boolean existsByNickname(String nickname);
 
     // 인증기간 지난 ID 삭제
-    Integer deleteByCreatedAtBeforeAndUseYn(LocalDateTime today, Use use);
+    Integer deleteByCreatedAtBeforeAndUseStatus(LocalDateTime today, Use use);
 
     // 이메일 코드, 이메일로 Member 엔티티 가져오기
     Optional<Member> findByEmailCodeAndEmail(String code, String email);

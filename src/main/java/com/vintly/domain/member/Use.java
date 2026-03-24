@@ -3,7 +3,7 @@ package com.vintly.domain.member;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-// MEMBER - useYn(사용여부)
+// MEMBER - useStatus(계정 이용 상태)
 @Getter
 @RequiredArgsConstructor
 public enum Use {
