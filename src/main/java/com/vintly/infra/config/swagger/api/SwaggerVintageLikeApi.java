@@ -1,7 +1,7 @@
 package com.vintly.infra.config.swagger.api;
 
 import com.vintly.interfaces.presentation.ApiResponse;
-import com.vintly.interfaces.vintageLike.VintageLikeResponse;
+import com.vintly.interfaces.vintagelike.VintageLikeResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;

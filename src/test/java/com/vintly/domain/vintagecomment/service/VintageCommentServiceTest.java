@@ -7,7 +7,7 @@ import com.vintly.domain.vintage.entity.Vintage;
 import com.vintly.domain.vintage.repo.VintageRepository;
 import com.vintly.domain.vintagecomment.entity.VintageComment;
 import com.vintly.domain.vintagecomment.repo.VintageCommentRepository;
-import com.vintly.interfaces.vintageComment.VintageCommentException;
+import com.vintly.interfaces.vintagecomment.VintageCommentException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

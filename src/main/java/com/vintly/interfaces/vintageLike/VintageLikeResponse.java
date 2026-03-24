@@ -1,4 +1,4 @@
-package com.vintly.interfaces.vintageLike;
+package com.vintly.interfaces.vintagelike;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

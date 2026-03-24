@@ -1,8 +1,8 @@
 package com.vintly.infra.config.swagger.api;
 
 import com.vintly.interfaces.presentation.ApiResponse;
-import com.vintly.interfaces.vintageComment.VintageCommentRequest;
-import com.vintly.interfaces.vintageComment.VintageCommentResponse;
+import com.vintly.interfaces.vintagecomment.VintageCommentRequest;
+import com.vintly.interfaces.vintagecomment.VintageCommentResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

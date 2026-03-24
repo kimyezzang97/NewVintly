@@ -2,7 +2,7 @@ package com.vintly.interfaces.presentation;
 
 import com.vintly.interfaces.member.MemberException;
 import com.vintly.interfaces.vintage.VintageException;
-import com.vintly.interfaces.vintageComment.VintageCommentException;
+import com.vintly.interfaces.vintagecomment.VintageCommentException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;

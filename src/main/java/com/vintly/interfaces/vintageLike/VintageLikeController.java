@@ -1,4 +1,4 @@
-package com.vintly.interfaces.vintageLike;
+package com.vintly.interfaces.vintagelike;
 
 import com.vintly.domain.vintagelike.service.VintageLikeService;
 import com.vintly.infra.config.swagger.api.SwaggerVintageLikeApi;

@@ -7,7 +7,7 @@ import com.vintly.domain.vintage.repo.VintageRepository;
 import com.vintly.domain.vintagelike.entity.VintageLike;
 import com.vintly.domain.vintagelike.repo.VintageLikeRepository;
 import com.vintly.infra.config.security.SecurityUtil;
-import com.vintly.interfaces.vintageLike.VintageLikeResponse;
+import com.vintly.interfaces.vintagelike.VintageLikeResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;

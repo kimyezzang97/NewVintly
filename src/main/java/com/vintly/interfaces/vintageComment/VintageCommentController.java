@@ -1,4 +1,4 @@
-package com.vintly.interfaces.vintageComment;
+package com.vintly.interfaces.vintagecomment;
 
 import com.vintly.domain.vintagecomment.service.VintageCommentService;
 import com.vintly.infra.config.swagger.api.SwaggerVintageCommentApi;

@@ -1,4 +1,4 @@
-package com.vintly.interfaces.vintageComment;
+package com.vintly.interfaces.vintagecomment;
 
 public class VintageCommentException {
 
