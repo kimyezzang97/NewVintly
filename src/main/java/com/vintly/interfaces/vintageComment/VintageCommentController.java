@@ -1,6 +1,7 @@
 package com.vintly.interfaces.vintageComment;
 
 import com.vintly.domain.vintagecomment.service.VintageCommentService;
+import com.vintly.infra.config.swagger.api.SwaggerVintageCommentApi;
 import com.vintly.infra.util.SecurityUtil;
 import com.vintly.interfaces.presentation.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/vintages/{vintageId}/comments")
 @RequiredArgsConstructor
 @Validated
-public class VintageCommentController {
+public class VintageCommentController implements SwaggerVintageCommentApi {
 
     private final VintageCommentService vintageCommentService;
 

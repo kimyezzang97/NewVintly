@@ -2,7 +2,7 @@ package com.vintly.interfaces.auth;
 
 import com.vintly.domain.auth.service.AuthService;
 import com.vintly.domain.member.service.CustomUserDetails;
-import com.vintly.domain.member.service.MemberService;
+import com.vintly.infra.config.swagger.api.SwaggerAuthApi;
 import com.vintly.infra.util.SecurityUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,7 +19,7 @@ import java.io.IOException;
 @RequestMapping("/api/v1/auth")
 @Validated
 @Slf4j
-public class AuthController {
+public class AuthController implements SwaggerAuthApi {
 
     private final AuthService authService;
 
