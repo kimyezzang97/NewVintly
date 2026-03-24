@@ -15,11 +15,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class MemberServiceTest {
@@ -47,7 +47,6 @@ public class MemberServiceTest {
         // then
         assertThat(existResult).isTrue();
         assertThat(notExistResult).isFalse();
-        // Mockito.verify(memberRepository).existsByEmail(email); // 1번 호출 되었는지 확인 방법
     }
 
     @Test
@@ -78,14 +77,10 @@ public class MemberServiceTest {
                 "secure123@"
         );
 
-        // 중복 확인시 false 리턴하게 세팅
         Mockito.when(memberRepository.existsByEmail(join.email())).thenReturn(false);
         Mockito.when(memberRepository.existsByNickname(join.nickname())).thenReturn(false);
-
-        // 비밀번호 인코더가 특정값 리턴하게 세팅
         Mockito.when(bCryptPasswordEncoder.encode(join.password())).thenReturn("encoded");
 
-        // 저장시 Member가 리턴된다.
         Member savedMember = new Member(
                 1L,
                 "test@example.com",
@@ -94,6 +89,7 @@ public class MemberServiceTest {
                 "123123",
                 "ROLE_USER",
                 Use.K,
+                null,
                 null
         );
         Mockito.when(memberRepository.save(ArgumentMatchers.any(Member.class))).thenReturn(savedMember);
@@ -105,7 +101,6 @@ public class MemberServiceTest {
         assertNotNull(emailCode);
         assertEquals(6, emailCode.length());
 
-        // 호출 확인
         Mockito.verify(memberRepository).existsByEmail(join.email());
         Mockito.verify(memberRepository).existsByNickname(join.nickname());
         Mockito.verify(bCryptPasswordEncoder).encode(join.password());
@@ -118,7 +113,7 @@ public class MemberServiceTest {
         // Arrange
         String email = "test@example.com";
         Member member = new Member(1L, email, "password", "닉네임",
-                "code", "ROLE_USER", Use.Y, null);
+                "code", "ROLE_USER", Use.Y, null, null);
         Mockito.when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
 
         // Act
@@ -147,11 +142,11 @@ public class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("닉네임 중복이 없으면 닉네임이 변경된다.")
+    @DisplayName("닉네임 중복이 없고 최초 변경이면 닉네임이 변경된다.")
     void shouldUpdateNicknameWhenNotDuplicated() {
         // Arrange
         Member member = new Member(1L, "test@example.com", "encoded", "oldNick",
-                "code", "ROLE_USER", Use.Y, null);
+                "code", "ROLE_USER", Use.Y, null, null);
         Mockito.when(memberRepository.existsByNickname("newNick")).thenReturn(false);
 
         // Act
@@ -162,15 +157,49 @@ public class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("닉네임 변경 후 14일이 지나면 재변경이 가능하다.")
+    void shouldUpdateNicknameWhenAfter14Days() {
+        // Arrange
+        LocalDateTime fifteenDaysAgo = LocalDateTime.now().minusDays(15);
+        Member member = new Member(1L, "test@example.com", "encoded", "oldNick",
+                "code", "ROLE_USER", Use.Y, null, fifteenDaysAgo);
+        Mockito.when(memberRepository.existsByNickname("newNick")).thenReturn(false);
+
+        // Act
+        memberService.updateNickname(member, "newNick");
+
+        // Assert
+        assertThat(member.getNickname()).isEqualTo("newNick");
+    }
+
+    @Test
+    @DisplayName("닉네임 변경 후 14일 이내에 재변경 시 NicknameChangeTooSoonException이 발생하고 남은 기간을 알려준다.")
+    void shouldThrowWhenNicknameChangedWithin14Days() {
+        // Arrange
+        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
+        Member member = new Member(1L, "test@example.com", "encoded", "oldNick",
+                "code", "ROLE_USER", Use.Y, null, threeDaysAgo);
+        Mockito.when(memberRepository.existsByNickname("newNick")).thenReturn(false);
+
+        // Act & Assert
+        MemberException.NicknameChangeTooSoonException ex = assertThrows(
+                MemberException.NicknameChangeTooSoonException.class,
+                () -> memberService.updateNickname(member, "newNick")
+        );
+        assertThat(ex.getRemainingDays()).isEqualTo(11);
+        assertThat(ex.getMessage()).contains("11");
+    }
+
+    @Test
     @DisplayName("닉네임이 중복이면 ConflictNicknameException이 발생한다.")
     void shouldThrowWhenNicknameDuplicated() {
         // Arrange
         Member member = new Member(1L, "test@example.com", "encoded", "oldNick",
-                "code", "ROLE_USER", Use.Y, null);
+                "code", "ROLE_USER", Use.Y, null, null);
         Mockito.when(memberRepository.existsByNickname("dupNick")).thenReturn(true);
 
         // Act & Assert
-        org.junit.jupiter.api.Assertions.assertThrows(
+        assertThrows(
                 MemberException.ConflictNicknameException.class,
                 () -> memberService.updateNickname(member, "dupNick")
         );
@@ -181,7 +210,7 @@ public class MemberServiceTest {
     void shouldUpdatePasswordWhenCurrentPasswordMatches() {
         // Arrange
         Member member = new Member(1L, "test@example.com", "oldEncoded", "nickname",
-                "code", "ROLE_USER", Use.Y, null);
+                "code", "ROLE_USER", Use.Y, null, null);
         Mockito.when(bCryptPasswordEncoder.matches("currentPw", "oldEncoded")).thenReturn(true);
         Mockito.when(bCryptPasswordEncoder.encode("newPw")).thenReturn("newEncoded");
 
@@ -197,11 +226,11 @@ public class MemberServiceTest {
     void shouldThrowWhenCurrentPasswordNotMatch() {
         // Arrange
         Member member = new Member(1L, "test@example.com", "oldEncoded", "nickname",
-                "code", "ROLE_USER", Use.Y, null);
+                "code", "ROLE_USER", Use.Y, null, null);
         Mockito.when(bCryptPasswordEncoder.matches("wrongPw", "oldEncoded")).thenReturn(false);
 
         // Act & Assert
-        org.junit.jupiter.api.Assertions.assertThrows(
+        assertThrows(
                 MemberException.PasswordNotMatchException.class,
                 () -> memberService.updatePassword(member, "wrongPw", "newPw")
         );
@@ -212,7 +241,7 @@ public class MemberServiceTest {
     void shouldWithdrawMember() {
         // Arrange
         Member member = new Member(1L, "test@example.com", "encoded", "nickname",
-                "code", "ROLE_USER", Use.Y, null);
+                "code", "ROLE_USER", Use.Y, null, null);
 
         // Act
         memberService.withdrawMember(member);

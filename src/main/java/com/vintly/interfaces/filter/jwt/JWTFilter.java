@@ -63,7 +63,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // email, role 만 생성
         Member member = new Member(memberId, username, null, null,
-                null, role, null, null);
+                null, role, null, null, null);
 
         CustomUserDetails customUserDetails = new CustomUserDetails(member);
 

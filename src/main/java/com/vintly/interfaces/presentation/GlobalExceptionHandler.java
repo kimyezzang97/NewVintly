@@ -49,6 +49,12 @@ public class GlobalExceptionHandler {
         return new ApiResponse<>(false, 409, e.getMessage(), null);
     }
 
+    // 닉네임 변경 - 14일 제한
+    @ExceptionHandler(MemberException.NicknameChangeTooSoonException.class)
+    protected ApiResponse<?> nicknameChangeTooSoon(MemberException.NicknameChangeTooSoonException e) {
+        return new ApiResponse<>(false, 429, e.getMessage(), null);
+    }
+
     // 회원 정보를 찾을 수 없음
     @ExceptionHandler(MemberException.MemberNotFoundException.class)
     protected ApiResponse<?> memberNotFound(MemberException.MemberNotFoundException e) {

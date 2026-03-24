@@ -14,7 +14,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -60,7 +61,7 @@ public class MemberService {
 
         // 회원정보 저장
         Member member = memberRepository.save(new Member(
-                null, join.email(), encodePassword, join.nickname(), emailCode, role, Use.K, null)
+                null, join.email(), encodePassword, join.nickname(), emailCode, role, Use.K, null, null)
                 );
 
         return emailCode;
@@ -74,6 +75,16 @@ public class MemberService {
     @Transactional(rollbackFor = Exception.class)
     public void updateNickname(Member member, String nickname) {
         if (memberRepository.existsByNickname(nickname)) throw new MemberException.ConflictNicknameException();
+
+        if (member.getNicknameUpdatedAt() != null) {
+            LocalDate allowedAt = member.getNicknameUpdatedAt().toLocalDate().plusDays(14);
+            LocalDate today = LocalDate.now();
+            if (today.isBefore(allowedAt)) {
+                long remainingDays = Math.max(1, ChronoUnit.DAYS.between(today, allowedAt));
+                throw new MemberException.NicknameChangeTooSoonException(remainingDays);
+            }
+        }
+
         member.changeNickname(nickname);
     }
 

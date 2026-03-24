@@ -14,7 +14,7 @@ class MemberTest {
     void ifEnableMemberUseYnStatusToY() {
         //given
         Member member = new Member(null, "test@test.com","password", "nickname",
-                "123456", "ROLE_USER", Use.K, null);
+                "123456", "ROLE_USER", Use.K, null, null);
 
         //when
         member.enableMember();
@@ -28,7 +28,7 @@ class MemberTest {
     void ifMemberLeavesUseStatusNAndCreateDeletedAt(){
         // given
         Member member = new Member(null, "test@test.com","password", "nickname",
-                "123456", "ROLE_USER", Use.K, null);
+                "123456", "ROLE_USER", Use.K, null, null);
 
         // when
         LocalDateTime deletedTime = LocalDateTime.now();
@@ -44,7 +44,7 @@ class MemberTest {
     void ifChangeNicknameThenNicknameUpdated(){
         // given
         Member member = new Member(null, "test@test.com", "password", "oldNick",
-                "123456", "ROLE_USER", Use.Y, null);
+                "123456", "ROLE_USER", Use.Y, null, null);
 
         // when
         member.changeNickname("newNick");
@@ -54,11 +54,28 @@ class MemberTest {
     }
 
     @Test
+    @DisplayName("닉네임 변경시 nicknameUpdatedAt이 현재 시간으로 설정된다.")
+    void ifChangeNicknameThenNicknameUpdatedAtIsSet(){
+        // given
+        Member member = new Member(null, "test@test.com", "password", "oldNick",
+                "123456", "ROLE_USER", Use.Y, null, null);
+        LocalDateTime before = LocalDateTime.now();
+
+        // when
+        member.changeNickname("newNick");
+
+        // then
+        Assertions.assertThat(member.getNicknameUpdatedAt()).isNotNull();
+        Assertions.assertThat(member.getNicknameUpdatedAt()).isAfterOrEqualTo(before);
+        Assertions.assertThat(member.getNicknameUpdatedAt()).isBeforeOrEqualTo(LocalDateTime.now());
+    }
+
+    @Test
     @DisplayName("비밀번호 변경시 password가 새 값으로 변경된다.")
     void ifChangePasswordThenPasswordUpdated(){
         // given
         Member member = new Member(null, "test@test.com", "oldEncoded", "nickname",
-                "123456", "ROLE_USER", Use.Y, null);
+                "123456", "ROLE_USER", Use.Y, null, null);
 
         // when
         member.changePassword("newEncoded");
@@ -72,7 +89,7 @@ class MemberTest {
     void ifMemberVanUseStatusNAndCreateDeletedAt(){
         // given
         Member member = new Member(null, "test@test.com","password", "nickname",
-                "123456", "ROLE_USER", Use.K, null);
+                "123456", "ROLE_USER", Use.K, null, null);
 
         // when
         LocalDateTime deletedTime = LocalDateTime.now();

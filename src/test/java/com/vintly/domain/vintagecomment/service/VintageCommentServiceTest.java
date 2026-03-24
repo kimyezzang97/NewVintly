@@ -39,7 +39,7 @@ class VintageCommentServiceTest {
 
     private Member createMember(Long memberId) {
         return new Member(memberId, "test@example.com", "password", "nickname",
-                "code", "ROLE_USER", Use.Y, null);
+                "code", "ROLE_USER", Use.Y, null, null);
     }
 
     private Vintage createVintage(Long vintageId) {

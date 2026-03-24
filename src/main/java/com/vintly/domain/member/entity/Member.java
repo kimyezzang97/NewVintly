@@ -51,12 +51,17 @@ public class Member extends BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Comment("닉네임 최종 변경 일시")
+    @Column(name = "nickname_updated_at")
+    private LocalDateTime nicknameUpdatedAt;
+
     public void enableMember(){
         this.useYn = Use.Y;
     }
 
     public void changeNickname(String nickname) {
         this.nickname = nickname;
+        this.nicknameUpdatedAt = LocalDateTime.now();
     }
 
     public void changePassword(String encodedPassword) {

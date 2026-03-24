@@ -43,4 +43,18 @@ public class MemberException {
             super("이미 사용 중인 닉네임입니다.");
         }
     }
+
+    // 닉네임 변경 - 14일 제한
+    public static class NicknameChangeTooSoonException extends RuntimeException {
+        private final long remainingDays;
+
+        public NicknameChangeTooSoonException(long remainingDays) {
+            super("닉네임은 14일에 한 번만 변경할 수 있습니다. 변경 가능까지 " + remainingDays + "일 남았습니다.");
+            this.remainingDays = remainingDays;
+        }
+
+        public long getRemainingDays() {
+            return remainingDays;
+        }
+    }
 }
