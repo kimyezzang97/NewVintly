@@ -237,7 +237,7 @@ public class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("회원 탈퇴시 useYn이 N으로 변경된다.")
+    @DisplayName("회원 탈퇴시 DB에서 즉시 삭제된다.")
     void shouldWithdrawMember() {
         // Arrange
         Member member = new Member(1L, "test@example.com", "encoded", "nickname",
@@ -247,7 +247,6 @@ public class MemberServiceTest {
         memberService.withdrawMember(member);
 
         // Assert
-        assertThat(member.getUseYn()).isEqualTo(Use.N);
-        assertThat(member.getDeletedAt()).isNotNull();
+        Mockito.verify(memberRepository).delete(member);
     }
 }

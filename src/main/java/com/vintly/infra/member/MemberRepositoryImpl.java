@@ -48,6 +48,11 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
+    public void delete(Member member) {
+        memberJpaRepository.delete(member);
+    }
+
+    @Override
     public void deleteAll() {
         memberJpaRepository.deleteAll();
     }

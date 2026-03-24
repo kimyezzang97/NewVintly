@@ -28,6 +28,8 @@ public interface MemberRepository {
 
     Member save(Member member);
 
+    void delete(Member member);
+
     void deleteAll();
 
     // 조회 쿼리 없이 프록시로 참조만 걸기

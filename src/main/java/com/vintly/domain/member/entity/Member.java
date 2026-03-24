@@ -68,11 +68,6 @@ public class Member extends BaseEntity {
         this.password = encodedPassword;
     }
 
-    public void leaveMember(LocalDateTime deletedAt){
-        this.deletedAt = deletedAt;
-        this.useYn = Use.N;
-    }
-
     public void vanMember(LocalDateTime deletedAt){
         this.deletedAt = deletedAt;
         this.useYn = Use.X;

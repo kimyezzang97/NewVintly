@@ -100,6 +100,6 @@ public class MemberService {
     // 회원 탈퇴
     @Transactional(rollbackFor = Exception.class)
     public void withdrawMember(Member member) {
-        member.leaveMember(java.time.LocalDateTime.now());
+        memberRepository.delete(member);
     }
 }

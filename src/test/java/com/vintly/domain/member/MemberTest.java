@@ -24,22 +24,6 @@ class MemberTest {
     }
 
     @Test
-    @DisplayName("회원 탈퇴시 useYn이 N으로 변경되고 삭제 날짜가 생긴다.")
-    void ifMemberLeavesUseStatusNAndCreateDeletedAt(){
-        // given
-        Member member = new Member(null, "test@test.com","password", "nickname",
-                "123456", "ROLE_USER", Use.K, null, null);
-
-        // when
-        LocalDateTime deletedTime = LocalDateTime.now();
-        member.leaveMember(deletedTime);
-
-        // then
-        Assertions.assertThat(member.getUseYn()).isEqualTo(Use.N);
-        Assertions.assertThat(member.getDeletedAt()).isBeforeOrEqualTo(LocalDateTime.now());
-    }
-
-    @Test
     @DisplayName("닉네임 변경시 nickname이 새 값으로 변경된다.")
     void ifChangeNicknameThenNicknameUpdated(){
         // given
