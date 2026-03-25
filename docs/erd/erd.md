@@ -75,42 +75,44 @@ erDiagram
         DATETIME created_at "좋아요 생성 시간"
     }
 
-    POST {
-        BIGINT post_id PK "AUTO INCREMENT"
-        BIGINT member_id FK "MEMBER 외래 키"
+    BOARD {
+        BIGINT board_id PK "AUTO INCREMENT"
+        BIGINT member_id FK "작성자 ID"
+        VARCHAR author_nickname "작성 당시 닉네임"
         VARCHAR title "제목"
         TEXT content "본문 내용"
-        INT view_count "조회수"
+        INT view_count "조회수 default 0"
+        ENUM del_status "[삭제자] 작성자: W, 관리자: S, 정상: N"
         DATETIME created_at "생성 시간"
         DATETIME updated_at "수정 시간"
-        DATETIME deleted_at "삭제 시간"
-        VARCHAR del_status "[삭제자] 작성자 : W, 관리자 : S, 삭제 안됨 : N"
+        DATETIME deleted_at "삭제 일시"
     }
 
-    POST_IMG {
-        BIGINT post_img_id PK "AUTO INCREMENT"
-        BIGINT post_id FK "게시글 ID"
+    BOARD_IMG {
+        BIGINT board_img_id PK "AUTO INCREMENT"
+        BIGINT board_id FK "게시글 ID"
         TEXT img_path "이미지 경로"
-        INT sort_order "정렬 순서"
+        INT sort_order "정렬 순서 default 1"
     }
 
-    POST_LIKE {
-        BIGINT post_like_id PK "AUTO INCREMENT"
-        BIGINT post_id FK "게시글 ID"
-        BIGINT member_id FK "MEMBER 외래 키"
+    BOARD_LIKE {
+        BIGINT board_like_id PK "AUTO INCREMENT"
+        BIGINT board_id FK "게시글 ID"
+        BIGINT member_id FK "멤버 ID"
         DATETIME created_at "좋아요 생성 시간"
     }
 
-    POST_COMMENT {
-        BIGINT post_comment_id PK "AUTO INCREMENT"
-        BIGINT post_id FK "게시글 ID"
-        BIGINT member_id FK "MEMBER 외래 키"
-        BIGINT parent_id FK "상위 댓글 (0이면 최상위) default 0"
+    BOARD_COMMENT {
+        BIGINT board_comment_id PK "AUTO INCREMENT"
+        BIGINT board_id FK "게시글 ID"
+        BIGINT member_id FK "작성자 ID"
+        VARCHAR author_nickname "작성 당시 닉네임"
+        BIGINT parent_id "상위 댓글 ID (0이면 최상위) default 0"
         TEXT content "댓글 내용"
+        ENUM del_status "[삭제자] 작성자: W, 관리자: S, 정상: N"
         DATETIME created_at "작성 시간"
         DATETIME updated_at "수정 시간"
-        DATETIME deleted_at "삭제 시간"
-        VARCHAR del_status "[삭제자] 작성자 : W, 관리자 : S, 삭제 안됨 : N"
+        DATETIME deleted_at "삭제 일시"
     }
 
     VINTAGE ||--o{ VINTAGE_IMG : "1:N"
@@ -123,10 +125,10 @@ erDiagram
     NOTICE ||--o{ NOTICE_LIKE : "1:N"
     NOTICE ||--o{ MEMBER : "1:N"
 
-    MEMBER ||--o{ POST : "1:N"
-    POST ||--o{ POST_IMG : "1:N"
-    POST ||--o{ POST_LIKE : "1:N"
-    MEMBER ||--o{ POST_LIKE : "1:N"
-    POST ||--o{ POST_COMMENT : "1:N"
-    MEMBER ||--o{ POST_COMMENT : "1:N"
+    MEMBER ||--o{ BOARD : "1:N"
+    BOARD ||--o{ BOARD_IMG : "1:N"
+    BOARD ||--o{ BOARD_LIKE : "1:N"
+    MEMBER ||--o{ BOARD_LIKE : "1:N"
+    BOARD ||--o{ BOARD_COMMENT : "1:N"
+    MEMBER ||--o{ BOARD_COMMENT : "1:N"
 ```
