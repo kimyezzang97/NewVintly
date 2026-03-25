@@ -18,7 +18,7 @@ public class VintageCommentController implements SwaggerVintageCommentApi {
 
     @PostMapping
     public ApiResponse<VintageCommentResponse.Create> createComment(@PathVariable Long vintageId,
-                                                                    @RequestBody @Validated VintageCommentRequest.Create req) {
+                                                                    @RequestBody VintageCommentRequest.Create req) {
         Long commentId = vintageCommentService.create(vintageId, SecurityUtil.getCurrentMemberId(), req.parentCommentId(), req.comment());
         Long parentId = req.parentCommentId() != null ? req.parentCommentId() : 0L;
         return new ApiResponse<>(true, 200, "", new VintageCommentResponse.Create(commentId, parentId));
@@ -27,7 +27,7 @@ public class VintageCommentController implements SwaggerVintageCommentApi {
     @PutMapping("/{commentId}")
     public ApiResponse<?> updateComment(@PathVariable Long vintageId,
                                         @PathVariable Long commentId,
-                                        @RequestBody @Validated VintageCommentRequest.Update req) {
+                                        @RequestBody VintageCommentRequest.Update req) {
         vintageCommentService.update(commentId, SecurityUtil.getCurrentMemberId(), req.comment());
         return new ApiResponse<>(true, 200, "댓글이 수정되었습니다.", null);
     }

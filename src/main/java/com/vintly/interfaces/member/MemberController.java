@@ -6,7 +6,6 @@ import com.vintly.domain.member.service.MemberService;
 import com.vintly.infra.config.swagger.api.SwaggerMemberApi;
 import com.vintly.infra.util.SecurityUtil;
 import com.vintly.interfaces.presentation.ApiResponse;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -56,14 +55,14 @@ public class MemberController implements SwaggerMemberApi {
 
      // 회원가입
     @PostMapping("/join")
-    public ApiResponse<?> createMember(@Valid @RequestBody MemberRequest.JoinMember join){
+    public ApiResponse<?> createMember(@RequestBody MemberRequest.JoinMember join){
         memberFacade.joinMember(join);
         return new ApiResponse<>(true, 200, "회원가입에 성공하였습니다. 이메일 인증을 완료 해주세요.", null);
     }
 
     // 닉네임 변경
     @PatchMapping("/me/nickname")
-    public ApiResponse<?> updateNickname(@Valid @RequestBody MemberRequest.ChangeNickname request) {
+    public ApiResponse<?> updateNickname(@RequestBody MemberRequest.ChangeNickname request) {
         String email = SecurityUtil.getCurrentEmail();
         Member member = memberService.findByEmail(email)
                 .orElseThrow(MemberException.MemberNotFoundException::new);
@@ -73,7 +72,7 @@ public class MemberController implements SwaggerMemberApi {
 
     // 비밀번호 변경
     @PatchMapping("/me/password")
-    public ApiResponse<?> updatePassword(@Valid @RequestBody MemberRequest.ChangePassword request) {
+    public ApiResponse<?> updatePassword(@RequestBody MemberRequest.ChangePassword request) {
         String email = SecurityUtil.getCurrentEmail();
         Member member = memberService.findByEmail(email)
                 .orElseThrow(MemberException.MemberNotFoundException::new);
@@ -83,7 +82,7 @@ public class MemberController implements SwaggerMemberApi {
 
     // 회원 탈퇴
     @DeleteMapping("/me")
-    public ApiResponse<?> withdrawMember(@Valid @RequestBody MemberRequest.WithdrawMember request) {
+    public ApiResponse<?> withdrawMember(@RequestBody MemberRequest.WithdrawMember request) {
         String email = SecurityUtil.getCurrentEmail();
         Member member = memberService.findByEmail(email)
                 .orElseThrow(MemberException.MemberNotFoundException::new);

@@ -1,5 +1,6 @@
 package com.vintly.interfaces.presentation;
 
+import com.vintly.interfaces.board.BoardException;
 import com.vintly.interfaces.member.MemberException;
 import com.vintly.interfaces.vintage.VintageException;
 import com.vintly.interfaces.vintagecomment.VintageCommentException;
@@ -80,6 +81,25 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(VintageException.VintageCreateException.class)
     protected ApiResponse<?> emailSendError(VintageException.VintageCreateException e) {
         return new ApiResponse<>(false, 500, e.getMessage(), null);
+    }
+
+    /**
+     * [board]
+     */
+
+    @ExceptionHandler(BoardException.BoardNotFoundException.class)
+    protected ApiResponse<?> boardNotFound(BoardException.BoardNotFoundException e) {
+        return new ApiResponse<>(false, 404, e.getMessage(), null);
+    }
+
+    @ExceptionHandler(BoardException.BoardForbiddenException.class)
+    protected ApiResponse<?> boardForbidden(BoardException.BoardForbiddenException e) {
+        return new ApiResponse<>(false, 403, e.getMessage(), null);
+    }
+
+    @ExceptionHandler(BoardException.BoardAlreadyDeletedException.class)
+    protected ApiResponse<?> boardAlreadyDeleted(BoardException.BoardAlreadyDeletedException e) {
+        return new ApiResponse<>(false, 404, e.getMessage(), null);
     }
 
     /**

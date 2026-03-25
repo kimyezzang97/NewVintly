@@ -25,6 +25,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 
 @Configuration // Configuration 등록하기
@@ -72,6 +73,20 @@ public class SecurityConfig {
                                 .requestMatchers("/admin").hasRole("ADMIN")
                                 // 나머지는 인증 필수
                                 .anyRequest().authenticated()
+                )
+
+                // 인증/인가 예외 처리
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"success\":false,\"code\":401,\"msg\":\"로그인이 필요합니다.\",\"data\":null}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"success\":false,\"code\":403,\"msg\":\"접근 권한이 없습니다.\",\"data\":null}");
+                        })
                 )
 
                 // 세션 없이 (stateless) / JWT 사용
