@@ -80,5 +80,5 @@ public interface SwaggerMemberApi {
     com.vintly.interfaces.presentation.ApiResponse<?> updatePassword(@Valid @RequestBody MemberRequest.ChangePassword request);
 
     @Operation(summary = "회원 탈퇴", description = "현재 로그인한 회원을 탈퇴 처리합니다.", security = @SecurityRequirement(name = "access"))
-    com.vintly.interfaces.presentation.ApiResponse<?> withdrawMember();
+    com.vintly.interfaces.presentation.ApiResponse<?> withdrawMember(@Valid @RequestBody MemberRequest.WithdrawMember request);
 }

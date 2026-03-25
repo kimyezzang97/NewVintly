@@ -1,5 +1,6 @@
 package com.vintly.infra.vintagecomment;
 
+import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.vintage.dto.VintageInfo;
 import com.vintly.domain.vintage.entity.Vintage;
 import com.vintly.domain.vintagecomment.entity.VintageComment;
@@ -49,5 +50,10 @@ public class VintageCommentRepositoryImpl implements VintageCommentRepository {
     @Override
     public void deleteAllByParentCommentId(Long parentCommentId) {
         jpaRepository.deleteAllByParentCommentId(parentCommentId);
+    }
+
+    @Override
+    public void anonymizeMemberInComments(Member member, String deletedNickname) {
+        jpaRepository.anonymizeMemberInComments(member, deletedNickname);
     }
 }

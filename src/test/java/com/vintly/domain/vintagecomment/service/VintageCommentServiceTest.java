@@ -47,11 +47,11 @@ class VintageCommentServiceTest {
     }
 
     private VintageComment createRootComment(Long commentId, Member member, Vintage vintage) {
-        return new VintageComment(commentId, vintage, member, 0L, "원본 댓글");
+        return new VintageComment(commentId, vintage, member, 0L, "원본 댓글", "nickname");
     }
 
     private VintageComment createReplyComment(Long commentId, Long parentId, Member member, Vintage vintage) {
-        return new VintageComment(commentId, vintage, member, parentId, "대댓글");
+        return new VintageComment(commentId, vintage, member, parentId, "대댓글", "nickname");
     }
 
     @Nested

@@ -76,7 +76,7 @@ public class VintageCommentService {
         VintageComment comment = vintageCommentRepository.findById(commentId)
                 .orElseThrow(VintageCommentException.CommentNotFoundException::new);
 
-        if (!comment.getMember().getMemberId().equals(memberId)) {
+        if (comment.getMember() == null || !comment.getMember().getMemberId().equals(memberId)) {
             throw new VintageCommentException.CommentNotOwnedException();
         }
 
@@ -89,7 +89,7 @@ public class VintageCommentService {
         VintageComment comment = vintageCommentRepository.findById(commentId)
                 .orElseThrow(VintageCommentException.CommentNotFoundException::new);
 
-        if (!comment.getMember().getMemberId().equals(memberId)) {
+        if (comment.getMember() == null || !comment.getMember().getMemberId().equals(memberId)) {
             throw new VintageCommentException.CommentNotOwnedException();
         }
 

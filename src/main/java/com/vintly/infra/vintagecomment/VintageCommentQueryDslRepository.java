@@ -26,13 +26,13 @@ public class VintageCommentQueryDslRepository {
                         vintageComment.vintageCommentId,
                         vintageComment.parentCommentId,
                         member.memberId,
-                        member.nickname,
+                        vintageComment.authorNickname,
                         vintageComment.content,
                         vintageComment.createdAt,
                         vintageComment.createdAt.ne(vintageComment.updatedAt)
                 ))
                 .from(vintageComment)
-                .join(vintageComment.member, member)
+                .leftJoin(vintageComment.member, member)
                 .where(vintageComment.vintage.vintageId.eq(vintageId))
                 .orderBy(vintageComment.createdAt.desc())
                 .fetch();

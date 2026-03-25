@@ -29,8 +29,8 @@ public class VintageComment extends BaseEntity {
     private Vintage vintage;
 
     @Comment("MEMBER 외래 키")
-    @ManyToOne(fetch = FetchType.LAZY) // 지연 로딩으로 성능 관리, DB에서 진짜 필요한 것만 쿼리로 날림.
-    @JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)) // FK 제약 X
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = true, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Member member;
 
     @Comment("상위 댓글 (0이면 최상위) default 0")
@@ -41,6 +41,10 @@ public class VintageComment extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
+    @Comment("댓글 작성자 닉네임 (탈퇴 시 del_{memberId}로 변경)")
+    @Column(name = "author_nickname", nullable = false, length = 30)
+    private String authorNickname;
+
     // ✅ 최상위 댓글
     public static VintageComment createRoot(Vintage vintage, Member member, String content) {
         VintageComment c = new VintageComment();
@@ -48,6 +52,7 @@ public class VintageComment extends BaseEntity {
         c.member = member;
         c.parentCommentId = 0L;
         c.content = content;
+        c.authorNickname = member.getNickname();
         return c;
     }
 
@@ -65,6 +70,7 @@ public class VintageComment extends BaseEntity {
         c.member = member;
         c.parentCommentId = parentCommentId;
         c.content = content;
+        c.authorNickname = member.getNickname();
         return c;
     }
 }
