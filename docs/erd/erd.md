@@ -49,9 +49,10 @@ erDiagram
     VINTAGE_COMMENT {
         BIGINT vintage_comment_id PK "AUTO INCREMENT"
         BIGINT vintage_id FK "SHOP 외래 키"
-        BIGINT member_id FK "MEMBER 외래 키"
+        BIGINT member_id FK "MEMBER 외래 키 (탈퇴 시 null)"
         BIGINT parent_comment_id FK "상위 댓글 (0이면 최상위) default 0"
-        TEXT cotent "댓글 내용"
+        TEXT content "댓글 내용"
+        VARCHAR author_nickname "작성자 닉네임 (탈퇴 시 del_{memberId})"
         DATETIME created_at "댓글 생성 날짜"
         DATETIME updated_at "댓글 수정 날짜"
     }
