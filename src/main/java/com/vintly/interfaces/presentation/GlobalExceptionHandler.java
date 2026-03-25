@@ -55,6 +55,12 @@ public class GlobalExceptionHandler {
         return new ApiResponse<>(false, 429, e.getMessage(), null);
     }
 
+    // 현재 비밀번호 불일치
+    @ExceptionHandler(MemberException.PasswordNotMatchException.class)
+    protected ApiResponse<?> passwordNotMatch(MemberException.PasswordNotMatchException e) {
+        return new ApiResponse<>(false, 400, e.getMessage(), null);
+    }
+
     // 회원 정보를 찾을 수 없음
     @ExceptionHandler(MemberException.MemberNotFoundException.class)
     protected ApiResponse<?> memberNotFound(MemberException.MemberNotFoundException e) {

@@ -40,7 +40,7 @@ public class MemberController implements SwaggerMemberApi {
      // nickname 중복 체크
     @GetMapping("/nickname/{nickname}")
     public ApiResponse<?> getChkNickname(@PathVariable("nickname") @NotBlank String nickname){
-        if (!nickname.matches("^[가-힣A-Za-z0-9_-]{2,10}$")) throw new MemberException.NicknameValidException();
+        if (!nickname.matches("^(?!del_)[가-힣A-Za-z0-9_-]{2,10}$")) throw new MemberException.NicknameValidException();
         if (memberService.getChkNickname(nickname)) return new ApiResponse<>(false, 409, "이미 사용중인 닉네임입니다.", null);
 
         return new ApiResponse<>(true, 200, "사용 가능한 닉네임입니다.", null);
@@ -83,11 +83,11 @@ public class MemberController implements SwaggerMemberApi {
 
     // 회원 탈퇴
     @DeleteMapping("/me")
-    public ApiResponse<?> withdrawMember() {
+    public ApiResponse<?> withdrawMember(@Valid @RequestBody MemberRequest.WithdrawMember request) {
         String email = SecurityUtil.getCurrentEmail();
         Member member = memberService.findByEmail(email)
                 .orElseThrow(MemberException.MemberNotFoundException::new);
-        memberService.withdrawMember(member);
+        memberService.withdrawMember(member, request.password());
         return new ApiResponse<>(true, 200, "회원 탈퇴가 완료되었습니다.", null);
     }
 }

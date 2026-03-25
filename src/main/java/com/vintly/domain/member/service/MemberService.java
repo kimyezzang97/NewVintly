@@ -1,12 +1,11 @@
 package com.vintly.domain.member.service;
 
-import com.vintly.domain.mail.entity.Mail;
 import com.vintly.domain.member.Use;
 import com.vintly.interfaces.member.MemberException;
 import com.vintly.interfaces.member.MemberRequest;
-import com.vintly.domain.mail.service.MailService;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
+import com.vintly.domain.vintagecomment.repo.VintageCommentRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,12 +24,14 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
+    private final VintageCommentRepository vintageCommentRepository;
 
     @Autowired
-    public MemberService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public MemberService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder,
+                         VintageCommentRepository vintageCommentRepository) {
         this.memberRepository = memberRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.vintageCommentRepository = vintageCommentRepository;
     }
 
     // email 중복 체크
@@ -99,7 +100,11 @@ public class MemberService {
 
     // 회원 탈퇴
     @Transactional(rollbackFor = Exception.class)
-    public void withdrawMember(Member member) {
+    public void withdrawMember(Member member, String password) {
+        if (!bCryptPasswordEncoder.matches(password, member.getPassword())) {
+            throw new MemberException.PasswordNotMatchException();
+        }
+        vintageCommentRepository.anonymizeMemberInComments(member, "del_" + member.getMemberId());
         memberRepository.delete(member);
     }
 }

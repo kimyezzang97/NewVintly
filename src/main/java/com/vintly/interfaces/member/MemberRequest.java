@@ -11,7 +11,7 @@ public class MemberRequest {
     public record ChangeNickname(
             @Schema(description = "새 닉네임", example = "새닉네임")
             @NotBlank(message = "닉네임을 공백없이 입력해주세요.")
-            @Pattern(regexp = "^[가-힣A-Za-z0-9_-]{2,10}$", message = "닉네임은 영어,한글 혹은 '-','_' 으로 2~10자로 입력해주세요.")
+            @Pattern(regexp = "^(?!del_)[가-힣A-Za-z0-9_-]{2,10}$", message = "닉네임은 영어,한글 혹은 '-','_' 으로 2~10자로 입력해주세요.")
             String nickname
     ) {}
 
@@ -27,11 +27,17 @@ public class MemberRequest {
             String newPassword
     ) {}
 
+    public record WithdrawMember(
+            @Schema(description = "현재 비밀번호", example = "current@123")
+            @NotBlank(message = "비밀번호를 입력해주세요.")
+            String password
+    ) {}
+
     public record JoinMember (
         // 닉네임
        @Schema(description = "닉네임", example = "김예짱")
        @NotBlank(message = "닉네임을 공백없이 입력해주세요.")
-       @Pattern(regexp = "^[가-힣A-Za-z0-9_-]{2,10}$", message = "닉네임은 영어,한글 혹은 '-','_' 으로 2~10자로 입력해주세요.")
+       @Pattern(regexp = "^(?!del_)[가-힣A-Za-z0-9_-]{2,10}$", message = "닉네임은 영어,한글 혹은 '-','_' 으로 2~10자로 입력해주세요.")
        String nickname,
 
        // 이메일

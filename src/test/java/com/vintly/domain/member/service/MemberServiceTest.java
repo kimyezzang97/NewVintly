@@ -3,6 +3,7 @@ package com.vintly.domain.member.service;
 import com.vintly.domain.member.Use;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
+import com.vintly.domain.vintagecomment.repo.VintageCommentRepository;
 import com.vintly.interfaces.member.MemberException;
 import com.vintly.interfaces.member.MemberRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +30,9 @@ public class MemberServiceTest {
 
     @Mock
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Mock
+    private VintageCommentRepository vintageCommentRepository;
 
     @InjectMocks
     private MemberService memberService;
@@ -159,29 +163,21 @@ public class MemberServiceTest {
     @Test
     @DisplayName("닉네임 변경 후 14일이 지나면 재변경이 가능하다.")
     void shouldUpdateNicknameWhenAfter14Days() {
-        // Arrange
         LocalDateTime fifteenDaysAgo = LocalDateTime.now().minusDays(15);
         Member member = new Member(1L, "test@example.com", "encoded", "oldNick",
                 "code", "ROLE_USER", Use.Y, null, fifteenDaysAgo);
         Mockito.when(memberRepository.existsByNickname("newNick")).thenReturn(false);
-
-        // Act
         memberService.updateNickname(member, "newNick");
-
-        // Assert
         assertThat(member.getNickname()).isEqualTo("newNick");
     }
 
     @Test
     @DisplayName("닉네임 변경 후 14일 이내에 재변경 시 NicknameChangeTooSoonException이 발생하고 남은 기간을 알려준다.")
     void shouldThrowWhenNicknameChangedWithin14Days() {
-        // Arrange
         LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
         Member member = new Member(1L, "test@example.com", "encoded", "oldNick",
                 "code", "ROLE_USER", Use.Y, null, threeDaysAgo);
         Mockito.when(memberRepository.existsByNickname("newNick")).thenReturn(false);
-
-        // Act & Assert
         MemberException.NicknameChangeTooSoonException ex = assertThrows(
                 MemberException.NicknameChangeTooSoonException.class,
                 () -> memberService.updateNickname(member, "newNick")
@@ -237,16 +233,34 @@ public class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("회원 탈퇴시 DB에서 즉시 삭제된다.")
-    void shouldWithdrawMember() {
+    @DisplayName("비밀번호가 일치하면 회원 탈퇴 시 댓글 익명화 후 DB에서 즉시 삭제된다.")
+    void shouldWithdrawMemberWhenPasswordMatches() {
         // Arrange
         Member member = new Member(1L, "test@example.com", "encoded", "nickname",
                 "code", "ROLE_USER", Use.Y, null, null);
+        Mockito.when(bCryptPasswordEncoder.matches("password", "encoded")).thenReturn(true);
 
         // Act
-        memberService.withdrawMember(member);
+        memberService.withdrawMember(member, "password");
 
         // Assert
+        Mockito.verify(vintageCommentRepository).anonymizeMemberInComments(member, "del_1");
         Mockito.verify(memberRepository).delete(member);
+    }
+
+    @Test
+    @DisplayName("비밀번호가 틀리면 회원 탈퇴 시 PasswordNotMatchException이 발생한다.")
+    void shouldThrowWhenPasswordNotMatchOnWithdraw() {
+        // Arrange
+        Member member = new Member(1L, "test@example.com", "encoded", "nickname",
+                "code", "ROLE_USER", Use.Y, null, null);
+        Mockito.when(bCryptPasswordEncoder.matches("wrongPassword", "encoded")).thenReturn(false);
+
+        // Act & Assert
+        assertThrows(
+                MemberException.PasswordNotMatchException.class,
+                () -> memberService.withdrawMember(member, "wrongPassword")
+        );
+        Mockito.verify(memberRepository, Mockito.never()).delete(member);
     }
 }
