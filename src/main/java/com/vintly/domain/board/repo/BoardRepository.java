@@ -16,4 +16,6 @@ public interface BoardRepository {
     Optional<Board> findById(Long boardId);
 
     Page<BoardInfo.BoardSummary> findBoardList(String keyword, Pageable pageable);
+
+    Board getReferenceById(Long boardId);
 }

@@ -31,4 +31,9 @@ public class BoardRepositoryImpl implements BoardRepository {
     public Page<BoardInfo.BoardSummary> findBoardList(String keyword, Pageable pageable) {
         return boardQueryDslRepository.findBoardList(keyword, pageable);
     }
+
+    @Override
+    public Board getReferenceById(Long boardId) {
+        return boardJpaRepository.getReferenceById(boardId);
+    }
 }
