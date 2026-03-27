@@ -122,6 +122,11 @@ Docker Compose로 로컬 MariaDB 11.3 구성 가능.
 - 모든 테스트 케이스가 통과해야 함
 
 ## 주의사항
+### 0. Swagger 인터페이스 + @Valid 규칙
+- 컨트롤러가 Swagger 인터페이스를 `implements`할 때, `@Valid` 등 파라미터 제약 조건은 **인터페이스 메서드에도 동일하게** 선언해야 한다.
+- 컨트롤러에만 `@Valid`를 붙이면 `HV000151: OverridingMethodMustNotAlterParameterConstraints` 에러 발생.
+- 항상 인터페이스와 구현체의 파라미터 어노테이션을 일치시킬 것.
+
 ### 1. Never Do
 - 실제 동작하지 않는 코드, 불필요한 Mock 데이터를 이요한 구현을 하지 말 것
 - null-safety 하지 않게 코드 작성하지 말 것 (Java 의 경우, Optional 을 활용할 것)
