@@ -77,15 +77,13 @@ erDiagram
 
     BOARD {
         BIGINT board_id PK "AUTO INCREMENT"
-        BIGINT member_id FK "작성자 ID"
+        BIGINT member_id FK "작성자 ID (탈퇴 시 orphaned)"
         VARCHAR author_nickname "작성 당시 닉네임"
         VARCHAR title "제목"
         TEXT content "본문 내용"
         INT view_count "조회수 default 0"
-        ENUM del_status "[삭제자] 작성자: W, 관리자: S, 정상: N"
         DATETIME created_at "생성 시간"
         DATETIME updated_at "수정 시간"
-        DATETIME deleted_at "삭제 일시"
     }
 
     BOARD_IMG {
@@ -105,14 +103,12 @@ erDiagram
     BOARD_COMMENT {
         BIGINT board_comment_id PK "AUTO INCREMENT"
         BIGINT board_id FK "게시글 ID"
-        BIGINT member_id FK "작성자 ID"
-        VARCHAR author_nickname "작성 당시 닉네임"
+        BIGINT member_id FK "작성자 ID (탈퇴 시 orphaned, author_nickname은 del_{memberId})"
+        VARCHAR author_nickname "작성 당시 닉네임 (탈퇴 시 del_{memberId})"
         BIGINT parent_id "상위 댓글 ID (0이면 최상위) default 0"
         TEXT content "댓글 내용"
-        ENUM del_status "[삭제자] 작성자: W, 관리자: S, 정상: N"
         DATETIME created_at "작성 시간"
         DATETIME updated_at "수정 시간"
-        DATETIME deleted_at "삭제 일시"
     }
 
     VINTAGE ||--o{ VINTAGE_IMG : "1:N"
