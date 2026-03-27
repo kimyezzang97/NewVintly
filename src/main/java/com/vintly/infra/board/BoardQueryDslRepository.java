@@ -6,7 +6,6 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.vintly.domain.board.dto.BoardInfo;
 import com.vintly.domain.board.entity.Board;
-import com.vintly.domain.board.entity.DelStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,18 +44,12 @@ public class BoardQueryDslRepository {
                 ))
                 .from(board)
                 .leftJoin(boardLike).on(boardLike.board.boardId.eq(board.boardId))
-                .leftJoin(boardComment).on(
-                        boardComment.board.boardId.eq(board.boardId)
-                                .and(boardComment.delStatus.eq(DelStatus.N))
-                )
+                .leftJoin(boardComment).on(boardComment.board.boardId.eq(board.boardId))
                 .leftJoin(boardImg).on(
                         boardImg.board.boardId.eq(board.boardId)
                                 .and(boardImg.sortOrder.eq(1))
                 )
-                .where(
-                        board.delStatus.eq(DelStatus.N),
-                        containsKeyword(keyword)
-                )
+                .where(containsKeyword(keyword))
                 .groupBy(board.boardId, board.createdAt, board.updatedAt)
                 .orderBy(board.createdAt.desc())
                 .offset(pageable.getOffset())
@@ -66,10 +59,7 @@ public class BoardQueryDslRepository {
         JPAQuery<Long> countQuery = queryFactory
                 .select(board.count())
                 .from(board)
-                .where(
-                        board.delStatus.eq(DelStatus.N),
-                        containsKeyword(keyword)
-                );
+                .where(containsKeyword(keyword));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
     }

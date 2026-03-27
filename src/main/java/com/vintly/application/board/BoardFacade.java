@@ -3,8 +3,9 @@ package com.vintly.application.board;
 import com.vintly.domain.board.dto.BoardInfo;
 import com.vintly.domain.board.entity.Board;
 import com.vintly.domain.board.entity.BoardImg;
-import com.vintly.domain.board.entity.DelStatus;
+import com.vintly.domain.board.service.BoardCommentService;
 import com.vintly.domain.board.service.BoardImgService;
+import com.vintly.domain.board.service.BoardLikeService;
 import com.vintly.domain.board.service.BoardService;
 import com.vintly.domain.img.service.ImgService;
 import com.vintly.domain.member.entity.Member;
@@ -32,6 +33,8 @@ public class BoardFacade {
 
     private final BoardService boardService;
     private final BoardImgService boardImgService;
+    private final BoardCommentService boardCommentService;
+    private final BoardLikeService boardLikeService;
     private final ImgService imgService;
     private final MemberService memberService;
 
@@ -48,16 +51,12 @@ public class BoardFacade {
         Board board = boardService.findById(boardId)
                 .orElseThrow(BoardException.BoardNotFoundException::new);
 
-        if (board.getDelStatus() != DelStatus.N) {
-            throw new BoardException.BoardAlreadyDeletedException();
-        }
-
-        boardService.incrementViewCount(board);
+        boardService.incrementViewCount(boardId);
 
         List<BoardInfo.BoardImgInfo> imgList = boardImgService.findImgListByBoardId(boardId);
+        List<BoardInfo.Comment> comments = boardCommentService.findCommentsByBoardId(boardId);
 
-        long likeCount = 0L;
-        boolean liked = false;
+        var likeStatus = boardLikeService.getStatus(boardId);
 
         BoardInfo.BoardDetail detail = new BoardInfo.BoardDetail(
                 board.getBoardId(),
@@ -66,9 +65,10 @@ public class BoardFacade {
                 board.getTitle(),
                 board.getContent(),
                 board.getViewCount(),
-                likeCount,
-                liked,
+                likeStatus.likeCount(),
+                likeStatus.liked(),
                 imgList,
+                comments,
                 board.getCreatedAt(),
                 board.getUpdatedAt()
         );
@@ -98,10 +98,6 @@ public class BoardFacade {
         Board board = boardService.findById(boardId)
                 .orElseThrow(BoardException.BoardNotFoundException::new);
 
-        if (board.getDelStatus() != DelStatus.N) {
-            throw new BoardException.BoardAlreadyDeletedException();
-        }
-
         String email = SecurityUtil.getCurrentEmail();
         Member member = memberService.findByEmail(email)
                 .orElseThrow(MemberException.MemberNotFoundException::new);
@@ -111,7 +107,6 @@ public class BoardFacade {
         }
 
         boardService.updateBoard(board, request.title(), request.content());
-
         updateBoardImg(board, request);
     }
 
@@ -120,10 +115,6 @@ public class BoardFacade {
     public void deleteBoard(Long boardId) {
         Board board = boardService.findById(boardId)
                 .orElseThrow(BoardException.BoardNotFoundException::new);
-
-        if (board.getDelStatus() != DelStatus.N) {
-            throw new BoardException.BoardAlreadyDeletedException();
-        }
 
         String email = SecurityUtil.getCurrentEmail();
         Member member = memberService.findByEmail(email)
@@ -137,10 +128,6 @@ public class BoardFacade {
     public void deleteBoardByAdmin(Long boardId) {
         Board board = boardService.findById(boardId)
                 .orElseThrow(BoardException.BoardNotFoundException::new);
-
-        if (board.getDelStatus() != DelStatus.N) {
-            throw new BoardException.BoardAlreadyDeletedException();
-        }
 
         boardService.deleteByAdmin(board);
     }

@@ -36,4 +36,14 @@ public class BoardRepositoryImpl implements BoardRepository {
     public Board getReferenceById(Long boardId) {
         return boardJpaRepository.getReferenceById(boardId);
     }
+
+    @Override
+    public void incrementViewCount(Long boardId) {
+        boardJpaRepository.incrementViewCount(boardId);
+    }
+
+    @Override
+    public void delete(Board board) {
+        boardJpaRepository.delete(board);
+    }
 }

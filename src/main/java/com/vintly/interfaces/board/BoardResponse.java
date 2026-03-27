@@ -46,6 +46,7 @@ public class BoardResponse {
             @Schema(description = "좋아요 수") long likeCount,
             @Schema(description = "사용자 좋아요 여부") boolean liked,
             @Schema(description = "이미지 목록") List<BoardImage> imgList,
+            @Schema(description = "댓글 목록") List<BoardComment> comments,
             @Schema(description = "작성 시간") LocalDateTime createdAt,
             @Schema(description = "수정 시간") LocalDateTime updatedAt
     ) {
@@ -60,8 +61,31 @@ public class BoardResponse {
                     info.likeCount(),
                     info.liked(),
                     info.imgList().stream().map(BoardImage::from).toList(),
+                    info.comments().stream().map(BoardComment::from).toList(),
                     info.createdAt(),
                     info.updatedAt()
+            );
+        }
+    }
+
+    public record BoardComment(
+            @Schema(description = "댓글 ID") Long commentId,
+            @Schema(description = "부모 댓글 ID (0이면 최상위)") Long parentId,
+            @Schema(description = "작성자 ID") Long memberId,
+            @Schema(description = "작성자 닉네임") String authorNickname,
+            @Schema(description = "댓글 내용") String content,
+            @Schema(description = "작성 시간") java.time.LocalDateTime createdAt,
+            @Schema(description = "수정 여부") boolean edited
+    ) {
+        public static BoardComment from(BoardInfo.Comment info) {
+            return new BoardComment(
+                    info.commentId(),
+                    info.parentId(),
+                    info.memberId(),
+                    info.authorNickname(),
+                    info.content(),
+                    info.createdAt(),
+                    info.edited()
             );
         }
     }

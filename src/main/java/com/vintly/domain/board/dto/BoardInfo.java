@@ -28,6 +28,7 @@ public class BoardInfo {
             long likeCount,
             boolean liked,
             List<BoardImgInfo> imgList,
+            List<Comment> comments,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {}
@@ -36,5 +37,15 @@ public class BoardInfo {
             Long boardImgId,
             String imgPath,
             int sortOrder
+    ) {}
+
+    public record Comment(
+            Long commentId,
+            Long parentId,
+            Long memberId,
+            String authorNickname,
+            String content,
+            LocalDateTime createdAt,
+            boolean edited
     ) {}
 }

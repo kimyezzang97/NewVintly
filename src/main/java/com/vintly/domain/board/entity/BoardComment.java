@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -26,12 +28,12 @@ public class BoardComment {
     @JoinColumn(name = "board_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Board board;
 
-    @Comment("작성자 ID")
+    @Comment("작성자 ID (탈퇴 시 orphaned, author_nickname은 del_{memberId}로 변경)")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = true, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Member member;
 
-    @Comment("작성 당시 닉네임")
+    @Comment("작성 당시 닉네임 (탈퇴 시 del_{memberId}로 변경)")
     @Column(name = "author_nickname", nullable = false, length = 30)
     private String authorNickname;
 
@@ -43,17 +45,37 @@ public class BoardComment {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Comment("[삭제자] 작성자: W, 관리자: S, 정상: N")
-    @Enumerated(EnumType.STRING)
-    @Column(name = "del_status", nullable = false, length = 1)
-    private DelStatus delStatus = DelStatus.N;
-
+    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    public static BoardComment createRoot(Board board, Member member, String content) {
+        BoardComment c = new BoardComment();
+        c.board = board;
+        c.member = member;
+        c.authorNickname = member.getNickname();
+        c.parentId = 0L;
+        c.content = content;
+        return c;
+    }
+
+    public static BoardComment createReply(Board board, Member member, Long parentId, String content) {
+        if (parentId == null || parentId <= 0)
+            throw new IllegalArgumentException("parentId는 0보다 커야 합니다.");
+        BoardComment c = new BoardComment();
+        c.board = board;
+        c.member = member;
+        c.authorNickname = member.getNickname();
+        c.parentId = parentId;
+        c.content = content;
+        return c;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }

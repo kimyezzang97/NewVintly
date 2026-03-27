@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
-
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
@@ -22,9 +20,9 @@ public class Board extends BaseEntity {
     @Column(name = "board_id")
     private Long boardId;
 
-    @Comment("작성자 ID")
+    @Comment("작성자 ID (탈퇴 시 orphaned)")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = true, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "member_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Member member;
 
     @Comment("작성 당시 닉네임")
@@ -43,15 +41,6 @@ public class Board extends BaseEntity {
     @Column(name = "view_count", nullable = false)
     private int viewCount = 0;
 
-    @Comment("[삭제자] 작성자: W, 관리자: S, 정상: N")
-    @Enumerated(EnumType.STRING)
-    @Column(name = "del_status", nullable = false, length = 1)
-    private DelStatus delStatus = DelStatus.N;
-
-    @Comment("삭제 일시")
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
     public static Board create(Member member, String title, String content) {
         Board board = new Board();
         board.member = member;
@@ -59,7 +48,6 @@ public class Board extends BaseEntity {
         board.title = title;
         board.content = content;
         board.viewCount = 0;
-        board.delStatus = DelStatus.N;
         return board;
     }
 
@@ -68,17 +56,4 @@ public class Board extends BaseEntity {
         this.content = content;
     }
 
-    public void incrementViewCount() {
-        this.viewCount++;
-    }
-
-    public void deleteByWriter() {
-        this.delStatus = DelStatus.W;
-        this.deletedAt = LocalDateTime.now();
-    }
-
-    public void deleteByAdmin() {
-        this.delStatus = DelStatus.S;
-        this.deletedAt = LocalDateTime.now();
-    }
 }

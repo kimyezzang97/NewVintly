@@ -44,16 +44,16 @@ public class BoardService {
         if (board.getMember() == null || !board.getMember().getMemberId().equals(member.getMemberId())) {
             throw new BoardException.BoardForbiddenException();
         }
-        board.deleteByWriter();
+        boardRepository.delete(board);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void deleteByAdmin(Board board) {
-        board.deleteByAdmin();
+        boardRepository.delete(board);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void incrementViewCount(Board board) {
-        board.incrementViewCount();
+    public void incrementViewCount(Long boardId) {
+        boardRepository.incrementViewCount(boardId);
     }
 }

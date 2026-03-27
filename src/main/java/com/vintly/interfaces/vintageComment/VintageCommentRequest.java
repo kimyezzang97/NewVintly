@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 public class VintageCommentRequest {
 
     // 빈티지 매장 댓글 등록
+    @Schema(name = "VintageCommentCreate")
     public record Create(
             @Schema(description = "빈티지 매장 ID", example = "42")
             @NotNull(message = "빈티지 매장 ID는 필수입니다.")
@@ -21,6 +22,7 @@ public class VintageCommentRequest {
     ) {}
 
     // 빈티지 매장 댓글 수정
+    @Schema(name = "VintageCommentUpdate")
     public record Update(
             @Schema(description = "댓글 ID", example = "101")
             @NotNull(message = "댓글 ID는 필수입니다.")

@@ -18,4 +18,8 @@ public interface BoardRepository {
     Page<BoardInfo.BoardSummary> findBoardList(String keyword, Pageable pageable);
 
     Board getReferenceById(Long boardId);
+
+    void incrementViewCount(Long boardId);
+
+    void delete(Board board);
 }

@@ -5,6 +5,7 @@ import com.vintly.interfaces.member.MemberException;
 import com.vintly.interfaces.member.MemberRequest;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
+import com.vintly.domain.board.repo.BoardCommentRepository;
 import com.vintly.domain.vintagecomment.repo.VintageCommentRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +26,16 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final VintageCommentRepository vintageCommentRepository;
+    private final BoardCommentRepository boardCommentRepository;
 
     @Autowired
     public MemberService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder,
-                         VintageCommentRepository vintageCommentRepository) {
+                         VintageCommentRepository vintageCommentRepository,
+                         BoardCommentRepository boardCommentRepository) {
         this.memberRepository = memberRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.vintageCommentRepository = vintageCommentRepository;
+        this.boardCommentRepository = boardCommentRepository;
     }
 
     // email 중복 체크
@@ -104,7 +108,9 @@ public class MemberService {
         if (!bCryptPasswordEncoder.matches(password, member.getPassword())) {
             throw new MemberException.PasswordNotMatchException();
         }
-        vintageCommentRepository.anonymizeMemberInComments(member, "del_" + member.getMemberId());
+        String deletedNickname = "del_" + member.getMemberId();
+        vintageCommentRepository.anonymizeMemberInComments(member, deletedNickname);
+        boardCommentRepository.anonymizeMemberInComments(member, deletedNickname);
         memberRepository.delete(member);
     }
 }
