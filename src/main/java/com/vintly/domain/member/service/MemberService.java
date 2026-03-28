@@ -52,8 +52,14 @@ public class MemberService {
 
     // 회원가입 return : emailCode
     public String createMember(MemberRequest.JoinMember join) {
-        // 중복체크
-        if(getChkEmail(join.email()) || getChkNickname(join.nickname())) throw new MemberException.ConflictMemberException();
+        // 이메일 중복 체크 (상태에 따라 분기)
+        memberRepository.findByEmail(join.email()).ifPresent(existing -> {
+            if (existing.getUseStatus() == Use.K) throw new MemberException.PendingEmailVerificationException();
+            throw new MemberException.ConflictMemberException();
+        });
+
+        // 닉네임 중복 체크
+        if(getChkNickname(join.nickname())) throw new MemberException.ConflictMemberException();
 
         // 비밀번호 암호화
         String encodePassword = bCryptPasswordEncoder.encode(join.password());

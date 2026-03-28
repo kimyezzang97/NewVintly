@@ -9,6 +9,13 @@ public class MemberException {
         }
     }
 
+    // 회원가입 - 이메일 인증 대기 중 (use_status = K)
+    public static class PendingEmailVerificationException extends RuntimeException {
+        public PendingEmailVerificationException() {
+            super("이미 가입된 이메일입니다. 이메일 인증을 완료해주세요.");
+        }
+    }
+
     // * 회원가입 - email 발송 실패
     public static class EmailSendException extends RuntimeException {
         public EmailSendException() {

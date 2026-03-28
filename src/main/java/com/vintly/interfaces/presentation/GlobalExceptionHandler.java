@@ -44,6 +44,12 @@ public class GlobalExceptionHandler {
         return new ApiResponse<>(false, 409, e.getMessage(), null);
     }
 
+    // 회원가입 - 이메일 인증 대기 중
+    @ExceptionHandler(MemberException.PendingEmailVerificationException.class)
+    protected ApiResponse<?> pendingEmailVerification(MemberException.PendingEmailVerificationException e) {
+        return new ApiResponse<>(false, 409, e.getMessage(), null);
+    }
+
     // 닉네임 변경 - 닉네임 중복
     @ExceptionHandler(MemberException.ConflictNicknameException.class)
     protected ApiResponse<?> conflictNickname(MemberException.ConflictNicknameException e) {

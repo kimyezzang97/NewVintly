@@ -1,5 +1,6 @@
 package com.vintly.domain.member.service;
 
+import com.vintly.domain.board.repo.BoardCommentRepository;
 import com.vintly.domain.member.Use;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
@@ -33,6 +34,9 @@ public class MemberServiceTest {
 
     @Mock
     private VintageCommentRepository vintageCommentRepository;
+
+    @Mock
+    private BoardCommentRepository boardCommentRepository;
 
     @InjectMocks
     private MemberService memberService;
@@ -81,7 +85,7 @@ public class MemberServiceTest {
                 "secure123@"
         );
 
-        Mockito.when(memberRepository.existsByEmail(join.email())).thenReturn(false);
+        Mockito.when(memberRepository.findByEmail(join.email())).thenReturn(Optional.empty());
         Mockito.when(memberRepository.existsByNickname(join.nickname())).thenReturn(false);
         Mockito.when(bCryptPasswordEncoder.encode(join.password())).thenReturn("encoded");
 
@@ -105,10 +109,50 @@ public class MemberServiceTest {
         assertNotNull(emailCode);
         assertEquals(6, emailCode.length());
 
-        Mockito.verify(memberRepository).existsByEmail(join.email());
+        Mockito.verify(memberRepository).findByEmail(join.email());
         Mockito.verify(memberRepository).existsByNickname(join.nickname());
         Mockito.verify(bCryptPasswordEncoder).encode(join.password());
         Mockito.verify(memberRepository).save(ArgumentMatchers.any(Member.class));
+    }
+
+    @Test
+    @DisplayName("이메일이 존재하고 use_status가 K이면 PendingEmailVerificationException이 발생한다.")
+    void shouldThrowPendingEmailVerificationWhenStatusIsK() {
+        // Arrange
+        MemberRequest.JoinMember join = new MemberRequest.JoinMember(
+                "nickname123", "test@example.com", "secure123@"
+        );
+        Member pendingMember = new Member(
+                1L, "test@example.com", "encoded", "nickname123",
+                "123456", "ROLE_USER", Use.K, null, null
+        );
+        Mockito.when(memberRepository.findByEmail(join.email())).thenReturn(Optional.of(pendingMember));
+
+        // Act & Assert
+        assertThrows(
+                MemberException.PendingEmailVerificationException.class,
+                () -> memberService.createMember(join)
+        );
+    }
+
+    @Test
+    @DisplayName("이메일이 존재하고 use_status가 K가 아니면 ConflictMemberException이 발생한다.")
+    void shouldThrowConflictWhenEmailExistsWithNonKStatus() {
+        // Arrange
+        MemberRequest.JoinMember join = new MemberRequest.JoinMember(
+                "nickname123", "test@example.com", "secure123@"
+        );
+        Member activeMember = new Member(
+                1L, "test@example.com", "encoded", "nickname123",
+                "123456", "ROLE_USER", Use.Y, null, null
+        );
+        Mockito.when(memberRepository.findByEmail(join.email())).thenReturn(Optional.of(activeMember));
+
+        // Act & Assert
+        assertThrows(
+                MemberException.ConflictMemberException.class,
+                () -> memberService.createMember(join)
+        );
     }
 
     @Test
