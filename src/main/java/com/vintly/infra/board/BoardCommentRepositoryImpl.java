@@ -43,6 +43,11 @@ public class BoardCommentRepositoryImpl implements BoardCommentRepository {
     }
 
     @Override
+    public void deleteAllByBoardId(Long boardId) {
+        jpaRepository.deleteAllByBoard_BoardId(boardId);
+    }
+
+    @Override
     public void anonymizeMemberInComments(Member member, String deletedNickname) {
         jpaRepository.anonymizeMemberInComments(member, deletedNickname);
     }

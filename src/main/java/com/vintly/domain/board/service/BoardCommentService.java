@@ -66,6 +66,11 @@ public class BoardCommentService {
     }
 
     @Transactional(rollbackFor = Exception.class)
+    public void deleteAllByBoardId(Long boardId) {
+        boardCommentRepository.deleteAllByBoardId(boardId);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long commentId, Long memberId) {
         BoardComment comment = boardCommentRepository.findById(commentId)
                 .orElseThrow(BoardCommentException.CommentNotFoundException::new);

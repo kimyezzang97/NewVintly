@@ -120,6 +120,7 @@ public class BoardFacade {
         Member member = memberService.findByEmail(email)
                 .orElseThrow(MemberException.MemberNotFoundException::new);
 
+        boardCommentService.deleteAllByBoardId(boardId);
         boardService.deleteByWriter(board, member);
     }
 
@@ -129,6 +130,7 @@ public class BoardFacade {
         Board board = boardService.findById(boardId)
                 .orElseThrow(BoardException.BoardNotFoundException::new);
 
+        boardCommentService.deleteAllByBoardId(boardId);
         boardService.deleteByAdmin(board);
     }
 

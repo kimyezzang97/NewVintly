@@ -19,5 +19,7 @@ public interface BoardCommentRepository {
 
     void deleteAllByParentId(Long parentId);
 
+    void deleteAllByBoardId(Long boardId);
+
     void anonymizeMemberInComments(Member member, String deletedNickname);
 }

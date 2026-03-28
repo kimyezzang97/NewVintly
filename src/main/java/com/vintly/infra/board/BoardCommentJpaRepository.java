@@ -11,6 +11,8 @@ public interface BoardCommentJpaRepository extends JpaRepository<BoardComment, L
 
     void deleteAllByParentId(Long parentId);
 
+    void deleteAllByBoard_BoardId(Long boardId);
+
     // member_id는 NOT NULL이므로 member를 null로 설정하지 않고 닉네임만 익명화
     @Modifying
     @Query("UPDATE board_comment bc SET bc.authorNickname = :deletedNickname WHERE bc.member = :member")
