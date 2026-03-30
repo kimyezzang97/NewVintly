@@ -36,9 +36,9 @@ public class AuthController implements SwaggerAuthApi {
         Boolean isVerified = authService.verifyEmail(code, email);
         try {
             if (isVerified){
-                res.sendRedirect(companyAddress+companyPort+"/members/verify/join/success");
+                res.sendRedirect("http://"+companyAddress+":"+companyPort+"/members/verify/join/success");
             } else {
-                res.sendRedirect(companyAddress+companyPort+"/members/verify/join/fail");
+                res.sendRedirect("http://"+companyAddress+":"+companyPort+"/members/verify/join/fail");
             }
         } catch (IOException e){
             log.warn("verifyMember {}", "\uD83D\uDD34 리다이렉트 중 오류 발생");
