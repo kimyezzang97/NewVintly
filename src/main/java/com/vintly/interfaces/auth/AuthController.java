@@ -5,6 +5,7 @@ import com.vintly.infra.config.swagger.api.SwaggerAuthApi;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -23,15 +24,21 @@ public class AuthController implements SwaggerAuthApi {
         this.authService = authService;
     }
 
+    @Value("${company.address}")
+    private String companyAddress;
+
+    @Value("${company.port}")
+    private String companyPort;
+
     // 이메일 인증
     @GetMapping("/verify")
     public void verifyMember(@RequestParam String code, @RequestParam String email, HttpServletResponse res){
         Boolean isVerified = authService.verifyEmail(code, email);
         try {
             if (isVerified){
-                res.sendRedirect("/members/verify/join/success");
+                res.sendRedirect(companyAddress+companyPort+"/members/verify/join/success");
             } else {
-                res.sendRedirect("/members/verify/join/fail");
+                res.sendRedirect(companyAddress+companyPort+"/members/verify/join/fail");
             }
         } catch (IOException e){
             log.warn("verifyMember {}", "\uD83D\uDD34 리다이렉트 중 오류 발생");
