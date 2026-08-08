@@ -1,5 +1,6 @@
 package com.vintly.domain.member.service;
 
+import com.vintly.domain.member.Use;
 import com.vintly.domain.member.entity.Member;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -48,8 +49,8 @@ public class CustomUserDetails implements UserDetails {
     // 계정이 잠기지 않았다 : true
     @Override
     public boolean isAccountNonLocked() {
-        // 실제 계정 잠금 여부를 체크하는 로직이 필요할 수 있음
-        return true;
+        // 추방(X) 상태가 아니면 잠기지 않은 것으로 간주
+        return member.getUseStatus() != Use.X;
     }
 
     @Override
@@ -60,7 +61,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        // 사용자 계정 활성화 상태 체크 (예: 사용자가 계정 비활성화 했을 경우)
-        return true;
+        // 이메일 인증 완료(사용 상태 Y) 여부 체크
+        return member.getUseStatus() == Use.Y;
     }
 }
