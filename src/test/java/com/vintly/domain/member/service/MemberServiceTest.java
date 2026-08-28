@@ -277,7 +277,7 @@ public class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("비밀번호가 일치하면 회원 탈퇴 시 댓글 익명화 후 DB에서 즉시 삭제된다.")
+    @DisplayName("비밀번호가 일치하면 회원 탈퇴 시 댓글 익명화 후 useStatus가 E로 변경되고 deletedAt이 기록된다.")
     void shouldWithdrawMemberWhenPasswordMatches() {
         // Arrange
         Member member = new Member(1L, "test@example.com", "encoded", "nickname",
@@ -289,7 +289,8 @@ public class MemberServiceTest {
 
         // Assert
         Mockito.verify(vintageCommentRepository).anonymizeMemberInComments(member, "del_1");
-        Mockito.verify(memberRepository).delete(member);
+        assertThat(member.getUseStatus()).isEqualTo(Use.E);
+        assertThat(member.getDeletedAt()).isNotNull();
     }
 
     @Test
@@ -305,6 +306,6 @@ public class MemberServiceTest {
                 MemberException.PasswordNotMatchException.class,
                 () -> memberService.withdrawMember(member, "wrongPassword")
         );
-        Mockito.verify(memberRepository, Mockito.never()).delete(member);
+        assertThat(member.getUseStatus()).isEqualTo(Use.Y);
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -117,6 +118,6 @@ public class MemberService {
         String deletedNickname = "del_" + member.getMemberId();
         vintageCommentRepository.anonymizeMemberInComments(member, deletedNickname);
         boardCommentRepository.anonymizeMemberInComments(member, deletedNickname);
-        memberRepository.delete(member);
+        member.withdraw(LocalDateTime.now());
     }
 }

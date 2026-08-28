@@ -42,7 +42,7 @@ public class Member extends BaseEntity {
     @Column(name = "role")
     private String role;
 
-    @Comment("[계정 이용 상태] 사용: Y, 추방: X, 대기: K")
+    @Comment("[계정 이용 상태] 사용: Y, 추방: X, 대기: K, 탈퇴: E")
     @Enumerated(value = EnumType.STRING)
     @Column(name = "use_status")
     private Use useStatus;
@@ -71,5 +71,10 @@ public class Member extends BaseEntity {
     public void vanMember(LocalDateTime deletedAt){
         this.deletedAt = deletedAt;
         this.useStatus = Use.X;
+    }
+
+    public void withdraw(LocalDateTime deletedAt){
+        this.deletedAt = deletedAt;
+        this.useStatus = Use.E;
     }
 }

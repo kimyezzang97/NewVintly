@@ -7,9 +7,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum Use {
-    Y("사용"), // 사용
-    X("추방"), // 추방
-    K("대기"); // 대기
+    Y("사용"),
+    X("추방"),
+    K("대기"),
+    E("탈퇴");
 
     private final String message;
 }

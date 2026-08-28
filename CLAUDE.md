@@ -4,6 +4,10 @@
 
 빈티지 커뮤니티 플랫폼 REST API 백엔드. 빈티지 매장 등록/조회, 좋아요, 댓글, 회원 관리 기능을 제공한다.
 
+- **전체 구성:** Flutter(앱) + Spring Boot(본 레포, 백엔드). 프론트는 별도 레포에서 Codex로 작업.
+- **배경:** 소규모 친구 그룹용으로 시작, 현재는 이직용 포트폴리오 목적으로 발전 중.
+- **도메인:** vintly.co.kr
+- **아키텍처 방침:** 모놀리식 유지 (프로젝트 규모상 MSA는 오버엔지니어링으로 판단). 단, 도메인 경계는 의식적으로 분리해 설계한다 (아래 Architecture 참고).
 - **Language:** Java 17
 - **Framework:** Spring Boot 3.4.0
 - **Build Tool:** Gradle 8.11.1
@@ -75,19 +79,31 @@ infra/        → JPA 구현체, QueryDSL, AWS S3, Redis, Security, Swagger 설�
 
 ## Authentication
 
-JWT 기반 Stateless 인증:
+JWT 기반 Stateless 인증, RTR(Refresh Token Rotation) 방식:
 - Access 토큰: 응답 헤더 `access`
-- Refresh 토큰: HttpOnly 쿠키 + Redis 저장
+- Refresh 토큰: HttpOnly 쿠키 + Redis 저장, 재발급 시 Access/Refresh를 함께 회전
 - `LoginFilter` → `JWTFilter` → `CustomLogoutFilter`
 - 비밀번호: BCrypt
 - 역할: `ROLE_USER`, `ROLE_ADMIN`
-- 회원 상태: `Use` enum (`Y`=활성, `N`=탈퇴, `X`=정지, `K`=대기)
+- 회원 상태: `Use` enum (`Y`=사용, `X`=추방, `E`=탈퇴, `K`=대기). 탈퇴 시 `useStatus=E` + `deletedAt` 기록, 닉네임은 조인 없이 조회 가능하도록 `board`/`board_comment`에 작성 당시 닉네임을 역정규화해 보존한다.
+- 소셜 로그인 도입 우선순위(국내 사용률 기준): 카카오 > 네이버 > 구글 > 애플 (미착수)
 
 ## Database
 
 - 감사 필드: `BaseEntity`의 `createdAt`, `updatedAt` 자동 관리
 - QueryDSL: `BooleanExpression` 빌더로 동적 쿼리, `Projections.constructor`로 DTO 매핑
 - DDL: dev/prd은 `update`, test는 `create-drop`
+
+### 게시판(BOARD) 도메인 규칙
+
+- 커뮤니티 게시판은 `board`, `board_img`, `board_like`, `board_comment` 테이블로 구성. 자유게시판 등으로 나누지 않고 **단일 게시판**으로 운영한다 (매장 관련 좋아요/댓글은 `vintage`/`vintagelike`/`vintagecomment`로 별도 도메인).
+- **Hard Delete만 사용한다.** `board`, `board_comment` 등 게시판 계열 테이블에 `del_status`, `deleted_at` 같은 소프트 삭제용 컬럼을 두지 않는다. (회원 탈퇴 시각을 남기는 `member.deleted_at`은 별개 — 게시글 삭제 상태와 무관하다.)
+- `board`/`board_comment`는 `author_nickname`(VARCHAR30)을 역정규화해 보유한다. 탈퇴/닉네임 변경 이후에도 작성 당시 닉네임을 조인 없이 조회하기 위함.
+- 다음은 **의도적으로 제거**한 설계다. 되돌리지 말 것:
+  - `category` 컬럼
+  - `ON DELETE CASCADE`, 물리 FK (`@JoinColumn`에 `foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)`로 명시)
+  - 인덱스 — 추후 인덱스 적용 전/후 성능(EXPLAIN) 비교를 포트폴리오 소재로 남기기 위해 의도적으로 비워둔 상태
+- `member` 테이블은 `use_status`, `nickname_updated_at` 컬럼을 보유한다.
 
 ## Testing
 
@@ -96,10 +112,13 @@ JWT 기반 Stateless 인증:
 - 이메일 테스트: GreenMail (fake SMTP)
 - 비동기 테스트: Awaitility
 
-## CI/CD
+## CI/CD & 인프라
 
-GitHub Actions (`deploy.yml`)로 dev 환경 자동 배포.
-Docker Compose로 로컬 MariaDB 11.3 구성 가능.
+- Docker Compose(`docker-compose.yml`)로 로컬 MariaDB 11.3 구성 가능.
+- **DEV 배포:** 집 NAS의 Synology Container Manager(Docker) — Nginx + Spring Boot(`vintly-backend`) + Redis + MariaDB. Jenkins로 CI, Blue/Green 배포. 리버스 프록시는 Nginx, HTTPS는 Certbot.
+- **PRD:** DB는 RDS 사용 예정. RDS 연결은 항상 SSL 필수 — JDBC URL에 `useSSL=true&requireSSL=true`.
+- 프로필: `local`, `dev`, `prd`, `test` (`application-{profile}.yml`). local/dev/prd yml은 `.gitignore` 처리되어 있고 실제 자격증명은 커밋되지 않는다 — 새 값 채울 때도 유지할 것.
+- Redis 연결 호스트가 환경별로 다르다: 배포(NAS Docker) 환경에서는 컨테이너명 `vintly-redis`, 로컬 개발에서는 NAS IP(또는 `localhost`)를 사용한다.
 
 ## 개발 규칙
 ### 진행 Workflow - 증강 코딩
@@ -131,6 +150,10 @@ Docker Compose로 로컬 MariaDB 11.3 구성 가능.
 - 실제 동작하지 않는 코드, 불필요한 Mock 데이터를 이요한 구현을 하지 말 것
 - null-safety 하지 않게 코드 작성하지 말 것 (Java 의 경우, Optional 을 활용할 것)
 - println 코드 남기지 말 것
+- 자격증명(DB 비밀번호, AWS 키, 메일 비밀번호, JWT secret 등)을 커밋하지 말 것. `application-{local,dev,prd,test}.yml`은 `.gitignore` 대상이며 실제 값이 필요하면 `.env`/서버 환경변수 등 별도 경로로 관리
+- 게시판(`board` 계열) 테이블에 인덱스, 물리 FK, `category` 컬럼, `ON DELETE CASCADE`를 임의로 추가하지 말 것 (의도적으로 제거된 설계, 위 Database 섹션 참고)
+- Soft Delete 방식(예: `del_status`, `deleted_at` 컬럼)으로 되돌리지 말 것 — Hard Delete 유지
+- 도메인을 별도 서비스/MSA로 쪼개지 말 것 — 모놀리식 + 도메인 분리 설계 유지
 
 ### 2. Recommendation
 - 실제 API 를 호출해 확인하는 E2E 테스트 코드 작성
