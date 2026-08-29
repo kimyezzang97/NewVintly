@@ -111,6 +111,15 @@ erDiagram
         DATETIME updated_at "수정 시간"
     }
 
+    YOUTUBE_LINK {
+        BIGINT youtube_link_id PK "AUTO INCREMENT"
+        VARCHAR url "유튜브 영상 URL"
+        VARCHAR title "제목"
+        TEXT description "설명"
+        DATETIME created_at "생성 시간"
+        DATETIME updated_at "수정 시간"
+    }
+
     VINTAGE ||--o{ VINTAGE_IMG : "1:N"
     VINTAGE_IMG ||--|| VINTAGE : "1:1(대표 이미지)"
     VINTAGE ||--o{ VINTAGE_LIKE : "1:N"
