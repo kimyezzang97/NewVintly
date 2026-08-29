@@ -35,7 +35,7 @@ class YoutubeLinkServiceTest {
         // Arrange
         Pageable pageable = PageRequest.of(0, 10);
         YoutubeLinkInfo.YoutubeLinkSummary summary = new YoutubeLinkInfo.YoutubeLinkSummary(
-                1L, "https://youtu.be/abc", "빈티지 소개 영상", "설명",
+                1L, "https://youtu.be/abc", "빈티지 소개 영상", "설명", false,
                 LocalDateTime.now(), LocalDateTime.now()
         );
         Page<YoutubeLinkInfo.YoutubeLinkSummary> page = new PageImpl<>(List.of(summary), pageable, 1);

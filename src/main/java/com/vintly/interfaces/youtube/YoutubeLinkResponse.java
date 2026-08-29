@@ -12,6 +12,7 @@ public class YoutubeLinkResponse {
             @Schema(description = "유튜브 URL") String url,
             @Schema(description = "제목") String title,
             @Schema(description = "설명") String description,
+            @Schema(description = "광고 여부") boolean isAd,
             @Schema(description = "생성 시간") LocalDateTime createdAt,
             @Schema(description = "수정 시간") LocalDateTime updatedAt
     ) {
@@ -21,6 +22,7 @@ public class YoutubeLinkResponse {
                     info.url(),
                     info.title(),
                     info.description(),
+                    info.isAd(),
                     info.createdAt(),
                     info.updatedAt()
             );

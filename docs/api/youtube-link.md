@@ -55,6 +55,7 @@ access: {accessToken}
         "url": "https://www.youtube.com/watch?v=xxxxxxxxxxx",
         "title": "90년대 빈티지 자켓 코디하는 법",
         "description": "빈티지 자켓 스타일링 팁 소개 영상",
+        "isAd": false,
         "createdAt": "2026-08-28T10:00:00",
         "updatedAt": "2026-08-28T10:00:00"
       }
@@ -77,6 +78,7 @@ access: {accessToken}
 | url | String | 유튜브 영상 URL |
 | title | String | 제목 |
 | description | String \| null | 설명 (없을 수 있음) |
+| isAd | boolean | 광고 여부 (DB는 TINYINT(1)로 저장, 0=false, 1=true) |
 | createdAt | String (ISO-8601 LocalDateTime) | 등록 시간 |
 | updatedAt | String (ISO-8601 LocalDateTime) | 수정 시간 |
 

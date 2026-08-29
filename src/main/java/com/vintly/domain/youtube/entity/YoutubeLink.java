@@ -35,4 +35,8 @@ public class YoutubeLink extends BaseEntity {
     @Comment("설명")
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Comment("광고 여부 (0=false, 1=true)")
+    @Column(name = "is_ad", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
+    private boolean isAd;
 }

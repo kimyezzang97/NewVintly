@@ -116,6 +116,7 @@ erDiagram
         VARCHAR url "유튜브 영상 URL"
         VARCHAR title "제목"
         TEXT description "설명"
+        BOOLEAN is_ad "광고 여부 (0=false, 1=true) default false"
         DATETIME created_at "생성 시간"
         DATETIME updated_at "수정 시간"
     }

@@ -28,6 +28,7 @@ public class YoutubeLinkQueryDslRepository {
                         youtubeLink.url,
                         youtubeLink.title,
                         youtubeLink.description,
+                        youtubeLink.isAd,
                         youtubeLink.createdAt,
                         youtubeLink.updatedAt
                 ))

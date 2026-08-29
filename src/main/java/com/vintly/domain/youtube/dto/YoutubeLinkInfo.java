@@ -9,6 +9,7 @@ public class YoutubeLinkInfo {
             String url,
             String title,
             String description,
+            boolean isAd,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {}
