@@ -14,7 +14,6 @@ public class MemberEvent {
     private String emailTitle;
     private String emailMsg;
     private String emailCode;
-    private String serverAddress;
-    private String serverPort;
+    private String baseUrl;
 
 }

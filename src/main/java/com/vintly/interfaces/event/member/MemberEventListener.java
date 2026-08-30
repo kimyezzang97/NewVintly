@@ -31,7 +31,7 @@ public class MemberEventListener {
         HashMap<String, Object> emailValues = new HashMap<>();
         emailValues.put("nickname", memberEvent.getNickname());
 
-        emailValues.put("url", "http://" + memberEvent.getServerAddress() + ":" + memberEvent.getServerPort() +
+        emailValues.put("url", memberEvent.getBaseUrl() +
                 "/api/v1/auth/verify?code=" + memberEvent.getEmailCode() + "&email=" + memberEvent.getEmailAddress());
 
         mailService.mailSend(mail, emailValues,"join");

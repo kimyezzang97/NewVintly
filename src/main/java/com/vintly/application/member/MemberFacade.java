@@ -16,11 +16,8 @@ public class MemberFacade {
     private MemberService memberService;
     private MemberEventPublisher memberEventPublisher;
 
-    @Value("${company.address}")
-    private String serverAddress;
-
-    @Value("${company.port}")
-    private String serverPort;
+    @Value("${company.base-url}")
+    private String baseUrl;
 
     public MemberFacade(MemberService memberService, MemberEventPublisher memberEventPublisher) {
         this.memberService = memberService;
@@ -35,7 +32,7 @@ public class MemberFacade {
 
         // 메일 발송 event 전달
         memberEventPublisher.publish(
-                new MemberEvent(join.email(), join.nickname(), "회원가입", "회원가입 메시지", emailCode, serverAddress, serverPort)
+                new MemberEvent(join.email(), join.nickname(), "회원가입", "회원가입 메시지", emailCode, baseUrl)
         );
     }
 }
