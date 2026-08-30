@@ -1,12 +1,102 @@
 <!DOCTYPE html>
-<html lang="kr">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>인증 성공</title>
+    <title>인증 성공 - Vintly</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f0eb;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 48px 40px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .icon {
+            width: 72px;
+            height: 72px;
+            background: #e8f5e9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 28px;
+        }
+
+        .icon svg {
+            width: 36px;
+            height: 36px;
+            color: #43a047;
+        }
+
+        .brand {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #a0876d;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        p {
+            font-size: 15px;
+            color: #6b6b6b;
+            line-height: 1.7;
+        }
+
+        .divider {
+            width: 40px;
+            height: 2px;
+            background: #e0d5c8;
+            margin: 24px auto;
+            border-radius: 2px;
+        }
+
+        .note {
+            font-size: 13px;
+            color: #9e9e9e;
+        }
+    </style>
 </head>
 <body>
-<h1>이메일 인증 성공!</h1>
-<p>회원가입이 완료되었습니다. 이제 로그인할 수 있습니다.</p>
+    <div class="card">
+        <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+        </div>
+        <div class="brand">Vintly</div>
+        <h1>이메일 인증 완료!</h1>
+        <p>회원가입이 완료되었습니다.<br>이제 로그인하실 수 있습니다.</p>
+        <div class="divider"></div>
+        <p class="note">앱으로 돌아가 로그인해 주세요.</p>
+    </div>
 </body>
 </html>

@@ -11,47 +11,48 @@ erDiagram
         VARCHAR nickname UK "닉네임[최대10자]"
         VARCHAR email_code "이메일 인증 번호"
         VARCHAR role "권한 (ROLE_USER, ROLE_ADMIN)"
-        VARCHAR use_yn "[사용 유무] 사용 : Y, 탈퇴 : N, 추방 : X, 대기 : K"
+        ENUM use_status "[계정 이용 상태] 사용: Y, 추방: X, 대기: K"
         DATETIME created_at "계정 생성 날짜"
         DATETIME updated_at "계정 수정 날짜"
-        DATETIME deleted_at "계정 삭제 날짜"
+        DATETIME deleted_at "계정 삭제 날짜 (추방 시)"
+        DATETIME nickname_updated_at "닉네임 최종 변경 일시"
     }
     
-    VINTAGE_SHOP {
-        BIGINT vintage_shop_id PK "AUTO INCREMENT"
+    VINTAGE {
+        BIGINT vintage_id PK "AUTO INCREMENT"
         VARCHAR name "빈티지 매장 이름"
-        VARCHAR state "ex) 경기도, 강원도 or N (없다)"
-        VARCHAR district "ex) 군포시, 안양시, 서울시"
-        VARCHAR town "ex) 석수2동, 성수동"
-        VARCHAR addr "상세 주소"
+        VARCHAR state "ex) 경기도, 서울특별시"
+        VARCHAR district "ex) 군포시, 안양시, 강동구(서울일 경우)"
+        VARCHAR detail_addr "ex) 아차산로 302"
         DECIMAL lat "DECIMAL(9,6) 위도 ex) 37.566535"
         DECIMAL lon "DECIMAL(9,6) 경도 ex) 126.977969"
-        BIGINT vintage_shop_image_id FK "대표 이미지 ID"
+        BIGINT vintage_img_id FK "대표 이미지 ID"
         DATETIME created_at "빈티지 매장 생성 날짜"
         DATETIME updated_at "빈티지 매장 수정 날짜"
     }
     
-    VINTAGE_SHOP_IMAGE {
-        BIGINT vintage_shop_image_id PK  "AUTO INCREMENT"
-        BIGINT vintage_shop_id FK "SHOP 테이블과 연결된 외래 키"
-        VARCHAR image_path "이미지경로"
+    VINTAGE_IMG {
+        BIGINT vintage_img_id PK  "AUTO INCREMENT"
+        BIGINT vintage_id FK "SHOP 외래 키"
+        VARCHAR img_path "이미지경로"
         DATETIME created_at "이미지 생성 날짜"
         DATETIME updated_at "이미지 수정 날짜"
     }
 
-    VINTAGE_SHOP_LIKE {
-        BIGINT vintage_shop_like_id PK "AUTO INCREMENT"
-        BIGINT vintage_shop_id FK "SHOP 외래 키"
+    VINTAGE_LIKE {
+        BIGINT vintage_like_id PK "AUTO INCREMENT"
+        BIGINT vintage_id FK "SHOP 외래 키"
         BIGINT member_id FK "MEMBER 외래 키"
         DATETIME created_at "좋아요 생성 날짜"
     }
     
-    VINTAGE_SHOP_COMMENT {
-        BIGINT vintage_shop_comment_id PK "AUTO INCREMENT"
-        BIGINT vintage_shop_id FK "SHOP 외래 키"
-        BIGINT member_id FK "MEMBER 외래 키"
+    VINTAGE_COMMENT {
+        BIGINT vintage_comment_id PK "AUTO INCREMENT"
+        BIGINT vintage_id FK "SHOP 외래 키"
+        BIGINT member_id FK "MEMBER 외래 키 (탈퇴 시 null)"
         BIGINT parent_comment_id FK "상위 댓글 (0이면 최상위) default 0"
-        TEXT cotent "댓글 내용"
+        TEXT content "댓글 내용"
+        VARCHAR author_nickname "작성자 닉네임 (탈퇴 시 del_{memberId})"
         DATETIME created_at "댓글 생성 날짜"
         DATETIME updated_at "댓글 수정 날짜"
     }
@@ -68,21 +69,72 @@ erDiagram
     }
 
     NOTICE_LIKE {
-        BIGINT NOTICE_like_id PK "AUTO INCREMENT"
+        BIGINT notice_like_id PK "AUTO INCREMENT"
         BIGINT notice_id FK "NOTICE 외래 키"
         BIGINT member_id FK "MEMBER 외래 키"
-        DATETIME created_at "좋아요 생성 날짜"
+        DATETIME created_at "좋아요 생성 시간"
     }
 
-    VINTAGE_SHOP ||--o{ VINTAGE_SHOP_IMAGE : "1:N"
-    VINTAGE_SHOP_IMAGE ||--|| VINTAGE_SHOP : "1:1(대표 이미지)"
-    VINTAGE_SHOP ||--o{ VINTAGE_SHOP_LIKE : "1:N"
-    VINTAGE_SHOP ||--o{ MEMBER : "1:N"
-    VINTAGE_SHOP ||--o{ VINTAGE_SHOP_COMMENT : "1:N"
-    MEMBER ||--o{ VINTAGE_SHOP_COMMENT : "1:N"
-    MEMBER ||--o{ VINTAGE_SHOP_LIKE : "1:N"
+    BOARD {
+        BIGINT board_id PK "AUTO INCREMENT"
+        BIGINT member_id FK "작성자 ID (탈퇴 시 orphaned)"
+        VARCHAR author_nickname "작성 당시 닉네임"
+        VARCHAR title "제목"
+        TEXT content "본문 내용"
+        INT view_count "조회수 default 0"
+        DATETIME created_at "생성 시간"
+        DATETIME updated_at "수정 시간"
+    }
+
+    BOARD_IMG {
+        BIGINT board_img_id PK "AUTO INCREMENT"
+        BIGINT board_id FK "게시글 ID"
+        TEXT img_path "이미지 경로"
+        INT sort_order "정렬 순서 default 1"
+    }
+
+    BOARD_LIKE {
+        BIGINT board_like_id PK "AUTO INCREMENT"
+        BIGINT board_id FK "게시글 ID"
+        BIGINT member_id FK "멤버 ID"
+        DATETIME created_at "좋아요 생성 시간"
+    }
+
+    BOARD_COMMENT {
+        BIGINT board_comment_id PK "AUTO INCREMENT"
+        BIGINT board_id FK "게시글 ID"
+        BIGINT member_id FK "작성자 ID (탈퇴 시 orphaned, author_nickname은 del_{memberId})"
+        VARCHAR author_nickname "작성 당시 닉네임 (탈퇴 시 del_{memberId})"
+        BIGINT parent_id "상위 댓글 ID (0이면 최상위) default 0"
+        TEXT content "댓글 내용"
+        DATETIME created_at "작성 시간"
+        DATETIME updated_at "수정 시간"
+    }
+
+    YOUTUBE_LINK {
+        BIGINT youtube_link_id PK "AUTO INCREMENT"
+        VARCHAR url "유튜브 영상 URL"
+        VARCHAR title "제목"
+        TEXT description "설명"
+        BOOLEAN is_ad "광고 여부 (0=false, 1=true) default false"
+        DATETIME created_at "생성 시간"
+        DATETIME updated_at "수정 시간"
+    }
+
+    VINTAGE ||--o{ VINTAGE_IMG : "1:N"
+    VINTAGE_IMG ||--|| VINTAGE : "1:1(대표 이미지)"
+    VINTAGE ||--o{ VINTAGE_LIKE : "1:N"
+    VINTAGE ||--o{ MEMBER : "1:N"
+    VINTAGE ||--o{ VINTAGE_COMMENT : "1:N"
+    MEMBER ||--o{ VINTAGE_COMMENT : "1:N"
+    MEMBER ||--o{ VINTAGE_LIKE : "1:N"
     NOTICE ||--o{ NOTICE_LIKE : "1:N"
     NOTICE ||--o{ MEMBER : "1:N"
-    
-    
+
+    MEMBER ||--o{ BOARD : "1:N"
+    BOARD ||--o{ BOARD_IMG : "1:N"
+    BOARD ||--o{ BOARD_LIKE : "1:N"
+    MEMBER ||--o{ BOARD_LIKE : "1:N"
+    BOARD ||--o{ BOARD_COMMENT : "1:N"
+    MEMBER ||--o{ BOARD_COMMENT : "1:N"
 ```
