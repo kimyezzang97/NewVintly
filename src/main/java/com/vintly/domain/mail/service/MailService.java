@@ -23,7 +23,7 @@ public class MailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
-    @Value("${spring.mail.username}")
+    @Value("${mail.from:${spring.mail.username}}")
     private String fromAddress;
 
     @Autowired
