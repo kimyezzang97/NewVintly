@@ -24,11 +24,8 @@ public class AuthController implements SwaggerAuthApi {
         this.authService = authService;
     }
 
-    @Value("${company.address}")
-    private String companyAddress;
-
-    @Value("${company.port}")
-    private String companyPort;
+    @Value("${company.base-url}")
+    private String companyBaseUrl;
 
     // 이메일 인증
     @GetMapping("/verify")
@@ -36,9 +33,9 @@ public class AuthController implements SwaggerAuthApi {
         Boolean isVerified = authService.verifyEmail(code, email);
         try {
             if (isVerified){
-                res.sendRedirect("http://"+companyAddress+":"+companyPort+"/members/verify/join/success");
+                res.sendRedirect(companyBaseUrl+"/members/verify/join/success");
             } else {
-                res.sendRedirect("http://"+companyAddress+":"+companyPort+"/members/verify/join/fail");
+                res.sendRedirect(companyBaseUrl+"/members/verify/join/fail");
             }
         } catch (IOException e){
             log.warn("verifyMember {}", "\uD83D\uDD34 리다이렉트 중 오류 발생");
