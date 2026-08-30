@@ -68,6 +68,7 @@ public class SecurityConfig {
                                 .requestMatchers("/members/verify/**").permitAll()
                                 //.requestMatchers("/api/v1/vintages/**").permitAll()
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                .requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
                                 .requestMatchers("/").permitAll()
                                 // ADMIN 전용
                                 .requestMatchers("/admin").hasRole("ADMIN")

@@ -75,13 +75,17 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 	// ELK
-	implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+//	implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
 
 	//QueryDsl
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+	// 모니터링: Actuator(헬스·지표 엔드포인트) + Micrometer Prometheus(지표를 Prometheus 형식으로 노출)
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {
