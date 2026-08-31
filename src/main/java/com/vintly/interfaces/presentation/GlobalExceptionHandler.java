@@ -4,6 +4,7 @@ import com.vintly.interfaces.board.BoardException;
 import com.vintly.interfaces.member.MemberException;
 import com.vintly.interfaces.vintage.VintageException;
 import com.vintly.interfaces.vintagecomment.VintageCommentException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,6 +28,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ApiResponse<?> pathValidationError(ConstraintViolationException exception) {
         return new ApiResponse<>(false, 400, "규칙을 지켜 확인해주세요.", null);
+    }
+
+    // 존재하지 않는 리소스 조회/수정/삭제 시도 (ex. 없는 vintageId로 상세조회/수정/삭제)
+    @ExceptionHandler(EntityNotFoundException.class)
+    protected ApiResponse<?> entityNotFound(EntityNotFoundException e) {
+        return new ApiResponse<>(false, 404, e.getMessage(), null);
+    }
+
+    // 도메인 엔티티의 잘못된 인자 검증 실패 (ex. parentCommentId <= 0, 대표 이미지 ID null)
+    @ExceptionHandler(IllegalArgumentException.class)
+    protected ApiResponse<?> illegalArgument(IllegalArgumentException e) {
+        return new ApiResponse<>(false, 400, e.getMessage(), null);
     }
 
     /**
