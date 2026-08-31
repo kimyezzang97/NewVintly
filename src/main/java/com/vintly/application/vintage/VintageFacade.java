@@ -23,6 +23,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,6 +52,7 @@ public class VintageFacade {
 
 
     // 빈티지 매장 등록
+    @CacheEvict(cacheNames = "vintages", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void createVintage(VintageRequest.CreateVintage createVintage) {
         try {
@@ -120,10 +122,11 @@ public class VintageFacade {
     }
 
     // 빈티지 매장 수정
+    @CacheEvict(cacheNames = "vintages", allEntries = true)
     @Transactional
     public void updateVintage(Long vintageId, VintageRequest.UpdateVintage request) {
         Vintage vintage = vintageService.findBasicInfoById(vintageId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 빈티지 매장을 찾을 수 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("해당 빈티지 매장을 찾을 수 없습니다."));
 
         // 1. 기본 정보 수정
         vintage.updateInfo(
@@ -172,7 +175,8 @@ public class VintageFacade {
         }
     }
 
-    // 빈티지 매장
+    // 빈티지 매장 삭제
+    @CacheEvict(cacheNames = "vintages", allEntries = true)
     public void deleteVintage(Long vintageId){
         // 1. 빈티지 조회
         Vintage vintage = vintageService.findBasicInfoById(vintageId)

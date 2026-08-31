@@ -11,6 +11,7 @@ import com.vintly.interfaces.vintage.VintageRequest;
 import com.vintly.interfaces.vintage.VintageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,11 +35,15 @@ public class VintageService {
         this.vintageImgRepository = vintageImgRepository;
     }
 
-    // 빈티지 매장 전체 조회
+    // 빈티지 매장 전체 조회 (변경이 드문 목록이라 Redis에 캐싱, 변경 시 VintageFacade에서 evict)
+    @Cacheable(cacheNames = "vintages")
     @Transactional(readOnly = true)
     public List<VintageResponse.VintageList> getVintageList() {
 
-        return vintageRepository.getVintageList().stream()
+        // Stream.toList()는 JDK 내부의 불변 List 구현체(final class)를 반환하는데,
+        // Redis 캐시 직렬화기(GenericJackson2JsonRedisSerializer)의 기본 타이핑이 최상위 값의 final 여부에 따라
+        // 타입 정보를 다르게 기록/기대해 역직렬화 시 깨진다. ArrayList로 한 번 더 감싸 대칭을 맞춘다.
+        return new ArrayList<>(vintageRepository.getVintageList().stream()
                 .map(v -> new VintageResponse.VintageList(
                         v.vintageId(),
                         v.name(),
@@ -48,7 +53,7 @@ public class VintageService {
                         v.lat(),
                         v.lon(),
                         v.thumbnailPath()
-                )).toList();
+                )).toList());
     }
 
     // 빈티지 기본 정보 조회
