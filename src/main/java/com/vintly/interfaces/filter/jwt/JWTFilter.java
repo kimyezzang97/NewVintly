@@ -4,6 +4,7 @@ import com.vintly.infra.config.jwt.JWTUtil;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.service.CustomUserDetails;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -44,6 +45,10 @@ public class JWTFilter extends OncePerRequestFilter {
         } catch (ExpiredJwtException e) {
             log.warn("access token expired - URI: {}, IP: {}", request.getRequestURI(), request.getRemoteAddr());
             sendUnauthorized(response, "access token expired");
+            return;
+        } catch (JwtException | IllegalArgumentException e) {
+            log.warn("invalid access token - URI: {}, IP: {}, reason: {}", request.getRequestURI(), request.getRemoteAddr(), e.getMessage());
+            sendUnauthorized(response, "invalid access token");
             return;
         }
 

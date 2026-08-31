@@ -5,6 +5,7 @@ import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.domain.member.service.CustomUserDetails;
 import com.vintly.infra.config.jwt.JWTUtil;
+import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.Cookie;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 // Login 클래스
+@Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
@@ -61,7 +63,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             password = String.valueOf(map.get("password"));
 
         } catch (Exception e){
-            e.printStackTrace();
+            log.warn("로그인 요청 파싱 실패 - IP: {}, message: {}", request.getRemoteAddr(), e.getMessage());
         }
 
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
@@ -77,7 +79,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
         Long memberId   = principal.getMemberId();     // PK
-        System.out.println("successfulAuthentication memberId :: " + memberId); // 잘 찍힘
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -135,7 +136,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24*60*60); // 24시간
+        cookie.setMaxAge(3*24*60*60); // 3일 (refresh 토큰 만료시간과 일치)
         cookie.setHttpOnly(true); // XSS 방어, JS 접근 차단
         cookie.setPath("/");
         //cookie.setSecure(true); // HTTPS 접근시만

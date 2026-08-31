@@ -3,6 +3,8 @@ package com.vintly.domain.auth.service;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.infra.config.jwt.JWTUtil;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -67,10 +69,15 @@ public class AuthService {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, 401, "refresh token null", null));
         }
 
-        // Refresh 토큰 만료 확인
-        if (jwtUtil.isExpired(refresh)) {
-            log.info("refresh 토큰 만료 email : {}",jwtUtil.getUsername(refresh));
+        // Refresh 토큰 만료/유효성 확인 (만료 시 isExpired 호출 자체에서 ExpiredJwtException 발생)
+        try {
+            jwtUtil.isExpired(refresh);
+        } catch (ExpiredJwtException e) {
+            log.info("refresh 토큰 만료 email : {}", e.getClaims().get("username", String.class));
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, 401, "refresh token expired", null));
+        } catch (JwtException | IllegalArgumentException e) {
+            log.warn("reissue 실패 - 유효하지 않은 refresh token, IP: {}, reason: {}", request.getRemoteAddr(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(false, 401, "invalid refresh token", null));
         }
 
         // Refresh 토큰인지 검증 (발급시 페이로드에 명시)
@@ -101,11 +108,11 @@ public class AuthService {
         String username = jwtUtil.getUsername(refresh);
         String role = jwtUtil.getRole(refresh);
         Long memberId = jwtUtil.getMemberId(refresh);
-        String newAccess = jwtUtil.createJwt("access", username, role, memberId, 86400000L); // 10분 600000L
-        String newRefresh = jwtUtil.createJwt("refresh", username, role, memberId, 86400000L); // 24시간
+        String newAccess = jwtUtil.createJwt("access", username, role, memberId, 1_800_000L); // 30분
+        String newRefresh = jwtUtil.createJwt("refresh", username, role, memberId, 259_200_000L); // 3일
 
         // redis 새 Refresh 토큰 저장
-        redisTemplate.opsForValue().set(redisKey, newRefresh, 86400000L, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set(redisKey, newRefresh, 259_200_000L, TimeUnit.MILLISECONDS);
 
         // 응답 헤더 및 쿠키 설정
         response.setHeader("access", newAccess);
@@ -116,7 +123,7 @@ public class AuthService {
 
     private Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24*60*60); // 24시간
+        cookie.setMaxAge(3*24*60*60); // 3일 (refresh 토큰 만료시간과 일치)
         cookie.setPath("/"); // 모든 경로에서 쿠키 사용 가능하도록
         cookie.setHttpOnly(true);
         //cookie.setSecure(true); HTTPS 에서만 전송
