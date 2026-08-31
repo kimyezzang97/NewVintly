@@ -70,6 +70,8 @@ public class SecurityConfig {
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 .requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
                                 .requestMatchers("/").permitAll()
+                                // /error forward는 JWTFilter가 재실행되지 않아, 막으면 실제 에러가 401로 덮어써짐
+                                .requestMatchers("/error").permitAll()
                                 // ADMIN 전용
                                 .requestMatchers("/admin").hasRole("ADMIN")
                                 // 나머지는 인증 필수
