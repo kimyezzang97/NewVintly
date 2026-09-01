@@ -1,0 +1,57 @@
+# 테스트 전용 설정 (저장소에 커밋된다).
+#
+# src/main/resources/application-{local,dev,prd,test}.yml 은 .gitignore 대상이라 새로 클론한 개발자에게는
+# 존재하지 않는다. 그 상태로 통합 테스트를 돌리면 secret 등이 없어 컨텍스트가 뜨지 않으므로,
+# 테스트에 필요한 값은 전부 여기에 둔다. 테스트 클래스패스(src/test/resources)가 main 보다 앞서므로
+# 로컬에 src/main/resources/application-test.yml 이 있어도 이 파일이 우선한다.
+#
+# 실제 자격증명은 절대 넣지 말 것. DB/Redis 접속 정보는 Testcontainers 가 @ServiceConnection 으로
+# 주입하므로 여기에 적을 필요가 없다. (컨테이너 실행에 Docker 가 필요하다.)
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    check-template-location: true
+    cache: false
+  mail:
+    host: localhost
+    port: 3025
+    username: ""
+    password: ""
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+
+company:
+  base-url: http://localhost:8080
+
+# 아래는 전부 테스트용 더미값 — 실제 키가 아니다.
+secret: test-only-jwt-secret-key-not-a-real-credential-0123456789
+
+cloud:
+  aws:
+    credentials:
+      access-key: test-access-key
+      secret-key: test-secret-key
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: test-bucket
+      domain: https://test-bucket.s3.ap-northeast-2.amazonaws.com

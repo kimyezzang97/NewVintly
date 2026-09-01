@@ -81,6 +81,7 @@ class MemberTest {
 
         // then
         Assertions.assertThat(member.getUseStatus()).isEqualTo(Use.X);
-        Assertions.assertThat(member.getDeletedAt()).isBefore(LocalDateTime.now());
+        // isBefore(now())는 클럭 해상도 때문에 두 now()가 같은 값이 나오면 깨진다. 전달한 시각이 그대로 기록되는지를 검증한다.
+        Assertions.assertThat(member.getDeletedAt()).isEqualTo(deletedTime);
     }
 }
