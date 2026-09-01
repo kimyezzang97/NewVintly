@@ -85,7 +85,12 @@ JWT 기반 Stateless 인증, RTR(Refresh Token Rotation) 방식:
 - `LoginFilter` → `JWTFilter` → `CustomLogoutFilter`
 - 비밀번호: BCrypt
 - 역할: `ROLE_USER`, `ROLE_ADMIN`
-- 회원 상태: `Use` enum (`Y`=사용, `X`=추방, `E`=탈퇴, `K`=대기). 탈퇴 시 `useStatus=E` + `deletedAt` 기록, 닉네임은 조인 없이 조회 가능하도록 `board`/`board_comment`에 작성 당시 닉네임을 역정규화해 보존한다.
+- 회원 상태: `Use` enum (`Y`=사용, `X`=추방, `K`=대기). `deletedAt`을 기록하는 건 `X`(추방)뿐이다. 탈퇴 상태값(`E`)은 물리 삭제 전환과 함께 제거했으니 되살리지 말 것.
+- **회원 탈퇴는 Hard Delete다.** `member` 행을 실제로 삭제하며 복구 수단은 없다 (이메일/닉네임도 재사용 가능해진다). 탈퇴 시 수행 순서는 `MemberService.withdrawMember` 참고:
+  1. `board`, `board_comment`, `vintagecomment`의 `author_nickname`을 `del_{memberId}`로 익명화 (글/댓글 자체는 보존). `vintagecomment`는 `member_id`를 null로 비우고, `member_id`가 NOT NULL인 `board`/`board_comment`는 orphan 값으로 남긴다 — 물리 FK가 없고 조회는 역정규화 닉네임/`leftJoin`으로 처리하므로 안전하다. 익명화 UPDATE에는 `SET x.updatedAt = x.updatedAt`이 반드시 들어가야 한다 (`board`/`board_comment`의 `updated_at`은 `ON UPDATE CURRENT_TIMESTAMP`라, 빼면 수정한 적 없는 글이 `edited=true`가 된다).
+  2. `board_like`, `vintagelike`에서 해당 회원의 좋아요 삭제 (남기면 좋아요 수가 부풀려짐).
+  3. `member` 행 삭제.
+  4. Redis의 `refresh:{email}` 키 삭제 (`MemberFacade.withdrawMember` → `AuthService.deleteRefreshToken`). 지우지 않으면 탈퇴 후에도 refresh 토큰으로 재발급이 된다. 이미 발급된 access 토큰은 만료(30분)까지 유효하다.
 - 소셜 로그인 도입 우선순위(국내 사용률 기준): 카카오 > 네이버 > 구글 > 애플 (미착수)
 
 ## Database
@@ -93,11 +98,12 @@ JWT 기반 Stateless 인증, RTR(Refresh Token Rotation) 방식:
 - 감사 필드: `BaseEntity`의 `createdAt`, `updatedAt` 자동 관리
 - QueryDSL: `BooleanExpression` 빌더로 동적 쿼리, `Projections.constructor`로 DTO 매핑
 - DDL: dev/prd은 `update`, test는 `create-drop`
+- **`ddl-auto: update`는 기존 컬럼의 NULL 허용 여부를 바꾸지 않는다.** 엔티티에서 `nullable`을 바꿔도 이미 만들어진 컬럼은 그대로이므로, 반드시 수동 `ALTER`가 필요하다. 그런 DDL은 `db/migration/`에 날짜별 `.sql`로 남기고 환경별 적용 여부를 파일 상단에 기록한다 (실제로 `vintage_comment.member_id`가 이 문제로 탈퇴 기능을 깨뜨린 사례가 있다).
 
 ### 게시판(BOARD) 도메인 규칙
 
 - 커뮤니티 게시판은 `board`, `board_img`, `board_like`, `board_comment` 테이블로 구성. 자유게시판 등으로 나누지 않고 **단일 게시판**으로 운영한다 (매장 관련 좋아요/댓글은 `vintage`/`vintagelike`/`vintagecomment`로 별도 도메인).
-- **Hard Delete만 사용한다.** `board`, `board_comment` 등 게시판 계열 테이블에 `del_status`, `deleted_at` 같은 소프트 삭제용 컬럼을 두지 않는다. (회원 탈퇴 시각을 남기는 `member.deleted_at`은 별개 — 게시글 삭제 상태와 무관하다.)
+- **Hard Delete만 사용한다.** `board`, `board_comment` 등 게시판 계열 테이블에 `del_status`, `deleted_at` 같은 소프트 삭제용 컬럼을 두지 않는다. (추방 시각을 남기는 `member.deleted_at`은 별개 — 게시글 삭제 상태와 무관하다.)
 - `board`/`board_comment`는 `author_nickname`(VARCHAR30)을 역정규화해 보유한다. 탈퇴/닉네임 변경 이후에도 작성 당시 닉네임을 조인 없이 조회하기 위함.
 - 다음은 **의도적으로 제거**한 설계다. 되돌리지 말 것:
   - `category` 컬럼
@@ -107,10 +113,22 @@ JWT 기반 Stateless 인증, RTR(Refresh Token Rotation) 방식:
 
 ## Testing
 
-- 단위 테스트: Mockito mock
-- 통합 테스트: Testcontainers (MariaDB 10.11, Redis 7.4.2)
+- 단위 테스트: Mockito mock (Spring 컨텍스트 없이 동작)
+- 통합 테스트: Testcontainers (MariaDB 10.11, Redis 7.4.2) — **Docker 필요**
 - 이메일 테스트: GreenMail (fake SMTP)
 - 비동기 테스트: Awaitility
+
+### 통합 테스트 작성 규칙
+
+- `com.vintly.TestContainerConfig`를 **상속**한다 (`@Import` 아님). 컨테이너는 static이라 JVM당 한 벌만 뜨고 모든 통합 테스트가 공유한다.
+  - `@DynamicPropertySource`는 **테스트 클래스와 그 상위 클래스에서만** 처리된다. `@Import`한 `@TestConfiguration`에 두면 조용히 무시되어, 컨테이너는 떠 있는데 테스트는 임베디드 H2에 붙는다.
+  - `@ServiceConnection`도 Redis에는 쓸 수 없다 — `RedisConfig`가 `@Value("${spring.data.redis.host}")`로 커넥션 팩토리를 직접 만들어 부트 자동설정을 대체하기 때문. 그러면 컨테이너가 아니라 개발자 PC의 로컬 Redis에 붙는다.
+  - 두 경우 모두 **테스트는 통과하는데 엉뚱한 대상을 검증**하므로 반드시 상속 방식을 쓸 것.
+- 설정은 커밋된 `src/test/resources/application-test.yml`에 둔다. `src/main/resources/application-*.yml`은 `.gitignore` 대상이라 새로 클론한 개발자에게는 없다. 테스트 클래스패스가 main보다 우선하므로 로컬에 같은 이름 파일이 있어도 이쪽이 이긴다. **실제 자격증명은 넣지 말 것** (DB/Redis 접속 정보는 컨테이너가 주입한다).
+- 격리는 클래스 레벨 `@Transactional` 롤백. 단 **Redis는 롤백되지 않으므로** `@AfterEach`에서 직접 지운다.
+- 벌크 `@Modifying` 쿼리 결과를 검증할 때는 엔티티가 아니라 `JdbcTemplate`으로 DB를 직접 읽는다. 벌크 쿼리는 영속성 컨텍스트를 우회하므로 엔티티로 읽으면 1차 캐시의 변경 전 값이 나와 가짜 성공이 된다.
+- 픽스처 생성 후 `entityManager.flush()` + `clear()`를 호출한다. 비우지 않으면 `em.remove(member)` 시 같은 컨텍스트에 남은 연관 엔티티 때문에 `TransientObjectException`이 난다 (운영에는 없는 테스트 전용 함정).
+- `ddl-auto=create-drop`은 엔티티에서 DDL을 만들기 때문에 운영 DB의 `ON UPDATE CURRENT_TIMESTAMP`나 컬럼 NULL 제약 드리프트가 재현되지 않는다. 그런 동작을 검증하려면 `@BeforeEach`에서 `ALTER`로 직접 재현할 것 (`MemberWithdrawIntegrationTest` 참고).
 
 ## CI/CD & 인프라
 
