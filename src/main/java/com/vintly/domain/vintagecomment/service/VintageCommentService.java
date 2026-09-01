@@ -1,5 +1,6 @@
 package com.vintly.domain.vintagecomment.service;
 
+import com.vintly.interfaces.member.MemberException;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.domain.vintage.dto.VintageInfo;
@@ -38,7 +39,8 @@ public class VintageCommentService {
 
         // 여기서는 진짜 조회할 필요 없이 프록시만 필요하니까 getReferenceById 사용
         Vintage vintageRef = vintageRepository.getReferenceById(vintageId);
-        Member memberRef   = memberRepository.getReferenceById(memberId);
+        Member memberRef   = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.MemberNotFoundException::new);
 
         VintageComment newComment;
 

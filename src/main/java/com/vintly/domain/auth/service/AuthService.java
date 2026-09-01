@@ -121,6 +121,11 @@ public class AuthService {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    // refresh 토큰 폐기 (탈퇴 시 잔여 토큰으로 재발급되는 것을 막음)
+    public void deleteRefreshToken(String email) {
+        redisTemplate.delete("refresh:" + email);
+    }
+
     private Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(3*24*60*60); // 3일 (refresh 토큰 만료시간과 일치)

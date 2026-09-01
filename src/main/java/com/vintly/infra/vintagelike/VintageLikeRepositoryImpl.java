@@ -43,4 +43,9 @@ public class VintageLikeRepositoryImpl implements VintageLikeRepository {
     public long deleteByVintageAndMember(Vintage vintage, Member member) {
         return jpaRepository.deleteByVintageAndMember(vintage, member);
     }
+
+    @Override
+    public void deleteAllByMember(Member member) {
+        jpaRepository.deleteAllByMember(member);
+    }
 }

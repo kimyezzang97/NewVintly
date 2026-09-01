@@ -1,5 +1,6 @@
 package com.vintly.domain.board.service;
 
+import com.vintly.interfaces.member.MemberException;
 import com.vintly.domain.board.entity.Board;
 import com.vintly.domain.board.entity.BoardLike;
 import com.vintly.domain.board.repo.BoardLikeRepository;
@@ -28,7 +29,8 @@ public class BoardLikeService {
 
         if (!boardLikeRepository.existsLikeByBoardIdAndMemberId(boardId, memberId)) {
             Board board = boardRepository.getReferenceById(boardId);
-            var member = memberRepository.getReferenceById(memberId);
+            var member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.MemberNotFoundException::new);
 
             try {
                 boardLikeRepository.save(BoardLike.create(board, member));
@@ -45,7 +47,8 @@ public class BoardLikeService {
     @Transactional(rollbackFor = Exception.class)
     public BoardLikeResponse.BoardLike unlike(Long boardId) {
         Board board = boardRepository.getReferenceById(boardId);
-        var member = memberRepository.getReferenceById(SecurityUtil.getCurrentMemberId());
+        var member = memberRepository.findById(SecurityUtil.getCurrentMemberId())
+                .orElseThrow(MemberException.MemberNotFoundException::new);
 
         boardLikeRepository.deleteByBoardAndMember(board, member);
 

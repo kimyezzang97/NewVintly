@@ -72,9 +72,4 @@ public class Member extends BaseEntity {
         this.deletedAt = deletedAt;
         this.useStatus = Use.X;
     }
-
-    public void withdraw(LocalDateTime deletedAt){
-        this.deletedAt = deletedAt;
-        this.useStatus = Use.E;
-    }
 }

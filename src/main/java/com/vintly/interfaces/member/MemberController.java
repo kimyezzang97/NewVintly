@@ -83,10 +83,7 @@ public class MemberController implements SwaggerMemberApi {
     // 회원 탈퇴
     @DeleteMapping("/me")
     public ApiResponse<?> withdrawMember(@RequestBody MemberRequest.WithdrawMember request) {
-        String email = SecurityUtil.getCurrentEmail();
-        Member member = memberService.findByEmail(email)
-                .orElseThrow(MemberException.MemberNotFoundException::new);
-        memberService.withdrawMember(member, request.password());
+        memberFacade.withdrawMember(SecurityUtil.getCurrentEmail(), request.password());
         return new ApiResponse<>(true, 200, "회원 탈퇴가 완료되었습니다.", null);
     }
 }

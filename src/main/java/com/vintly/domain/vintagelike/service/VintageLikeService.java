@@ -1,5 +1,6 @@
 package com.vintly.domain.vintagelike.service;
 
+import com.vintly.interfaces.member.MemberException;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.domain.vintage.entity.Vintage;
@@ -48,7 +49,8 @@ public class VintageLikeService {
         // 이미 있으면 멱등 처리
         if (!vintageLikeRepository.existsLikeByVintageIdAndMemberId(vintageId, memberId)) {
             Vintage vintage = vintageRepository.getReferenceById(vintageId);
-            Member member = memberRepository.getReferenceById(memberId);
+            Member member = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.MemberNotFoundException::new);
 
             try {
                 vintageLikeRepository.save(VintageLike.create(vintage, member));
@@ -66,7 +68,8 @@ public class VintageLikeService {
     @Transactional
     public VintageLikeResponse.VintageLike unlike(Long vintageId) {
         Vintage vintage = vintageRepository.getReferenceById(vintageId);
-        Member member = memberRepository.getReferenceById(SecurityUtil.getCurrentMemberId());
+        Member member = memberRepository.findById(SecurityUtil.getCurrentMemberId())
+                .orElseThrow(MemberException.MemberNotFoundException::new);
 
         long deleted = vintageLikeRepository.deleteByVintageAndMember(vintage, member);
 

@@ -32,6 +32,9 @@ public interface MemberRepository {
 
     void deleteAll();
 
+    // 회원 존재 확인이 필요한 경우 사용 (탈퇴 회원의 잔여 access 토큰 차단)
+    Optional<Member> findById(Long memberId);
+
     // 조회 쿼리 없이 프록시로 참조만 걸기
     Member getReferenceById(Long memberId);
 }

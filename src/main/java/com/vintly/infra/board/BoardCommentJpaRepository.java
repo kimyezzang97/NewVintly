@@ -13,8 +13,9 @@ public interface BoardCommentJpaRepository extends JpaRepository<BoardComment, L
 
     void deleteAllByBoard_BoardId(Long boardId);
 
-    // member_id는 NOT NULL이므로 member를 null로 설정하지 않고 닉네임만 익명화
+    // member_id는 NOT NULL이므로 member를 null로 설정하지 않고 닉네임만 익명화.
+    // updated_at은 ON UPDATE CURRENT_TIMESTAMP라 자기 값을 그대로 대입해 자동 갱신을 막는다 (익명화 때문에 edited=true가 되면 안 됨)
     @Modifying
-    @Query("UPDATE board_comment bc SET bc.authorNickname = :deletedNickname WHERE bc.member = :member")
+    @Query("UPDATE board_comment bc SET bc.authorNickname = :deletedNickname, bc.updatedAt = bc.updatedAt WHERE bc.member = :member")
     void anonymizeMemberInComments(@Param("member") Member member, @Param("deletedNickname") String deletedNickname);
 }

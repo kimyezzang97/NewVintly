@@ -38,4 +38,9 @@ public class BoardLikeRepositoryImpl implements BoardLikeRepository {
     public void deleteAllLikesByBoard(Board board) {
         jpaRepository.deleteAllByBoard(board);
     }
+
+    @Override
+    public void deleteAllByMember(Member member) {
+        jpaRepository.deleteAllByMember(member);
+    }
 }
