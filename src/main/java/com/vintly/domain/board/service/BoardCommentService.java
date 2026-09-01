@@ -1,5 +1,6 @@
 package com.vintly.domain.board.service;
 
+import com.vintly.interfaces.member.MemberException;
 import com.vintly.domain.board.dto.BoardInfo;
 import com.vintly.domain.board.entity.Board;
 import com.vintly.domain.board.entity.BoardComment;
@@ -29,7 +30,8 @@ public class BoardCommentService {
     @Transactional(rollbackFor = Exception.class)
     public Long create(Long boardId, Long memberId, Long parentId, String content) {
         Board boardRef = boardRepository.getReferenceById(boardId);
-        var memberRef = memberRepository.getReferenceById(memberId);
+        var memberRef = memberRepository.findById(memberId)
+                .orElseThrow(MemberException.MemberNotFoundException::new);
 
         BoardComment comment;
 
