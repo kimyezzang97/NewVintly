@@ -9,8 +9,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface BoardJpaRepository extends JpaRepository<Board, Long> {
 
+    // 조회수 증가는 '수정'이 아니므로 updated_at을 자기 값으로 대입해 ON UPDATE CURRENT_TIMESTAMP 자동 갱신을 막는다
     @Modifying
-    @Query("UPDATE board b SET b.viewCount = b.viewCount + 1 WHERE b.boardId = :boardId")
+    @Query("UPDATE board b SET b.viewCount = b.viewCount + 1, b.updatedAt = b.updatedAt WHERE b.boardId = :boardId")
     void incrementViewCount(@Param("boardId") Long boardId);
 
     // member_id는 NOT NULL이므로 member는 orphan으로 두고 닉네임만 익명화.
