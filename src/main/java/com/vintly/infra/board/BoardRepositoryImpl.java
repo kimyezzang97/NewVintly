@@ -3,6 +3,7 @@ package com.vintly.infra.board;
 import com.vintly.domain.board.dto.BoardInfo;
 import com.vintly.domain.board.entity.Board;
 import com.vintly.domain.board.repo.BoardRepository;
+import com.vintly.domain.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,5 +46,10 @@ public class BoardRepositoryImpl implements BoardRepository {
     @Override
     public void delete(Board board) {
         boardJpaRepository.delete(board);
+    }
+
+    @Override
+    public void anonymizeMemberInBoards(Member member, String deletedNickname) {
+        boardJpaRepository.anonymizeMemberInBoards(member, deletedNickname);
     }
 }

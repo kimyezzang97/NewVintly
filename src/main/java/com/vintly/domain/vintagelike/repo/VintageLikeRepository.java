@@ -18,4 +18,7 @@ public interface VintageLikeRepository {
     void save(VintageLike vintageLike);
 
     long deleteByVintageAndMember(Vintage vintage, Member member);
+
+    // 탈퇴 회원이 누른 좋아요 전체 삭제
+    void deleteAllByMember(Member member);
 }

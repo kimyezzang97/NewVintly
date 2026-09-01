@@ -6,16 +6,17 @@ import com.vintly.interfaces.member.MemberRequest;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.domain.board.repo.BoardCommentRepository;
+import com.vintly.domain.board.repo.BoardLikeRepository;
+import com.vintly.domain.board.repo.BoardRepository;
 import com.vintly.domain.vintagecomment.repo.VintageCommentRepository;
+import com.vintly.domain.vintagelike.repo.VintageLikeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
@@ -28,15 +29,24 @@ public class MemberService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final VintageCommentRepository vintageCommentRepository;
     private final BoardCommentRepository boardCommentRepository;
+    private final BoardRepository boardRepository;
+    private final BoardLikeRepository boardLikeRepository;
+    private final VintageLikeRepository vintageLikeRepository;
 
     @Autowired
     public MemberService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder,
                          VintageCommentRepository vintageCommentRepository,
-                         BoardCommentRepository boardCommentRepository) {
+                         BoardCommentRepository boardCommentRepository,
+                         BoardRepository boardRepository,
+                         BoardLikeRepository boardLikeRepository,
+                         VintageLikeRepository vintageLikeRepository) {
         this.memberRepository = memberRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.vintageCommentRepository = vintageCommentRepository;
         this.boardCommentRepository = boardCommentRepository;
+        this.boardRepository = boardRepository;
+        this.boardLikeRepository = boardLikeRepository;
+        this.vintageLikeRepository = vintageLikeRepository;
     }
 
     // email 중복 체크
@@ -109,15 +119,23 @@ public class MemberService {
         member.changePassword(bCryptPasswordEncoder.encode(newPassword));
     }
 
-    // 회원 탈퇴
+    // 회원 탈퇴 (member 행 물리 삭제, 작성 글/댓글은 익명화해 보존)
     @Transactional(rollbackFor = Exception.class)
     public void withdrawMember(Member member, String password) {
         if (!bCryptPasswordEncoder.matches(password, member.getPassword())) {
             throw new MemberException.PasswordNotMatchException();
         }
         String deletedNickname = "del_" + member.getMemberId();
+
+        // 작성 글/댓글은 남기고 작성자 표기만 익명화
+        boardRepository.anonymizeMemberInBoards(member, deletedNickname);
         vintageCommentRepository.anonymizeMemberInComments(member, deletedNickname);
         boardCommentRepository.anonymizeMemberInComments(member, deletedNickname);
-        member.withdraw(LocalDateTime.now());
+
+        // 좋아요는 회원과 함께 사라져야 카운트가 어긋나지 않음
+        boardLikeRepository.deleteAllByMember(member);
+        vintageLikeRepository.deleteAllByMember(member);
+
+        memberRepository.delete(member);
     }
 }

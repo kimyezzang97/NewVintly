@@ -158,6 +158,19 @@ class AuthServiceTest {
         verify(redisTemplate).delete(redisKey);
     }
 
+    @Test
+    @DisplayName("refresh 토큰을 삭제하면 해당 이메일의 Redis 키가 제거된다.")
+    void deleteRefreshTokenRemovesRedisKey() {
+        // Arrange
+        String redisKey = "refresh:" + EMAIL;
+
+        // Act
+        authService.deleteRefreshToken(EMAIL);
+
+        // Assert
+        verify(redisTemplate).delete(redisKey);
+    }
+
     private long lifetime(String token) {
         var claims = Jwts.parser().verifyWith(secretKey).build()
                 .parseSignedClaims(token)

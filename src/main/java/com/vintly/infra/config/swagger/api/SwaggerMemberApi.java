@@ -79,6 +79,6 @@ public interface SwaggerMemberApi {
     @Operation(summary = "비밀번호 변경", description = "현재 로그인한 회원의 비밀번호를 변경합니다.", security = @SecurityRequirement(name = "access"))
     com.vintly.interfaces.presentation.ApiResponse<?> updatePassword(@Valid @RequestBody MemberRequest.ChangePassword request);
 
-    @Operation(summary = "회원 탈퇴", description = "현재 로그인한 회원을 탈퇴 처리합니다.", security = @SecurityRequirement(name = "access"))
+    @Operation(summary = "회원 탈퇴", description = "현재 로그인한 회원 정보를 삭제합니다. 작성한 게시글/댓글은 작성자명이 del_{memberId}로 익명화된 채 남고, 좋아요는 함께 삭제됩니다. 복구는 불가합니다.", security = @SecurityRequirement(name = "access"))
     com.vintly.interfaces.presentation.ApiResponse<?> withdrawMember(@Valid @RequestBody MemberRequest.WithdrawMember request);
 }

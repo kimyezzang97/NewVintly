@@ -15,4 +15,7 @@ public interface BoardLikeRepository {
     long deleteByBoardAndMember(Board board, Member member);
 
     void deleteAllLikesByBoard(Board board);
+
+    // 탈퇴 회원이 누른 좋아요 전체 삭제
+    void deleteAllByMember(Member member);
 }

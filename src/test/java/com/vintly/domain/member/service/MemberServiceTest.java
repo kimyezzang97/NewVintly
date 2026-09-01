@@ -1,16 +1,20 @@
 package com.vintly.domain.member.service;
 
 import com.vintly.domain.board.repo.BoardCommentRepository;
+import com.vintly.domain.board.repo.BoardLikeRepository;
+import com.vintly.domain.board.repo.BoardRepository;
 import com.vintly.domain.member.Use;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.domain.vintagecomment.repo.VintageCommentRepository;
+import com.vintly.domain.vintagelike.repo.VintageLikeRepository;
 import com.vintly.interfaces.member.MemberException;
 import com.vintly.interfaces.member.MemberRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -37,6 +41,15 @@ public class MemberServiceTest {
 
     @Mock
     private BoardCommentRepository boardCommentRepository;
+
+    @Mock
+    private BoardRepository boardRepository;
+
+    @Mock
+    private BoardLikeRepository boardLikeRepository;
+
+    @Mock
+    private VintageLikeRepository vintageLikeRepository;
 
     @InjectMocks
     private MemberService memberService;
@@ -277,7 +290,7 @@ public class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("비밀번호가 일치하면 회원 탈퇴 시 댓글 익명화 후 useStatus가 E로 변경되고 deletedAt이 기록된다.")
+    @DisplayName("비밀번호가 일치하면 회원 탈퇴 시 게시글/댓글이 익명화되고 좋아요 삭제 후 회원이 물리 삭제된다.")
     void shouldWithdrawMemberWhenPasswordMatches() {
         // Arrange
         Member member = new Member(1L, "test@example.com", "encoded", "nickname",
@@ -288,9 +301,14 @@ public class MemberServiceTest {
         memberService.withdrawMember(member, "password");
 
         // Assert
-        Mockito.verify(vintageCommentRepository).anonymizeMemberInComments(member, "del_1");
-        assertThat(member.getUseStatus()).isEqualTo(Use.E);
-        assertThat(member.getDeletedAt()).isNotNull();
+        InOrder inOrder = Mockito.inOrder(boardRepository, vintageCommentRepository, boardCommentRepository,
+                boardLikeRepository, vintageLikeRepository, memberRepository);
+        inOrder.verify(boardRepository).anonymizeMemberInBoards(member, "del_1");
+        inOrder.verify(vintageCommentRepository).anonymizeMemberInComments(member, "del_1");
+        inOrder.verify(boardCommentRepository).anonymizeMemberInComments(member, "del_1");
+        inOrder.verify(boardLikeRepository).deleteAllByMember(member);
+        inOrder.verify(vintageLikeRepository).deleteAllByMember(member);
+        inOrder.verify(memberRepository).delete(member);
     }
 
     @Test
@@ -306,6 +324,7 @@ public class MemberServiceTest {
                 MemberException.PasswordNotMatchException.class,
                 () -> memberService.withdrawMember(member, "wrongPassword")
         );
-        assertThat(member.getUseStatus()).isEqualTo(Use.Y);
+        Mockito.verify(memberRepository, Mockito.never()).delete(ArgumentMatchers.any());
+        Mockito.verify(boardLikeRepository, Mockito.never()).deleteAllByMember(ArgumentMatchers.any());
     }
 }
