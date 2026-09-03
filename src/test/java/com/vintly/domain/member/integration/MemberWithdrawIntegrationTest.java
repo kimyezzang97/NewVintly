@@ -15,6 +15,10 @@ import com.vintly.domain.member.Use;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.domain.member.service.MemberService;
+import com.vintly.domain.report.ReportReason;
+import com.vintly.domain.report.ReportTargetType;
+import com.vintly.domain.report.entity.Report;
+import com.vintly.domain.report.repo.ReportRepository;
 import com.vintly.domain.member.service.CustomUserDetails;
 import com.vintly.domain.vintage.entity.Vintage;
 import com.vintly.domain.vintage.repo.VintageRepository;
@@ -86,6 +90,7 @@ class MemberWithdrawIntegrationTest extends TestContainerConfig {
     @Autowired private VintageRepository vintageRepository;
     @Autowired private VintageCommentRepository vintageCommentRepository;
     @Autowired private VintageLikeRepository vintageLikeRepository;
+    @Autowired private ReportRepository reportRepository;
     @Autowired private BCryptPasswordEncoder passwordEncoder;
     @Autowired private StringRedisTemplate redisTemplate;
     @Autowired private JdbcTemplate jdbcTemplate;
@@ -138,6 +143,25 @@ class MemberWithdrawIntegrationTest extends TestContainerConfig {
 
         assertThat(count("SELECT COUNT(*) FROM board_like WHERE member_id = ?", f.memberId())).isZero();
         assertThat(count("SELECT COUNT(*) FROM vintage_like WHERE member_id = ?", f.memberId())).isZero();
+    }
+
+    @Test
+    @DisplayName("탈퇴해도 이 회원이 접수한 신고 이력은 남는다 (reporter_id는 orphan으로 둔다).")
+    void withdrawKeepsReportHistory() {
+        // Arrange
+        Fixture f = createFixture("keep-report@test.local", "keepReport");
+
+        // Act
+        memberService.withdrawMember(load(f), PASSWORD);
+        entityManager.flush();
+
+        // Assert - 신고는 감사 로그 성격이라 지우지 않는다. 지우면 제재 근거가 사라진다.
+        assertThat(count("SELECT COUNT(*) FROM member WHERE member_id = ?", f.memberId())).isZero();
+        assertThat(count("SELECT COUNT(*) FROM report WHERE report_id = ?", f.reportId())).isEqualTo(1);
+        assertThat(scalar("SELECT reporter_id FROM report WHERE report_id = ?", f.reportId()))
+                .isEqualTo(String.valueOf(f.memberId()));
+        assertThat(scalar("SELECT status FROM report WHERE report_id = ?", f.reportId()))
+                .isEqualTo("PENDING");
     }
 
     @Test
@@ -271,7 +295,7 @@ class MemberWithdrawIntegrationTest extends TestContainerConfig {
     // --- fixture ---
 
     private record Fixture(String email, String nickname, Long memberId, Long boardId,
-                           Long boardCommentId, Long vintageId, Long vintageCommentId) {}
+                           Long boardCommentId, Long vintageId, Long vintageCommentId, Long reportId) {}
 
     /** 탈퇴 대상 회원을 영속성 컨텍스트가 비워진 상태에서 새로 조회한다. */
     private Member load(Fixture f) {
@@ -303,9 +327,14 @@ class MemberWithdrawIntegrationTest extends TestContainerConfig {
                 VintageComment.createRoot(vintage, member, "vintage comment"));
         vintageLikeRepository.save(VintageLike.create(vintage, member));
 
+        // 이 회원이 남의 콘텐츠를 신고한 이력. 탈퇴해도 남아야 한다.
+        Report report = reportRepository.save(
+                Report.create(member, ReportTargetType.BOARD, 999L, ReportReason.ABUSE, null));
+
         entityManager.flush();
         Fixture fixture = new Fixture(email, nickname, member.getMemberId(), board.getBoardId(),
-                boardComment.getBoardCommentId(), vintage.getVintageId(), vintageComment.getVintageCommentId());
+                boardComment.getBoardCommentId(), vintage.getVintageId(), vintageComment.getVintageCommentId(),
+                report.getReportId());
         entityManager.clear();
         return fixture;
     }
