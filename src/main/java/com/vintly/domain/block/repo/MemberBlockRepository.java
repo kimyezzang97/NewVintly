@@ -10,6 +10,9 @@ public interface MemberBlockRepository {
 
     boolean existsByBlockerIdAndBlockedId(Long blockerId, Long blockedId);
 
+    // 내 차단 목록. 닉네임을 함께 쓰므로 구현체에서 fetch join 한다
+    List<MemberBlock> findAllByBlockerId(Long blockerId);
+
     // 조회 필터가 쓰는 목록. 비어 있으면 호출부에서 조건을 붙이지 않아야 한다.
     List<Long> findBlockedIdsByBlockerId(Long blockerId);
 

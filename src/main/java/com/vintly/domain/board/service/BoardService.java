@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,8 +21,8 @@ public class BoardService {
     private final BoardRepository boardRepository;
 
     @Transactional(readOnly = true)
-    public Page<BoardInfo.BoardSummary> getBoardList(String keyword, Pageable pageable) {
-        return boardRepository.findBoardList(keyword, pageable);
+    public Page<BoardInfo.BoardSummary> getBoardList(String keyword, Pageable pageable, List<Long> blockedIds) {
+        return boardRepository.findBoardList(keyword, pageable, blockedIds);
     }
 
     @Transactional(readOnly = true)

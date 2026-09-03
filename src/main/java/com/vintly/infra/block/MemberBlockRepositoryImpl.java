@@ -33,6 +33,11 @@ public class MemberBlockRepositoryImpl implements MemberBlockRepository {
     }
 
     @Override
+    public List<MemberBlock> findAllByBlockerId(Long blockerId) {
+        return jpaRepository.findAllByBlockerId(blockerId);
+    }
+
+    @Override
     public List<Long> findBlockedIdsByBlockerId(Long blockerId) {
         return jpaRepository.findBlockedIdsByBlockerId(blockerId);
     }

@@ -12,6 +12,10 @@ public interface MemberBlockJpaRepository extends JpaRepository<MemberBlock, Lon
 
     boolean existsByBlockerMemberIdAndBlockedMemberId(Long blockerId, Long blockedId);
 
+    // 차단 목록은 상대 닉네임을 함께 쓰므로 fetch join 으로 N+1 을 막는다
+    @Query("SELECT mb FROM member_block mb JOIN FETCH mb.blocked WHERE mb.blocker.memberId = :blockerId ORDER BY mb.blockId DESC")
+    List<MemberBlock> findAllByBlockerId(@Param("blockerId") Long blockerId);
+
     @Query("SELECT mb.blocked.memberId FROM member_block mb WHERE mb.blocker.memberId = :blockerId")
     List<Long> findBlockedIdsByBlockerId(@Param("blockerId") Long blockerId);
 

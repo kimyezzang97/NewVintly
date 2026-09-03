@@ -6,6 +6,7 @@ import com.vintly.domain.board.entity.BoardImg;
 import com.vintly.domain.board.service.BoardCommentService;
 import com.vintly.domain.board.service.BoardImgService;
 import com.vintly.domain.board.service.BoardLikeService;
+import com.vintly.domain.block.service.MemberBlockService;
 import com.vintly.domain.board.service.BoardService;
 import com.vintly.domain.img.service.ImgService;
 import com.vintly.domain.member.entity.Member;
@@ -37,11 +38,13 @@ public class BoardFacade {
     private final BoardLikeService boardLikeService;
     private final ImgService imgService;
     private final MemberService memberService;
+    private final MemberBlockService memberBlockService;
 
     // 게시글 목록 조회 (검색)
     @Transactional(readOnly = true)
     public Page<BoardResponse.BoardList> getBoardList(String keyword, Pageable pageable) {
-        return boardService.getBoardList(keyword, pageable)
+        List<Long> blockedIds = memberBlockService.findBlockedIds(SecurityUtil.getCurrentMemberId());
+        return boardService.getBoardList(keyword, pageable, blockedIds)
                 .map(BoardResponse.BoardList::from);
     }
 
