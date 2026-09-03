@@ -1,6 +1,7 @@
 package com.vintly.domain.vintagecomment.service;
 
 import com.vintly.interfaces.member.MemberException;
+import com.vintly.domain.block.service.MemberBlockService;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.domain.vintage.dto.VintageInfo;
@@ -8,6 +9,7 @@ import com.vintly.domain.vintage.entity.Vintage;
 import com.vintly.domain.vintage.repo.VintageRepository;
 import com.vintly.domain.vintagecomment.entity.VintageComment;
 import com.vintly.domain.vintagecomment.repo.VintageCommentRepository;
+import com.vintly.interfaces.block.MemberBlockException;
 import com.vintly.interfaces.vintagecomment.VintageCommentException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ public class VintageCommentService {
     private final VintageCommentRepository vintageCommentRepository;
     private final VintageRepository vintageRepository;
     private final MemberRepository memberRepository;
+    private final MemberBlockService memberBlockService;
 
     // 빈티지 매장에 달린 댓글 리스트 조회 (최신순 정렬)
     public List<VintageInfo.Comment> findCommentsByVintageId(Long vintageId, List<Long> blockedIds) {
@@ -62,6 +65,15 @@ public class VintageCommentService {
             // 한 단계까지만 허용 (부모가 이미 대댓글이면 막기)
             if (parent.getParentCommentId() != 0L) {
                 throw new VintageCommentException.ReplyDepthExceededException();
+            }
+
+            // 부모 댓글 작성자가 나를 차단했으면 답글을 달 수 없다 (설계 결정 6번).
+            // 매장은 특정 회원의 소유가 아니라 최상위 댓글에는 검사할 대상이 없다.
+            // 작성자가 이미 탈퇴했으면 member 가 null 이므로 통과시킨다.
+            Member parentAuthor = parent.getMember();
+            if (parentAuthor != null && parentAuthor.getMemberId() != null
+                    && memberBlockService.isBlockedBy(memberId, parentAuthor.getMemberId())) {
+                throw new MemberBlockException.BlockedByAuthorException();
             }
 
             newComment = vintageCommentRepository.save(VintageComment.createReply(vintageRef, memberRef, parentCommentId, comment));
