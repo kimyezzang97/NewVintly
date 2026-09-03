@@ -1,8 +1,8 @@
 # 사용자 차단
 
-내가 차단한 회원의 글·댓글이 내 화면에서 보이지 않게 한다.
+내가 차단한 회원의 글·댓글이 내 화면에서 보이지 않게 한다. 구현 완료.
 
-**아직 구현 전이다.** 이 문서는 착수 전 합의용이며, 구현 후 4장을 "구현된 것"으로 바꾼다.
+API 스펙은 `docs/api/block.md`, 스키마 DDL은 `db/migration/2026-09-03_member_block_table.sql`에 있다.
 
 ---
 
@@ -30,7 +30,7 @@
 
 | # | 결정 | 선택 | 근거 |
 | :-- | :--- | :--- | :--- |
-| 1 | 차단 효과 | **표시 차단 (단방향)** | 내가 차단하면 내 화면에서만 사라진다. 상대는 아무것도 알 수 없다. 상호작용 차단은 3장 참고. |
+| 1 | 차단 효과 | **표시 차단 (단방향)** | 내가 차단하면 내 화면에서만 사라진다. 상대는 아무것도 알 수 없다. 상호작용 차단은 결정 6번 참고. |
 | 2 | 중복 차단 요청 | **멱등 처리 (성공)** | 차단은 설정이라 "이미 그 상태"가 오류일 이유가 없다. 좋아요와 같은 방식이고, 409를 쓰는 신고와는 반대다. |
 | 3 | 탈퇴 시 차단 데이터 | **삭제** | 개인 설정이라 남길 이유가 없다. 신고 이력을 보존하는 것과 정반대이므로 헷갈리지 말 것. 차단한 쪽/차단당한 쪽 어느 편이 탈퇴해도 그 행을 지운다. |
 | 4 | 관리자 화면 | **없음** | 개인 설정이라 운영이 들여다볼 일이 없다. |
@@ -51,7 +51,7 @@
 
 ---
 
-## 4. 데이터 모델
+## 3. 데이터 모델
 
 ```
 member_block
@@ -78,7 +78,7 @@ DELETE FROM member_block WHERE blocker_id = ? OR blocked_id = ?
 
 ---
 
-## 5. 조회에 미치는 영향
+## 4. 조회에 미치는 영향
 
 차단 필터를 걸어야 하는 지점은 세 곳이다.
 
@@ -165,9 +165,9 @@ parentId NOT IN (
 
 ---
 
-## 6. API (안)
+## 5. API
 
-신고와 같은 모양으로 맞춘다.
+신고와 같은 모양으로 맞췄다. 상세 스펙은 `docs/api/block.md` 참고.
 
 ```
 POST   /api/v1/blocks              차단        body: { "memberId": 5 }
@@ -188,16 +188,31 @@ GET    /api/v1/blocks              내 차단 목록
 
 ---
 
-## 7. 작업 순서
+## 6. 구현된 것
 
-`CLAUDE.md`의 TDD 절차를 따른다.
+| 계층 | 위치 |
+| :--- | :--- |
+| 엔티티 | `domain/block/entity/MemberBlock` |
+| 리포지토리 | `domain/block/repo/` + `infra/block/` |
+| 서비스 | `domain/block/service/MemberBlockService` |
+| API | `interfaces/block/` + `infra/config/swagger/api/SwaggerMemberBlockApi` |
+| 조회 필터 | `BoardQueryDslRepository.findBoardList`, `BoardCommentQueryDslRepository`, `VintageCommentQueryDslRepository` |
+| 작성 검사 | `BoardCommentService.create`, `VintageCommentService.create` |
+| 탈퇴 연동 | `MemberService.withdrawMember` |
 
-1. `MemberBlock` 엔티티 + 리포지토리 (신고와 같은 3-파일 구조)
-2. `MemberBlockService` — 차단/해제/목록, 자기 차단·없는 회원 검사
-3. 게시글 목록에 차단 필터 (함정 1·2를 테스트로 먼저 고정)
-4. 댓글 조회 2곳에 차단 필터 + 대댓글 서브쿼리 (함정 3)
-5. 댓글 작성 2곳에 결정 6번 검사 (방향 주의)
-6. 컨트롤러 + Swagger + 예외 매핑
-7. 통합 테스트 — 차단 후 목록·댓글에서 사라지는지, **탈퇴자 글은 남아 있는지**, 차단당한 사람의 댓글 작성이 막히는지
-8. `db/migration/`에 DDL, `.http/block.http`, `docs/api/block.md`(댓글 수 불일치 명시)
-9. `CLAUDE.md` 탈퇴 절차에 `member_block` 삭제 추가 + 통합 테스트
+테스트 49개가 이 기능을 지킨다. 그중 함정을 직접 겨냥한 것들은 제거해 보고 실제로 실패하는 것을 확인했다.
+
+| 무엇을 지키는가 | 테스트 |
+| :--- | :--- |
+| 탈퇴자 글·댓글이 필터에 쓸려 사라지지 않음 | `BoardBlockFilterIntegrationTest`, `CommentBlockFilterIntegrationTest` |
+| 대댓글까지 함께 가려짐 | `CommentBlockFilterIntegrationTest` |
+| 작성 검사 방향이 뒤집히지 않음 | `CommentWriteBlockIntegrationTest` |
+| 차단 → 해제 흐름이 이어짐 | `BlockLifecycleIntegrationTest` |
+| 탈퇴 시 차단이 삭제됨 (신고는 보존) | `MemberWithdrawIntegrationTest` |
+
+## 7. 앱에 전달해야 할 제약
+
+`docs/api/block.md`에 적어 두었다.
+
+- **댓글 수가 실제와 어긋난다.** 결정 7번 때문에 차단한 회원의 최상위 댓글에 달린 남의 대댓글도 사라진다. 목록의 `commentCount`는 차단을 반영하지 않은 값이므로, 상세 화면의 개수는 받은 배열 길이로 표시해야 한다.
+- **게시글 상세는 차단이 적용되지 않는다** (결정 8번).
