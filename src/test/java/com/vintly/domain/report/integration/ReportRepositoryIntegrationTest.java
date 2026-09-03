@@ -30,12 +30,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * 신고 접수 리포지토리 통합 테스트.
  *
  * 단위 테스트로는 확인할 수 없는 두 가지를 실제 MariaDB 스키마에 대고 검증한다.
- *   - 복합 유니크 제약이 실제 DDL 로 나가는가 — {@code (reporter_id, target_type, target_id)}.
+ *   - 복합 유니크 제약이 실제 DDL 로 나가는가 — (reporter_id, target_type, target_id).
  *       엔티티에 어노테이션만 붙고 스키마에 반영되지 않으면 중복 신고가 그대로 쌓인다.
  *   - enum 이 문자열로 저장되는가 — 관리자가 DB 를 직접 조회해 처리하므로
- *       {@code 0}, {@code 1} 이 아니라 {@code BOARD}, {@code PENDING} 이 보여야 한다.
+ *       0, 1 이 아니라 BOARD, PENDING 이 보여야 한다.
  *
- * 실행에는 Docker 가 필요하다. 격리는 클래스 레벨 {@link Transactional} 롤백.
+ * 실행에는 Docker 가 필요하다. 격리는 클래스 레벨 Transactional 롤백.
  */
 @SpringBootTest
 @ActiveProfiles("test")
