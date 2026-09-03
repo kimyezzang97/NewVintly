@@ -1,5 +1,6 @@
 package com.vintly.interfaces.presentation;
 
+import com.vintly.interfaces.block.MemberBlockException;
 import com.vintly.interfaces.board.BoardException;
 import com.vintly.interfaces.member.MemberException;
 import com.vintly.interfaces.report.ReportException;
@@ -175,6 +176,22 @@ public class GlobalExceptionHandler {
     // 본인이 작성한 콘텐츠 신고
     @ExceptionHandler(ReportException.SelfReportException.class)
     protected ApiResponse<?> selfReport(ReportException.SelfReportException e) {
+        return new ApiResponse<>(false, 403, e.getMessage(), null);
+    }
+
+    /**
+     * [block]
+     */
+
+    // 자기 자신 차단
+    @ExceptionHandler(MemberBlockException.SelfBlockException.class)
+    protected ApiResponse<?> selfBlock(MemberBlockException.SelfBlockException e) {
+        return new ApiResponse<>(false, 403, e.getMessage(), null);
+    }
+
+    // 나를 차단한 회원의 글에 댓글 작성 시도
+    @ExceptionHandler(MemberBlockException.BlockedByAuthorException.class)
+    protected ApiResponse<?> blockedByAuthor(MemberBlockException.BlockedByAuthorException e) {
         return new ApiResponse<>(false, 403, e.getMessage(), null);
     }
 
