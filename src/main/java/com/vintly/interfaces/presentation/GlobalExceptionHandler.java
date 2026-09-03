@@ -2,6 +2,7 @@ package com.vintly.interfaces.presentation;
 
 import com.vintly.interfaces.board.BoardException;
 import com.vintly.interfaces.member.MemberException;
+import com.vintly.interfaces.report.ReportException;
 import com.vintly.interfaces.vintage.VintageException;
 import com.vintly.interfaces.vintagecomment.VintageCommentException;
 import jakarta.persistence.EntityNotFoundException;
@@ -152,6 +153,28 @@ public class GlobalExceptionHandler {
     // 본인의 댓글이 아님
     @ExceptionHandler(VintageCommentException.CommentNotOwnedException.class)
     protected ApiResponse<?> commentNotOwned(VintageCommentException.CommentNotOwnedException e) {
+        return new ApiResponse<>(false, 403, e.getMessage(), null);
+    }
+
+    /**
+     * [report]
+     */
+
+    // 같은 대상을 두 번 신고 (선체크 또는 유니크 제약)
+    @ExceptionHandler(ReportException.DuplicateReportException.class)
+    protected ApiResponse<?> duplicateReport(ReportException.DuplicateReportException e) {
+        return new ApiResponse<>(false, 409, e.getMessage(), null);
+    }
+
+    // 신고 대상이 존재하지 않음
+    @ExceptionHandler(ReportException.ReportTargetNotFoundException.class)
+    protected ApiResponse<?> reportTargetNotFound(ReportException.ReportTargetNotFoundException e) {
+        return new ApiResponse<>(false, 404, e.getMessage(), null);
+    }
+
+    // 본인이 작성한 콘텐츠 신고
+    @ExceptionHandler(ReportException.SelfReportException.class)
+    protected ApiResponse<?> selfReport(ReportException.SelfReportException e) {
         return new ApiResponse<>(false, 403, e.getMessage(), null);
     }
 
