@@ -2,6 +2,8 @@ package com.vintly.domain.member.integration;
 
 import com.vintly.TestContainerConfig;
 import com.vintly.application.member.MemberFacade;
+import com.vintly.domain.block.entity.MemberBlock;
+import com.vintly.domain.block.repo.MemberBlockRepository;
 import com.vintly.domain.board.entity.Board;
 import com.vintly.domain.board.entity.BoardComment;
 import com.vintly.domain.board.entity.BoardLike;
@@ -91,6 +93,7 @@ class MemberWithdrawIntegrationTest extends TestContainerConfig {
     @Autowired private VintageCommentRepository vintageCommentRepository;
     @Autowired private VintageLikeRepository vintageLikeRepository;
     @Autowired private ReportRepository reportRepository;
+    @Autowired private MemberBlockRepository memberBlockRepository;
     @Autowired private BCryptPasswordEncoder passwordEncoder;
     @Autowired private StringRedisTemplate redisTemplate;
     @Autowired private JdbcTemplate jdbcTemplate;
@@ -162,6 +165,32 @@ class MemberWithdrawIntegrationTest extends TestContainerConfig {
                 .isEqualTo(String.valueOf(f.memberId()));
         assertThat(scalar("SELECT status FROM report WHERE report_id = ?", f.reportId()))
                 .isEqualTo("PENDING");
+    }
+
+    @Test
+    @DisplayName("탈퇴하면 이 회원이 관련된 차단은 방향 상관없이 모두 삭제된다.")
+    void withdrawDeletesBlocksInBothDirections() {
+        // Arrange - 탈퇴자가 남을 차단하고, 남도 탈퇴자를 차단한 상태
+        Fixture f = createFixture("delete-block@test.local", "deleteBlock");
+        Member other = memberRepository.save(new Member(
+                null, "block-peer@test.local", passwordEncoder.encode(PASSWORD), "blockPeer",
+                "123456", "ROLE_USER", Use.Y, null, null));
+        Member leaving = load(f);
+        memberBlockRepository.save(MemberBlock.create(leaving, other));
+        memberBlockRepository.save(MemberBlock.create(other, leaving));
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(count("SELECT COUNT(*) FROM member_block WHERE blocker_id = ? OR blocked_id = ?",
+                f.memberId(), f.memberId())).isEqualTo(2);
+
+        // Act
+        memberService.withdrawMember(load(f), PASSWORD);
+        entityManager.flush();
+
+        // Assert - 차단은 감사 기록이 아니라 개인 설정이라 남길 이유가 없다 (신고와 반대)
+        assertThat(count("SELECT COUNT(*) FROM member_block WHERE blocker_id = ? OR blocked_id = ?",
+                f.memberId(), f.memberId())).isZero();
     }
 
     @Test
@@ -350,6 +379,11 @@ class MemberWithdrawIntegrationTest extends TestContainerConfig {
 
     private long count(String sql, Object arg) {
         Long value = jdbcTemplate.queryForObject(sql, Long.class, arg);
+        return value == null ? 0L : value;
+    }
+
+    private long count(String sql, Object arg1, Object arg2) {
+        Long value = jdbcTemplate.queryForObject(sql, Long.class, arg1, arg2);
         return value == null ? 0L : value;
     }
 

@@ -89,9 +89,11 @@ JWT 기반 Stateless 인증, RTR(Refresh Token Rotation) 방식:
 - **회원 탈퇴는 Hard Delete다.** `member` 행을 실제로 삭제하며 복구 수단은 없다 (이메일/닉네임도 재사용 가능해진다). 탈퇴 시 수행 순서는 `MemberService.withdrawMember` 참고:
   1. `board`, `board_comment`, `vintagecomment`의 `author_nickname`을 `del_{memberId}`로 익명화 (글/댓글 자체는 보존). `vintagecomment`는 `member_id`를 null로 비우고, `member_id`가 NOT NULL인 `board`/`board_comment`는 orphan 값으로 남긴다 — 물리 FK가 없고 조회는 역정규화 닉네임/`leftJoin`으로 처리하므로 안전하다. 익명화 UPDATE에는 `SET x.updatedAt = x.updatedAt`이 반드시 들어가야 한다 (`board`/`board_comment`의 `updated_at`은 `ON UPDATE CURRENT_TIMESTAMP`라, 빼면 수정한 적 없는 글이 `edited=true`가 된다).
   2. `board_like`, `vintagelike`에서 해당 회원의 좋아요 삭제 (남기면 좋아요 수가 부풀려짐).
-  3. **`report`는 손대지 않는다.** 이 회원이 접수한 신고는 그대로 남기고 `reporter_id`를 orphan으로 둔다. 감사 로그 성격이라 지우면 제재 근거가 사라지고, `reporter_id`는 숫자 ID라 개인정보도 남지 않는다. 누락이 아니라 의도된 결정이니 삭제 로직을 추가하지 말 것 (`MemberWithdrawIntegrationTest.withdrawKeepsReportHistory`가 지킨다).
-  4. `member` 행 삭제.
-  5. Redis의 `refresh:{email}` 키 삭제 (`MemberFacade.withdrawMember` → `AuthService.deleteRefreshToken`). 지우지 않으면 탈퇴 후에도 refresh 토큰으로 재발급이 된다. 이미 발급된 access 토큰은 만료(30분)까지 유효하다.
+  3. `member_block`에서 이 회원이 걸린 차단을 **방향 상관없이 삭제** (`blocker_id` 또는 `blocked_id`). 차단은 개인 설정이라 회원이 사라지면 남길 이유가 없다.
+  4. **`report`는 손대지 않는다.** 이 회원이 접수한 신고는 그대로 남기고 `reporter_id`를 orphan으로 둔다. 감사 로그 성격이라 지우면 제재 근거가 사라지고, `reporter_id`는 숫자 ID라 개인정보도 남지 않는다. 누락이 아니라 의도된 결정이니 삭제 로직을 추가하지 말 것 (`MemberWithdrawIntegrationTest.withdrawKeepsReportHistory`가 지킨다).
+     - **`report`와 `member_block`이 정반대로 동작한다는 점을 헷갈리지 말 것.** 신고는 감사 기록이라 남기고, 차단은 개인 설정이라 지운다. 각각 `withdrawKeepsReportHistory`, `withdrawDeletesBlocksInBothDirections`가 지킨다.
+  5. `member` 행 삭제.
+  6. Redis의 `refresh:{email}` 키 삭제 (`MemberFacade.withdrawMember` → `AuthService.deleteRefreshToken`). 지우지 않으면 탈퇴 후에도 refresh 토큰으로 재발급이 된다. 이미 발급된 access 토큰은 만료(30분)까지 유효하다.
 - 소셜 로그인 도입 우선순위(국내 사용률 기준): 카카오 > 네이버 > 구글 > 애플 (미착수)
 
 ## Database
