@@ -10,6 +10,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
@@ -33,6 +35,7 @@ public class Report extends BaseEntity {
 
     @Comment("신고 대상 종류")
     @Enumerated(value = EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "target_type", nullable = false, length = 20)
     private ReportTargetType targetType;
 
@@ -42,6 +45,7 @@ public class Report extends BaseEntity {
 
     @Comment("신고 사유")
     @Enumerated(value = EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 20)
     private ReportReason reason;
 
@@ -51,6 +55,7 @@ public class Report extends BaseEntity {
 
     @Comment("처리 상태")
     @Enumerated(value = EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(nullable = false, length = 20)
     private ReportStatus status;
 

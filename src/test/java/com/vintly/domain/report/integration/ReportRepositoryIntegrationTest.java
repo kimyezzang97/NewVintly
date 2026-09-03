@@ -100,6 +100,25 @@ class ReportRepositoryIntegrationTest extends TestContainerConfig {
     }
 
     @Test
+    @DisplayName("enum 컬럼은 네이티브 ENUM이 아니라 varchar로 만들어진다.")
+    void enumColumnsAreVarcharNotNativeEnum() {
+        // given - Hibernate 6은 MariaDB에서 @Enumerated(STRING)을 네이티브 ENUM으로 만든다.
+        // 그대로 두면 신고 사유를 하나 추가할 때마다 환경별로 ALTER TABLE이 필요하고,
+        // ddl-auto=update는 기존 컬럼 타입을 바꾸지 않으므로 운영에서 조용히 실패한다.
+
+        // when
+        List<Map<String, Object>> columns = jdbcTemplate.queryForList(
+                "SELECT column_name, data_type FROM information_schema.columns "
+                        + "WHERE table_schema = DATABASE() AND table_name = 'report' "
+                        + "AND column_name IN ('target_type', 'reason', 'status')");
+
+        // then
+        assertThat(columns).hasSize(3);
+        assertThat(columns).allSatisfy(column ->
+                assertThat(column.get("data_type")).isEqualTo("varchar"));
+    }
+
+    @Test
     @DisplayName("같은 신고자가 같은 대상을 다시 신고하면 유니크 제약에 걸린다.")
     void duplicateReportIsRejectedByUniqueConstraint() {
         // given
