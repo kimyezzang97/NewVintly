@@ -28,7 +28,7 @@ public class ReportFacade {
     /**
      * 신고 접수. 대상 존재 확인과 자기 콘텐츠 판정을 거쳐 {@link ReportService}에 넘긴다.
      *
-     * <p>대상 도메인({@code board}, {@code board_comment}, {@code vintage_comment})을 알아야 하는
+     * 대상 도메인({@code board}, {@code board_comment}, {@code vintage_comment})을 알아야 하는
      * 판정이라 도메인 서비스가 아니라 여기서 조합한다.
      */
     @Transactional(rollbackFor = Exception.class)
@@ -49,14 +49,14 @@ public class ReportFacade {
     /**
      * 대상의 작성자 ID를 찾는다. 대상이 없으면 예외를 던지므로 존재 확인을 겸한다.
      *
-     * <p>비어 있는 {@link Optional}은 "대상이 없다"가 아니라 <b>"작성자가 없다"</b>는 뜻이다.
+     * 비어 있는 {@link Optional}은 "대상이 없다"가 아니라 "작성자가 없다"는 뜻이다.
      * {@code vintage_comment}는 작성자 탈퇴 시 {@code member_id}가 null이 되기 때문이다. 이 경우
      * 댓글 자체는 남아 있으므로 신고할 수 있어야 한다.
      *
-     * <p>대상이 3종뿐이라 {@code switch}로 둔다. 늘어나면 {@link ReportTargetType}에 확인 전략을
+     * 대상이 3종뿐이라 {@code switch}로 둔다. 늘어나면 {@link ReportTargetType}에 확인 전략을
      * 붙이는 형태가 자연스럽다.
      *
-     * <p>존재 확인만 필요한 자리에 {@code findById}로 엔티티 전체를 읽는 것은, 작성자 ID를 함께
+     * 존재 확인만 필요한 자리에 {@code findById}로 엔티티 전체를 읽는 것은, 작성자 ID를 함께
      * 얻어야 해서다. LAZY 프록시에서 식별자를 꺼내는 것은 추가 쿼리를 일으키지 않으므로 대상당
      * 한 번의 조회로 끝난다.
      */

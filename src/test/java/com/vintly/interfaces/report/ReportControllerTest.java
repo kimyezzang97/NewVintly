@@ -40,10 +40,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * 신고 API 의 요청 검증과 예외 매핑 테스트.
  *
- * <p>이 프로젝트는 예외를 HTTP 상태 코드가 아니라 {@code ApiResponse.code} 로 돌려주므로
+ * 이 프로젝트는 예외를 HTTP 상태 코드가 아니라 {@code ApiResponse.code} 로 돌려주므로
  * (전역 핸들러에 {@code @ResponseStatus} 가 없다) 본문의 {@code code} 를 검증한다.
  *
- * <p>스프링 컨텍스트 없이 standalone MockMvc 로 컨트롤러와 전역 예외 핸들러만 물린다.
+ * 스프링 컨텍스트 없이 standalone MockMvc 로 컨트롤러와 전역 예외 핸들러만 물린다.
  * {@code SecurityUtil} 이 {@code SecurityContextHolder} 를 직접 읽으므로 인증 정보만 심어 준다.
  */
 @ExtendWith(MockitoExtension.class)

@@ -26,11 +26,11 @@ public class ReportService {
     /**
      * 신고 접수.
      *
-     * <p>중복 신고는 두 겹으로 막는다. 선체크가 정상 흐름을 걸러 명확한 예외를 주고, 동시 요청으로
+     * 중복 신고는 두 겹으로 막는다. 선체크가 정상 흐름을 걸러 명확한 예외를 주고, 동시 요청으로
      * 양쪽 모두 선체크를 통과한 경우에는 유니크 제약이 잡는다. 후자를 그대로 흘리면 500 이 나가므로
      * 같은 예외로 변환해 409 로 응답한다.
      *
-     * <p>대상 존재 확인과 자기 콘텐츠 여부 판정은 대상 도메인을 알아야 하므로 Facade 가 맡는다.
+     * 대상 존재 확인과 자기 콘텐츠 여부 판정은 대상 도메인을 알아야 하므로 Facade 가 맡는다.
      */
     @Transactional(rollbackFor = Exception.class)
     public Long create(Long reporterId, ReportTargetType targetType, Long targetId,

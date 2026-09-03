@@ -19,7 +19,7 @@ public class ReportRepositoryImpl implements ReportRepository {
     /**
      * 신고 접수 저장.
      *
-     * <p>{@code save} 가 아니라 {@code saveAndFlush} 를 쓴다. 중복 신고는 서비스에서 먼저 걸러내지만,
+     * {@code save} 가 아니라 {@code saveAndFlush} 를 쓴다. 중복 신고는 서비스에서 먼저 걸러내지만,
      * 두 요청이 동시에 들어오면 양쪽 모두 "없음"을 보고 통과하는 창이 남는다. 그 경우 유니크 제약이
      * 최후 방어선이 되는데, 지연 플러시로 두면 위반이 트랜잭션 커밋 시점에 터진다. 그때는 서비스를
      * 이미 빠져나온 뒤라 409 로 변환할 수 없고 500 이 나간다. 저장 시점에 플러시해 서비스가 잡을 수
