@@ -28,8 +28,8 @@ public class BoardCommentRepositoryImpl implements BoardCommentRepository {
     }
 
     @Override
-    public List<BoardInfo.Comment> findCommentsByBoardId(Long boardId) {
-        return dslRepository.findCommentsByBoardId(boardId);
+    public List<BoardInfo.Comment> findCommentsByBoardId(Long boardId, List<Long> blockedIds) {
+        return dslRepository.findCommentsByBoardId(boardId, blockedIds);
     }
 
     @Override

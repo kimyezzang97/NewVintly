@@ -1,5 +1,6 @@
 package com.vintly.application.vintage;
 
+import com.vintly.domain.block.service.MemberBlockService;
 import com.vintly.domain.img.service.ImgService;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
@@ -48,6 +49,7 @@ public class VintageFacade {
     private final VintageCommentService vintageCommentService;
     private final VintageService vintageService;
     private final MemberService memberService;
+    private final MemberBlockService memberBlockService;
 
 
 
@@ -100,8 +102,11 @@ public class VintageFacade {
             liked = vintageLikeService.existsLikeByVintageIdAndMemberId(vintageId, memberId);
         }
 
-        // 5. 댓글 리스트 조회
-        List<VintageInfo.Comment> result  = vintageCommentService.findCommentsByVintageId(vintageId);
+        // 5. 댓글 리스트 조회 (비로그인이면 차단 목록이 없으므로 필터가 붙지 않는다)
+        List<Long> blockedIds = memberId != null
+                ? memberBlockService.findBlockedIds(memberId)
+                : List.of();
+        List<VintageInfo.Comment> result  = vintageCommentService.findCommentsByVintageId(vintageId, blockedIds);
 
         // 6. 내부 전용 DTO → 응답용 DTO로 매핑 후 반환
         VintageInfo.VintageDetail detail = new VintageInfo.VintageDetail(

@@ -23,8 +23,8 @@ public class BoardCommentService {
     private final MemberRepository memberRepository;
 
     @Transactional(readOnly = true)
-    public List<BoardInfo.Comment> findCommentsByBoardId(Long boardId) {
-        return boardCommentRepository.findCommentsByBoardId(boardId);
+    public List<BoardInfo.Comment> findCommentsByBoardId(Long boardId, List<Long> blockedIds) {
+        return boardCommentRepository.findCommentsByBoardId(boardId, blockedIds);
     }
 
     @Transactional(rollbackFor = Exception.class)

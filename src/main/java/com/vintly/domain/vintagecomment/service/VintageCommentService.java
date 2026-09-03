@@ -24,8 +24,8 @@ public class VintageCommentService {
     private final MemberRepository memberRepository;
 
     // 빈티지 매장에 달린 댓글 리스트 조회 (최신순 정렬)
-    public List<VintageInfo.Comment> findCommentsByVintageId(Long vintageId) {
-        return vintageCommentRepository.findCommentsByVintageId(vintageId);
+    public List<VintageInfo.Comment> findCommentsByVintageId(Long vintageId, List<Long> blockedIds) {
+        return vintageCommentRepository.findCommentsByVintageId(vintageId, blockedIds);
     }
 
     public void deleteAllCommentsByVintage(Vintage vintage) {

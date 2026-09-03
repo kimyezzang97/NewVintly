@@ -23,8 +23,8 @@ public class VintageCommentRepositoryImpl implements VintageCommentRepository {
 
     // 빈티지 매장에 달린 댓글 리스트 조회 (최신순 정렬)
     @Override
-    public List<VintageInfo.Comment> findCommentsByVintageId(Long vintageId) {
-        return dslRepository.findCommentsByVintageId(vintageId);
+    public List<VintageInfo.Comment> findCommentsByVintageId(Long vintageId, List<Long> blockedIds) {
+        return dslRepository.findCommentsByVintageId(vintageId, blockedIds);
     }
 
     @Override

@@ -57,7 +57,9 @@ public class BoardFacade {
         boardService.incrementViewCount(boardId);
 
         List<BoardInfo.BoardImgInfo> imgList = boardImgService.findImgListByBoardId(boardId);
-        List<BoardInfo.Comment> comments = boardCommentService.findCommentsByBoardId(boardId);
+        List<Long> blockedIds = memberBlockService.findBlockedIds(SecurityUtil.getCurrentMemberId());
+
+        List<BoardInfo.Comment> comments = boardCommentService.findCommentsByBoardId(boardId, blockedIds);
 
         var likeStatus = boardLikeService.getStatus(boardId);
 
