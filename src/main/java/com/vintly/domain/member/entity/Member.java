@@ -42,12 +42,12 @@ public class Member extends BaseEntity {
     @Column(name = "role")
     private String role;
 
-    @Comment("[계정 이용 상태] 사용: Y, 추방: X, 대기: K, 탈퇴: E")
+    @Comment("[계정 이용 상태] 사용: Y, 추방: X, 대기: K")
     @Enumerated(value = EnumType.STRING)
     @Column(name = "use_status")
     private Use useStatus;
 
-    @Comment("계정 삭제 날짜")
+    @Comment("추방 일시 (추방 시에만 기록, 탈퇴는 행을 삭제하므로 남지 않는다)")
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
