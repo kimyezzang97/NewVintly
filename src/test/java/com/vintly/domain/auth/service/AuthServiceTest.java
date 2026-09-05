@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -85,6 +86,12 @@ class AuthServiceTest {
         assertThat(jwtUtil.getCategory(newRefresh)).isEqualTo("refresh");
         assertThat(lifetime(newRefresh)).isEqualTo(259_200_000L);
         assertThat(refreshCookie.getMaxAge()).isEqualTo(3 * 24 * 60 * 60);
+
+        // admin 프론트가 크로스사이트라 SameSite=None(+Secure)이 없으면 브라우저가 재발급 요청에 쿠키를 싣지 않는다
+        assertThat(response.getHeader(HttpHeaders.SET_COOKIE))
+                .contains("SameSite=None")
+                .contains("Secure")
+                .contains("HttpOnly");
 
         verify(valueOperations).set(eq(redisKey), anyString(), eq(259_200_000L), eq(TimeUnit.MILLISECONDS));
     }

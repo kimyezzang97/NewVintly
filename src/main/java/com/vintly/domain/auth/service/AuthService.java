@@ -3,6 +3,7 @@ package com.vintly.domain.auth.service;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.infra.config.jwt.JWTUtil;
+import com.vintly.infra.util.RefreshCookieUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.Cookie;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import com.vintly.interfaces.presentation.ApiResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -116,7 +118,7 @@ public class AuthService {
 
         // 응답 헤더 및 쿠키 설정
         response.setHeader("access", newAccess);
-        response.addCookie(createCookie("refresh", newRefresh));
+        response.addHeader(HttpHeaders.SET_COOKIE, RefreshCookieUtil.create(newRefresh).toString());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -126,13 +128,4 @@ public class AuthService {
         redisTemplate.delete("refresh:" + email);
     }
 
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(3*24*60*60); // 3일 (refresh 토큰 만료시간과 일치)
-        cookie.setPath("/"); // 모든 경로에서 쿠키 사용 가능하도록
-        cookie.setHttpOnly(true);
-        //cookie.setSecure(true); HTTPS 에서만 전송
-
-        return cookie;
-    }
 }

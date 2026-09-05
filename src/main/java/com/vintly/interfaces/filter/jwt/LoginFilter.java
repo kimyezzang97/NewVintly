@@ -5,6 +5,7 @@ import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.domain.member.service.CustomUserDetails;
 import com.vintly.infra.config.jwt.JWTUtil;
+import com.vintly.infra.util.RefreshCookieUtil;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletInputStream;
@@ -12,6 +13,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -94,7 +96,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         //응답 설정
         response.setHeader("access", access); // header 는 access 토큰
-        response.addCookie(createCookie("refresh", refresh)); // cookie 는 refresh 토큰
+        response.addHeader(HttpHeaders.SET_COOKIE, RefreshCookieUtil.create(refresh).toString()); // cookie 는 refresh 토큰
         response.setStatus(HttpStatus.OK.value());
 
         // body에 회원 정보 내려주기
@@ -128,19 +130,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setStatus(401);
 
         // 로그인 실패 시 refresh 쿠키 삭제
-        Cookie cookie = new Cookie("refresh", null);
-        cookie.setMaxAge(0); // 쿠키 삭제
-        cookie.setPath("/");
-        response.addCookie(cookie);
-    }
-
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(3*24*60*60); // 3일 (refresh 토큰 만료시간과 일치)
-        cookie.setHttpOnly(true); // XSS 방어, JS 접근 차단
-        cookie.setPath("/");
-        //cookie.setSecure(true); // HTTPS 접근시만
-
-        return cookie;
+        response.addHeader(HttpHeaders.SET_COOKIE, RefreshCookieUtil.expire().toString());
     }
 }
