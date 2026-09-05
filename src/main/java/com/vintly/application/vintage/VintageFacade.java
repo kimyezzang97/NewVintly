@@ -74,7 +74,7 @@ public class VintageFacade {
 
         } catch (Exception e) {
             log.error("빈티지 매장 등록 중 오류 발생", e);
-            throw new VintageException.VintageCreateException();
+            throw new VintageException.VintageCreateException(e);
         }
     }
 
