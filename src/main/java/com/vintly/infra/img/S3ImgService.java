@@ -46,10 +46,11 @@ public class S3ImgService implements ImgService {
     }
 
     private String uploadSingleImage(MultipartFile image, String path) {
-        try {
-            String extension = extractExtension(image.getOriginalFilename()); // 확장자 추출
-            String fileName = buildFileName(path, extension); // S3에 저장할 파일명 생성
+        // 키 생성은 예외를 던지지 않으므로 try 밖에서 만든다. 실패 로그에 키를 함께 남기기 위함.
+        String extension = extractExtension(image.getOriginalFilename()); // 확장자 추출
+        String fileName = buildFileName(path, extension); // S3에 저장할 파일명 생성
 
+        try {
             // S3에 업로드
             s3Client.putObject(
                     PutObjectRequest.builder()
@@ -63,8 +64,10 @@ public class S3ImgService implements ImgService {
             return s3Domain + "/" + fileName; // 접근 가능한 URL 리턴
 
         } catch (Exception e) {
-            log.error("S3 이미지 업로드 실패", e);
-            throw new RuntimeException("S3 이미지 업로드 중 오류가 발생했습니다.");
+            // 원인(e)을 반드시 물려준다. 빠뜨리면 상위에 남는 스택트레이스에 실제 사유가 사라져
+            // NoSuchBucket 같은 설정 문제를 로그를 따로 뒤져야만 알 수 있다.
+            log.error("S3 이미지 업로드 실패 - bucket: {}, key: {}", bucket, fileName, e);
+            throw new RuntimeException("S3 이미지 업로드 중 오류가 발생했습니다.", e);
         }
     }
 
