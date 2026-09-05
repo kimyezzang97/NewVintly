@@ -1,3 +1,17 @@
+spring:
+  servlet:
+    multipart:
+      # 설정이 없으면 스프링 기본값(파일 1MB / 요청 10MB)이라 폰 사진 한 장에도 업로드가 막힌다.
+      # 빈티지 매장 등록은 이미지를 최대 10장까지 받는다 (VintageRequest.CreateVintage)
+      max-file-size: 10MB
+      max-request-size: 100MB
+
+server:
+  tomcat:
+    # 한도 초과로 업로드를 거절할 때, 톰캣은 남은 요청 본문을 끝까지 읽어 버려야 응답을 돌려줄 수 있다.
+    # 기본값(2MB)을 넘어서면 커넥션을 끊어버려서, 클라이언트는 413 대신 "연결 끊김"을 보게 된다.
+    max-swallow-size: -1
+
 management:
   endpoints:
     web:

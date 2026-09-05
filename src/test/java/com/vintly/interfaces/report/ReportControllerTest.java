@@ -60,7 +60,7 @@ class ReportControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(reportController)
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(new GlobalExceptionHandler("10MB", "100MB"))
                 .build();
 
         Member reporter = new Member(REPORTER_ID, "reporter@test.com", "password", "reporterNick",

@@ -56,7 +56,7 @@ class MemberBlockControllerTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(memberBlockController)
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(new GlobalExceptionHandler("10MB", "100MB"))
                 .build();
 
         Member me = new Member(MY_ID, "me@test.com", "password", "myNick",
