@@ -3,6 +3,7 @@ package com.vintly.interfaces.filter.jwt;
 import com.vintly.infra.config.jwt.JWTUtil;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.service.CustomUserDetails;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 
 @Slf4j
 public class JWTFilter extends OncePerRequestFilter {
@@ -43,7 +47,8 @@ public class JWTFilter extends OncePerRequestFilter {
         try {
             jwtUtil.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
-            log.warn("access token expired - URI: {}, IP: {}", request.getRequestURI(), request.getRemoteAddr());
+            log.warn("access token expired - URI: {}, IP: {}, {}",
+                    request.getRequestURI(), request.getRemoteAddr(), describeExpiredToken(e));
             sendUnauthorized(response, "access token expired");
             return;
         } catch (JwtException | IllegalArgumentException e) {
@@ -76,6 +81,29 @@ public class JWTFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
+    }
+
+    /**
+     * 거절된 토큰이 "누구의, 얼마나 지난" 것인지 남긴다.
+     *
+     * <p>URI와 IP만으로는 정상 만료(수명 30분 경과)인지, 클라이언트가 예전 토큰을 계속 재사용하는지,
+     * 서버 시계가 어긋난 건지 구분할 수 없다. 경과 시간이 그 판단의 근거가 된다.
+     * ExpiredJwtException은 만료된 토큰의 클레임을 그대로 들고 있어 추가 파싱이 필요 없다.
+     */
+    private String describeExpiredToken(ExpiredJwtException e) {
+        Claims claims = e.getClaims();
+        if (claims == null) {
+            return "email: unknown, exp: unknown";
+        }
+
+        String email = claims.get("username", String.class);
+        Date expiration = claims.getExpiration();
+        if (expiration == null) {
+            return String.format("email: %s, exp: unknown", email);
+        }
+
+        long minutesAgo = Duration.between(expiration.toInstant(), Instant.now()).toMinutes();
+        return String.format("email: %s, exp: %s (%d분 경과)", email, expiration.toInstant(), minutesAgo);
     }
 
     private void sendUnauthorized(HttpServletResponse response, String message) throws IOException {

@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface VintageCommentRepository {
 
     // 해당 빈티지 매장의 댓글 리스트 조회
-    List<VintageInfo.Comment> findCommentsByVintageId(Long vintageId);
+    List<VintageInfo.Comment> findCommentsByVintageId(Long vintageId, List<Long> blockedIds);
 
     void deleteAllCommentsByVintageId(Vintage vintage);
 

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,7 +17,7 @@ public interface BoardRepository {
 
     Optional<Board> findById(Long boardId);
 
-    Page<BoardInfo.BoardSummary> findBoardList(String keyword, Pageable pageable);
+    Page<BoardInfo.BoardSummary> findBoardList(String keyword, Pageable pageable, List<Long> blockedIds);
 
     Board getReferenceById(Long boardId);
 

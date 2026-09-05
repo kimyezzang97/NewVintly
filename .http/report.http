@@ -1,0 +1,142 @@
+### 신고 API
+#
+# 인증: 로그인 응답의 access 헤더 값을 그대로 요청의 access 헤더에 넣는다 (Bearer 접두사 없음).
+# 아래 첫 요청을 실행하면 토큰이 자동으로 저장되어 이후 요청에 쓰인다.
+#
+# targetType : BOARD | BOARD_COMMENT | VINTAGE_COMMENT
+# reason     : OBSCENE | ABUSE | SPAM | FLOOD | ETC
+#
+# 이 프로젝트는 오류를 HTTP 상태가 아니라 응답 본문의 code로 돌려준다.
+# 실패해도 HTTP 200 이므로 body 의 success / code 를 확인할 것.
+
+@host = http://localhost:8080
+
+### 로그인 (access 토큰 저장)
+POST {{host}}/login
+Content-Type: application/json
+
+{
+  "username": "reporter@test.com",
+  "password": "Passw0rd!23"
+}
+
+> {%
+    client.global.set("access", response.headers.valueOf("access"));
+%}
+
+
+### 게시글 신고
+POST {{host}}/api/v1/reports
+Content-Type: application/json
+access: {{access}}
+
+{
+  "targetType": "BOARD",
+  "targetId": 1,
+  "reason": "ABUSE",
+  "detail": "욕설이 포함되어 있습니다."
+}
+
+
+### 게시판 댓글 신고
+POST {{host}}/api/v1/reports
+Content-Type: application/json
+access: {{access}}
+
+{
+  "targetType": "BOARD_COMMENT",
+  "targetId": 1,
+  "reason": "SPAM",
+  "detail": "광고 댓글입니다."
+}
+
+
+### 매장 댓글 신고 (상세 사유 없이)
+POST {{host}}/api/v1/reports
+Content-Type: application/json
+access: {{access}}
+
+{
+  "targetType": "VINTAGE_COMMENT",
+  "targetId": 1,
+  "reason": "FLOOD"
+}
+
+
+### 중복 신고 - code 409
+# 위의 "게시글 신고"를 실행한 뒤 같은 요청을 다시 보낸다.
+POST {{host}}/api/v1/reports
+Content-Type: application/json
+access: {{access}}
+
+{
+  "targetType": "BOARD",
+  "targetId": 1,
+  "reason": "SPAM",
+  "detail": "사유만 바꿔 재신고"
+}
+
+
+### 본인 콘텐츠 신고 - code 403
+# targetId 를 로그인한 계정이 작성한 게시글 ID 로 바꿔서 실행한다.
+POST {{host}}/api/v1/reports
+Content-Type: application/json
+access: {{access}}
+
+{
+  "targetType": "BOARD",
+  "targetId": 2,
+  "reason": "ABUSE"
+}
+
+
+### 존재하지 않는 대상 신고 - code 404
+POST {{host}}/api/v1/reports
+Content-Type: application/json
+access: {{access}}
+
+{
+  "targetType": "BOARD",
+  "targetId": 999999,
+  "reason": "ABUSE"
+}
+
+
+### 필수값 누락 - code 400
+POST {{host}}/api/v1/reports
+Content-Type: application/json
+access: {{access}}
+
+{
+  "targetId": 1,
+  "reason": "ABUSE"
+}
+
+
+### 상세 사유 500자 초과 - code 400
+POST {{host}}/api/v1/reports
+Content-Type: application/json
+access: {{access}}
+
+{
+  "targetType": "BOARD",
+  "targetId": 1,
+  "reason": "ETC",
+  "detail": "가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하"
+}
+
+
+### 내 신고 내역 조회 (최신순)
+GET {{host}}/api/v1/reports/me
+access: {{access}}
+
+
+### 인증 없이 신고 - 401
+POST {{host}}/api/v1/reports
+Content-Type: application/json
+
+{
+  "targetType": "BOARD",
+  "targetId": 1,
+  "reason": "ABUSE"
+}

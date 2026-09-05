@@ -14,11 +14,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class S3ImgService implements ImgService {
+
+    // 확장자로 인정할 형태 (점 + 영숫자 1~10자). 벗어나면 확장자 없이 저장한다.
+    private static final Pattern EXTENSION_PATTERN = Pattern.compile("^\\.[a-z0-9]{1,10}$");
 
     private final S3Client s3Client;
 
@@ -43,8 +47,7 @@ public class S3ImgService implements ImgService {
 
     private String uploadSingleImage(MultipartFile image, String path) {
         try {
-            String originalFilename = image.getOriginalFilename(); // 원본 파일명 추출
-            String extension = originalFilename.substring(originalFilename.lastIndexOf('.')); // 확장자 추출
+            String extension = extractExtension(image.getOriginalFilename()); // 확장자 추출
             String fileName = buildFileName(path, extension); // S3에 저장할 파일명 생성
 
             // S3에 업로드
@@ -65,10 +68,33 @@ public class S3ImgService implements ImgService {
         }
     }
 
+    /**
+     * 원본 파일명에서 확장자를 뽑는다. 뽑을 수 없으면 빈 문자열.
+     *
+     * <p>확장자가 없어도 업로드 시 Content-Type을 함께 저장하므로 이미지 서빙에는 지장이 없다.
+     * 다만 다운로드나 S3 콘솔 확인을 위해 살릴 수 있으면 살린다.
+     *
+     * <p>파일명은 클라이언트가 보내는 값이라 그대로 믿고 자르면 안 된다.
+     * 점이 없으면 substring(-1)로 예외가 나고, 점 뒤에 임의 문자열이 오면 S3 키에 그대로 섞여 들어간다.
+     */
+    private String extractExtension(String originalFilename) {
+        if (originalFilename == null) {
+            return "";
+        }
+
+        int dotIndex = originalFilename.lastIndexOf('.');
+        if (dotIndex < 0 || dotIndex == originalFilename.length() - 1) {
+            return ""; // 점이 없거나 점으로 끝나는 경우
+        }
+
+        String extension = originalFilename.substring(dotIndex).toLowerCase();
+        return EXTENSION_PATTERN.matcher(extension).matches() ? extension : "";
+    }
+
     private String buildFileName(String path, String extension) {
         String now = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_")); // 날짜+시간 포맷
-        return String.format("images/%s/%s%s",
+        return String.format("images/%s/%s%s%s",
                 path,           // ex) vintage, board, notice
                 now, // ex) 20250625_145922
                 UUID.randomUUID().toString().substring(0, 8), // UUID 일부, // 중복 방지를 위한 고유 식별자

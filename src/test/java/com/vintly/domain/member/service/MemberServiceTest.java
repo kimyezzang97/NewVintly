@@ -1,6 +1,7 @@
 package com.vintly.domain.member.service;
 
 import com.vintly.domain.board.repo.BoardCommentRepository;
+import com.vintly.domain.block.repo.MemberBlockRepository;
 import com.vintly.domain.board.repo.BoardLikeRepository;
 import com.vintly.domain.board.repo.BoardRepository;
 import com.vintly.domain.member.Use;
@@ -50,6 +51,9 @@ public class MemberServiceTest {
 
     @Mock
     private VintageLikeRepository vintageLikeRepository;
+
+    @Mock
+    private MemberBlockRepository memberBlockRepository;
 
     @InjectMocks
     private MemberService memberService;

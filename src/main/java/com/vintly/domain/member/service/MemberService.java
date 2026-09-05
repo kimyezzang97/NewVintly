@@ -6,6 +6,7 @@ import com.vintly.interfaces.member.MemberRequest;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.domain.board.repo.BoardCommentRepository;
+import com.vintly.domain.block.repo.MemberBlockRepository;
 import com.vintly.domain.board.repo.BoardLikeRepository;
 import com.vintly.domain.board.repo.BoardRepository;
 import com.vintly.domain.vintagecomment.repo.VintageCommentRepository;
@@ -32,6 +33,7 @@ public class MemberService {
     private final BoardRepository boardRepository;
     private final BoardLikeRepository boardLikeRepository;
     private final VintageLikeRepository vintageLikeRepository;
+    private final MemberBlockRepository memberBlockRepository;
 
     @Autowired
     public MemberService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder,
@@ -39,7 +41,8 @@ public class MemberService {
                          BoardCommentRepository boardCommentRepository,
                          BoardRepository boardRepository,
                          BoardLikeRepository boardLikeRepository,
-                         VintageLikeRepository vintageLikeRepository) {
+                         VintageLikeRepository vintageLikeRepository,
+                         MemberBlockRepository memberBlockRepository) {
         this.memberRepository = memberRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.vintageCommentRepository = vintageCommentRepository;
@@ -47,6 +50,7 @@ public class MemberService {
         this.boardRepository = boardRepository;
         this.boardLikeRepository = boardLikeRepository;
         this.vintageLikeRepository = vintageLikeRepository;
+        this.memberBlockRepository = memberBlockRepository;
     }
 
     // email 중복 체크
@@ -135,6 +139,10 @@ public class MemberService {
         // 좋아요는 회원과 함께 사라져야 카운트가 어긋나지 않음
         boardLikeRepository.deleteAllByMember(member);
         vintageLikeRepository.deleteAllByMember(member);
+
+        // 차단은 개인 설정이라 남길 이유가 없다. 차단한 쪽이든 당한 쪽이든 이 회원이 걸린 행을 지운다.
+        // (감사 기록인 report 는 반대로 그대로 남긴다 — CLAUDE.md 탈퇴 절차 참고)
+        memberBlockRepository.deleteAllByMemberId(member.getMemberId());
 
         memberRepository.delete(member);
     }

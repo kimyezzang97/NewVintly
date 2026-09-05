@@ -2,6 +2,8 @@ package com.vintly.domain.member.integration;
 
 import com.vintly.TestContainerConfig;
 import com.vintly.application.member.MemberFacade;
+import com.vintly.domain.block.entity.MemberBlock;
+import com.vintly.domain.block.repo.MemberBlockRepository;
 import com.vintly.domain.board.entity.Board;
 import com.vintly.domain.board.entity.BoardComment;
 import com.vintly.domain.board.entity.BoardLike;
@@ -15,6 +17,10 @@ import com.vintly.domain.member.Use;
 import com.vintly.domain.member.entity.Member;
 import com.vintly.domain.member.repo.MemberRepository;
 import com.vintly.domain.member.service.MemberService;
+import com.vintly.domain.report.ReportReason;
+import com.vintly.domain.report.ReportTargetType;
+import com.vintly.domain.report.entity.Report;
+import com.vintly.domain.report.repo.ReportRepository;
 import com.vintly.domain.member.service.CustomUserDetails;
 import com.vintly.domain.vintage.entity.Vintage;
 import com.vintly.domain.vintage.repo.VintageRepository;
@@ -52,23 +58,23 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * 회원 탈퇴(하드 삭제) 통합 테스트.
  *
- * <p><b>격리 방식</b> — 클래스에 {@link Transactional}을 걸어 각 테스트가 끝나면 롤백된다.
- * 다만 Redis는 트랜잭션 대상이 아니므로 {@link #clearRedisKeys()}에서 직접 지운다.
+ * 격리 방식 — 클래스에 Transactional을 걸어 각 테스트가 끝나면 롤백된다.
+ * 다만 Redis는 트랜잭션 대상이 아니므로 #clearRedisKeys()에서 직접 지운다.
  *
- * <p><b>주의 1. 벌크 쿼리와 1차 캐시</b> — 탈퇴 로직은 전부 벌크 {@code @Modifying} 쿼리라
- * 영속성 컨텍스트를 우회한다. 같은 트랜잭션에서 엔티티로 읽으면 1차 캐시의 <em>변경 전</em> 값이 나와
- * "익명화가 안 됐는데 통과"하는 가짜 성공이 된다. 그래서 검증은 {@link JdbcTemplate}으로 DB를 직접 읽는다
+ * 주의 1. 벌크 쿼리와 1차 캐시 — 탈퇴 로직은 전부 벌크 @Modifying 쿼리라
+ * 영속성 컨텍스트를 우회한다. 같은 트랜잭션에서 엔티티로 읽으면 1차 캐시의 변경 전 값이 나와
+ * "익명화가 안 됐는데 통과"하는 가짜 성공이 된다. 그래서 검증은 JdbcTemplate으로 DB를 직접 읽는다
  * (같은 커넥션을 쓰므로 커밋 전 데이터도 보인다).
  *
- * <p><b>주의 2. 운영 스키마 재현</b> — {@code ddl-auto=create-drop}은 엔티티에서 DDL을 만들기 때문에
- * 운영 DB에 실제로 걸려 있는 {@code ON UPDATE CURRENT_TIMESTAMP}가 생성되지 않는다. 그 상태로 두면
- * 익명화·조회수 쿼리에서 {@code SET x.updatedAt = x.updatedAt}을 지워도 테스트가 통과한다.
- * {@link #replicateProductionSchema()}가 그 속성을 붙여 회귀를 실제로 잡도록 한다.
+ * 주의 2. 운영 스키마 재현 — ddl-auto=create-drop은 엔티티에서 DDL을 만들기 때문에
+ * 운영 DB에 실제로 걸려 있는 ON UPDATE CURRENT_TIMESTAMP가 생성되지 않는다. 그 상태로 두면
+ * 익명화·조회수 쿼리에서 SET x.updatedAt = x.updatedAt을 지워도 테스트가 통과한다.
+ * #replicateProductionSchema()가 그 속성을 붙여 회귀를 실제로 잡도록 한다.
  * (실제 DB에 직접 붙여 테스트한다면 이 메서드는 불필요하다 — 이미 스키마에 있으므로.)
  *
- * <p><b>실행 조건</b> — Docker 가 필요하다. DB/Redis 는 {@link TestContainerConfig}가 컨테이너로 띄우고
- * 접속 정보를 주입하며, 나머지 설정은 {@code src/test/resources/application-test.yml}(커밋됨)에 있다.
- * 별도 로컬 설정 없이 클론 직후 {@code ./gradlew test}로 바로 돌아간다.
+ * 실행 조건 — Docker 가 필요하다. DB/Redis 는 TestContainerConfig가 컨테이너로 띄우고
+ * 접속 정보를 주입하며, 나머지 설정은 src/test/resources/application-test.yml(커밋됨)에 있다.
+ * 별도 로컬 설정 없이 클론 직후 ./gradlew test로 바로 돌아간다.
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -86,6 +92,8 @@ class MemberWithdrawIntegrationTest extends TestContainerConfig {
     @Autowired private VintageRepository vintageRepository;
     @Autowired private VintageCommentRepository vintageCommentRepository;
     @Autowired private VintageLikeRepository vintageLikeRepository;
+    @Autowired private ReportRepository reportRepository;
+    @Autowired private MemberBlockRepository memberBlockRepository;
     @Autowired private BCryptPasswordEncoder passwordEncoder;
     @Autowired private StringRedisTemplate redisTemplate;
     @Autowired private JdbcTemplate jdbcTemplate;
@@ -138,6 +146,51 @@ class MemberWithdrawIntegrationTest extends TestContainerConfig {
 
         assertThat(count("SELECT COUNT(*) FROM board_like WHERE member_id = ?", f.memberId())).isZero();
         assertThat(count("SELECT COUNT(*) FROM vintage_like WHERE member_id = ?", f.memberId())).isZero();
+    }
+
+    @Test
+    @DisplayName("탈퇴해도 이 회원이 접수한 신고 이력은 남는다 (reporter_id는 orphan으로 둔다).")
+    void withdrawKeepsReportHistory() {
+        // Arrange
+        Fixture f = createFixture("keep-report@test.local", "keepReport");
+
+        // Act
+        memberService.withdrawMember(load(f), PASSWORD);
+        entityManager.flush();
+
+        // Assert - 신고는 감사 로그 성격이라 지우지 않는다. 지우면 제재 근거가 사라진다.
+        assertThat(count("SELECT COUNT(*) FROM member WHERE member_id = ?", f.memberId())).isZero();
+        assertThat(count("SELECT COUNT(*) FROM report WHERE report_id = ?", f.reportId())).isEqualTo(1);
+        assertThat(scalar("SELECT reporter_id FROM report WHERE report_id = ?", f.reportId()))
+                .isEqualTo(String.valueOf(f.memberId()));
+        assertThat(scalar("SELECT status FROM report WHERE report_id = ?", f.reportId()))
+                .isEqualTo("PENDING");
+    }
+
+    @Test
+    @DisplayName("탈퇴하면 이 회원이 관련된 차단은 방향 상관없이 모두 삭제된다.")
+    void withdrawDeletesBlocksInBothDirections() {
+        // Arrange - 탈퇴자가 남을 차단하고, 남도 탈퇴자를 차단한 상태
+        Fixture f = createFixture("delete-block@test.local", "deleteBlock");
+        Member other = memberRepository.save(new Member(
+                null, "block-peer@test.local", passwordEncoder.encode(PASSWORD), "blockPeer",
+                "123456", "ROLE_USER", Use.Y, null, null));
+        Member leaving = load(f);
+        memberBlockRepository.save(MemberBlock.create(leaving, other));
+        memberBlockRepository.save(MemberBlock.create(other, leaving));
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(count("SELECT COUNT(*) FROM member_block WHERE blocker_id = ? OR blocked_id = ?",
+                f.memberId(), f.memberId())).isEqualTo(2);
+
+        // Act
+        memberService.withdrawMember(load(f), PASSWORD);
+        entityManager.flush();
+
+        // Assert - 차단은 감사 기록이 아니라 개인 설정이라 남길 이유가 없다 (신고와 반대)
+        assertThat(count("SELECT COUNT(*) FROM member_block WHERE blocker_id = ? OR blocked_id = ?",
+                f.memberId(), f.memberId())).isZero();
     }
 
     @Test
@@ -271,7 +324,7 @@ class MemberWithdrawIntegrationTest extends TestContainerConfig {
     // --- fixture ---
 
     private record Fixture(String email, String nickname, Long memberId, Long boardId,
-                           Long boardCommentId, Long vintageId, Long vintageCommentId) {}
+                           Long boardCommentId, Long vintageId, Long vintageCommentId, Long reportId) {}
 
     /** 탈퇴 대상 회원을 영속성 컨텍스트가 비워진 상태에서 새로 조회한다. */
     private Member load(Fixture f) {
@@ -281,8 +334,8 @@ class MemberWithdrawIntegrationTest extends TestContainerConfig {
     /**
      * 회원 1명과 그 회원의 게시글·댓글·좋아요·매장댓글·매장좋아요를 한 벌씩 만든다.
      *
-     * <p>flush로 INSERT를 내보낸 뒤 <b>clear로 영속성 컨텍스트를 비우는 것이 핵심이다.</b> 비우지 않으면
-     * 탈퇴가 {@code em.remove(member)}를 호출하는 순간, 같은 컨텍스트에 남아 있는 Board/BoardLike 등이
+     * flush로 INSERT를 내보낸 뒤 clear로 영속성 컨텍스트를 비우는 것이 핵심이다. 비우지 않으면
+     * 탈퇴가 em.remove(member)를 호출하는 순간, 같은 컨텍스트에 남아 있는 Board/BoardLike 등이
      * 여전히 그 Member를 참조하고 있어 flush 시 TransientObjectException이 난다. 운영에서는 요청마다
      * 영속성 컨텍스트가 분리되어 발생하지 않는, 테스트 전용 함정이다.
      */
@@ -303,9 +356,14 @@ class MemberWithdrawIntegrationTest extends TestContainerConfig {
                 VintageComment.createRoot(vintage, member, "vintage comment"));
         vintageLikeRepository.save(VintageLike.create(vintage, member));
 
+        // 이 회원이 남의 콘텐츠를 신고한 이력. 탈퇴해도 남아야 한다.
+        Report report = reportRepository.save(
+                Report.create(member, ReportTargetType.BOARD, 999L, ReportReason.ABUSE, null));
+
         entityManager.flush();
         Fixture fixture = new Fixture(email, nickname, member.getMemberId(), board.getBoardId(),
-                boardComment.getBoardCommentId(), vintage.getVintageId(), vintageComment.getVintageCommentId());
+                boardComment.getBoardCommentId(), vintage.getVintageId(), vintageComment.getVintageCommentId(),
+                report.getReportId());
         entityManager.clear();
         return fixture;
     }
@@ -321,6 +379,11 @@ class MemberWithdrawIntegrationTest extends TestContainerConfig {
 
     private long count(String sql, Object arg) {
         Long value = jdbcTemplate.queryForObject(sql, Long.class, arg);
+        return value == null ? 0L : value;
+    }
+
+    private long count(String sql, Object arg1, Object arg2) {
+        Long value = jdbcTemplate.queryForObject(sql, Long.class, arg1, arg2);
         return value == null ? 0L : value;
     }
 

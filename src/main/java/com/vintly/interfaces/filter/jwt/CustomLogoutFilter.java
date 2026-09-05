@@ -1,6 +1,7 @@
 package com.vintly.interfaces.filter.jwt;
 
 import com.vintly.infra.config.jwt.JWTUtil;
+import com.vintly.infra.util.RefreshCookieUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,6 +11,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
@@ -76,14 +78,8 @@ public class CustomLogoutFilter extends GenericFilterBean {
         //System.out.println(redisKey);
         redisTemplate.delete(redisKey);
 
-        //Refresh 토큰 Cookie 값 0
-        Cookie cookie = new Cookie("refresh", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true); // XSS 공격 방지, JS 접근 방지
-        // cookie.setSecure(true); // HTTPS에서만 전송
-
-        response.addCookie(cookie);
+        //Refresh 토큰 Cookie 삭제 (발급 때와 속성이 같아야 브라우저가 실제로 지운다)
+        response.addHeader(HttpHeaders.SET_COOKIE, RefreshCookieUtil.expire().toString());
         response.setStatus(HttpServletResponse.SC_OK); // 200
     }
 

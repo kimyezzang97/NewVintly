@@ -89,8 +89,11 @@ JWT 기반 Stateless 인증, RTR(Refresh Token Rotation) 방식:
 - **회원 탈퇴는 Hard Delete다.** `member` 행을 실제로 삭제하며 복구 수단은 없다 (이메일/닉네임도 재사용 가능해진다). 탈퇴 시 수행 순서는 `MemberService.withdrawMember` 참고:
   1. `board`, `board_comment`, `vintagecomment`의 `author_nickname`을 `del_{memberId}`로 익명화 (글/댓글 자체는 보존). `vintagecomment`는 `member_id`를 null로 비우고, `member_id`가 NOT NULL인 `board`/`board_comment`는 orphan 값으로 남긴다 — 물리 FK가 없고 조회는 역정규화 닉네임/`leftJoin`으로 처리하므로 안전하다. 익명화 UPDATE에는 `SET x.updatedAt = x.updatedAt`이 반드시 들어가야 한다 (`board`/`board_comment`의 `updated_at`은 `ON UPDATE CURRENT_TIMESTAMP`라, 빼면 수정한 적 없는 글이 `edited=true`가 된다).
   2. `board_like`, `vintagelike`에서 해당 회원의 좋아요 삭제 (남기면 좋아요 수가 부풀려짐).
-  3. `member` 행 삭제.
-  4. Redis의 `refresh:{email}` 키 삭제 (`MemberFacade.withdrawMember` → `AuthService.deleteRefreshToken`). 지우지 않으면 탈퇴 후에도 refresh 토큰으로 재발급이 된다. 이미 발급된 access 토큰은 만료(30분)까지 유효하다.
+  3. `member_block`에서 이 회원이 걸린 차단을 **방향 상관없이 삭제** (`blocker_id` 또는 `blocked_id`). 차단은 개인 설정이라 회원이 사라지면 남길 이유가 없다.
+  4. **`report`는 손대지 않는다.** 이 회원이 접수한 신고는 그대로 남기고 `reporter_id`를 orphan으로 둔다. 감사 로그 성격이라 지우면 제재 근거가 사라지고, `reporter_id`는 숫자 ID라 개인정보도 남지 않는다. 누락이 아니라 의도된 결정이니 삭제 로직을 추가하지 말 것 (`MemberWithdrawIntegrationTest.withdrawKeepsReportHistory`가 지킨다).
+     - **`report`와 `member_block`이 정반대로 동작한다는 점을 헷갈리지 말 것.** 신고는 감사 기록이라 남기고, 차단은 개인 설정이라 지운다. 각각 `withdrawKeepsReportHistory`, `withdrawDeletesBlocksInBothDirections`가 지킨다.
+  5. `member` 행 삭제.
+  6. Redis의 `refresh:{email}` 키 삭제 (`MemberFacade.withdrawMember` → `AuthService.deleteRefreshToken`). 지우지 않으면 탈퇴 후에도 refresh 토큰으로 재발급이 된다. 이미 발급된 access 토큰은 만료(30분)까지 유효하다.
 - 소셜 로그인 도입 우선순위(국내 사용률 기준): 카카오 > 네이버 > 구글 > 애플 (미착수)
 
 ## Database
@@ -137,6 +140,35 @@ JWT 기반 Stateless 인증, RTR(Refresh Token Rotation) 방식:
 - **PRD:** DB는 RDS 사용 예정. RDS 연결은 항상 SSL 필수 — JDBC URL에 `useSSL=true&requireSSL=true`.
 - 프로필: `local`, `dev`, `prd`, `test` (`application-{profile}.yml`). local/dev/prd yml은 `.gitignore` 처리되어 있고 실제 자격증명은 커밋되지 않는다 — 새 값 채울 때도 유지할 것.
 - Redis 연결 호스트가 환경별로 다르다: 배포(NAS Docker) 환경에서는 컨테이너명 `vintly-redis`, 로컬 개발에서는 NAS IP(또는 `localhost`)를 사용한다.
+
+## 문서 (`docs/`)
+
+기능 단위로 md 문서를 남긴다. 분류별 하위 디렉터리를 쓴다.
+
+| 디렉터리 | 용도 | 예시 |
+| :--- | :--- | :--- |
+| `docs/design/` | **기능별 설계 결정과 후속 계획** | `report.md` |
+| `docs/api/` | API 레퍼런스 (엔드포인트·요청·응답) | `youtube-link.md` |
+| `docs/erd/` | ERD | `erd.md` |
+| `docs/flow/` | 플로우 다이어그램 | `join.md` |
+
+### `docs/design/<기능>.md` 작성 규칙
+
+새 기능에 착수하면 **먼저** 이 문서를 만들고 방향을 합의한 뒤 코드를 쓴다. 구성은 `report.md`를 따른다.
+
+1. **배포 전 반드시 할 것** — 마이그레이션 적용 순서 등 빠뜨리면 운영이 깨지는 절차. 없으면 생략.
+2. **결정사항** — 표로. 반드시 **근거**를 함께 적는다. 되돌리려는 사람이 여기부터 읽는다.
+3. **데이터 모델** — 스키마와 "왜 이렇게 했는가". 겪은 함정도 여기 남긴다.
+4. **구현된 것** — 엔드포인트와 계층별 파일 위치.
+5. **후속 계획** — 아직 안 한 것.
+
+**남길 것과 지울 것**
+
+- 남긴다: 판단의 **근거**, 되돌리면 안 되는 결정, 배포 절차, 실제로 당한 함정, 후속 계획.
+- 지운다: 코드를 보면 아는 것(구현 순서, 메서드 목록), **완료된 작업 체크리스트**. 끝나면 문서에서 걷어내고 "구현된 것"으로 압축한다.
+- 문서가 코드와 어긋나면 문서를 고친다. 계획 단계의 추측이 실제와 달랐다면 그 사실 자체를 적어 둔다 (예: `report.md`의 Hibernate enum 함정).
+
+스키마 변경 DDL은 문서가 아니라 `db/migration/`에 날짜별 `.sql`로 남기고, 문서에서는 그 파일을 가리킨다.
 
 ## 개발 규칙
 ### 진행 Workflow - 증강 코딩

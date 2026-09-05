@@ -1,9 +1,15 @@
 package com.vintly.interfaces.filter.jwt;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.vintly.infra.config.jwt.JWTUtil;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
+import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +19,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -67,6 +77,43 @@ class JWTFilterTest {
         assertThat(response.getStatus()).isEqualTo(401);
         assertThat(response.getContentAsString()).contains("access token expired");
         verify(filterChain, never()).doFilter(any(), any());
+    }
+
+    @Test
+    @DisplayName("만료 로그에 토큰 주인의 이메일과 만료 시각, 경과 시간이 함께 남는다.")
+    void shouldLogOwnerAndElapsedTimeWhenAccessTokenExpired() throws Exception {
+        // Arrange
+        Instant expiredAt = Instant.now().minus(Duration.ofMinutes(10));
+        Claims claims = Jwts.claims()
+                .add("username", "test@example.com")
+                .expiration(Date.from(expiredAt))
+                .build();
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("access", "expired-token");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        JWTFilter jwtFilter = new JWTFilter(jwtUtil);
+
+        when(jwtUtil.isExpired("expired-token"))
+                .thenThrow(new ExpiredJwtException(null, claims, "token expired"));
+
+        Logger filterLogger = (Logger) LoggerFactory.getLogger(JWTFilter.class);
+        ListAppender<ILoggingEvent> logs = new ListAppender<>();
+        logs.start();
+        filterLogger.addAppender(logs);
+
+        try {
+            // Act
+            jwtFilter.doFilter(request, response, filterChain);
+
+            // Assert : URI/IP만으로는 정상 만료인지 옛 토큰 재사용인지 구분할 수 없다
+            assertThat(logs.list).hasSize(1);
+            assertThat(logs.list.get(0).getFormattedMessage())
+                    .contains("email: test@example.com")
+                    .contains("10분 경과");
+        } finally {
+            filterLogger.detachAppender(logs);
+        }
     }
 
     @Test

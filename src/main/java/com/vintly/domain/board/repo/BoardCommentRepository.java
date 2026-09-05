@@ -13,7 +13,7 @@ public interface BoardCommentRepository {
 
     Optional<BoardComment> findById(Long boardCommentId);
 
-    List<BoardInfo.Comment> findCommentsByBoardId(Long boardId);
+    List<BoardInfo.Comment> findCommentsByBoardId(Long boardId, List<Long> blockedIds);
 
     void deleteById(Long boardCommentId);
 

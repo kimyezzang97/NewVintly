@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -29,8 +30,8 @@ public class BoardRepositoryImpl implements BoardRepository {
     }
 
     @Override
-    public Page<BoardInfo.BoardSummary> findBoardList(String keyword, Pageable pageable) {
-        return boardQueryDslRepository.findBoardList(keyword, pageable);
+    public Page<BoardInfo.BoardSummary> findBoardList(String keyword, Pageable pageable, List<Long> blockedIds) {
+        return boardQueryDslRepository.findBoardList(keyword, pageable, blockedIds);
     }
 
     @Override

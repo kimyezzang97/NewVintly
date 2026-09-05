@@ -1,19 +1,48 @@
 package com.vintly.interfaces.presentation;
 
+import com.vintly.interfaces.block.MemberBlockException;
 import com.vintly.interfaces.board.BoardException;
 import com.vintly.interfaces.member.MemberException;
+import com.vintly.interfaces.report.ReportException;
 import com.vintly.interfaces.vintage.VintageException;
 import com.vintly.interfaces.vintagecomment.VintageCommentException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 // 발생한 예외를 한 곳에서 관리하고 처리할 수 있게 도와주는 어노테이션
 @RestControllerAdvice // 전역설정을 위한 어노테이션
 public class GlobalExceptionHandler {
+
+    // 안내 문구가 실제 설정과 어긋나지 않도록 yml 값을 그대로 읽어 쓴다
+    private final String maxFileSize;
+    private final String maxRequestSize;
+
+    public GlobalExceptionHandler(
+            @Value("${spring.servlet.multipart.max-file-size}") String maxFileSize,
+            @Value("${spring.servlet.multipart.max-request-size}") String maxRequestSize) {
+        this.maxFileSize = maxFileSize;
+        this.maxRequestSize = maxRequestSize;
+    }
+
+    /**
+     * 업로드 용량 초과 (spring.servlet.multipart 한도).
+     *
+     * <p>멀티파트 파싱 단계에서 터지므로 컨트롤러/파사드의 try-catch에는 잡히지 않는다.
+     * 참고로 Nginx의 client_max_body_size를 먼저 넘기면 요청이 여기까지 오지도 못하고
+     * Nginx가 실제 HTTP 413(HTML)을 반환한다 - 프론트는 두 형태를 모두 처리해야 한다.
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    protected ApiResponse<?> maxUploadSizeExceeded(MaxUploadSizeExceededException e) {
+        String msg = String.format("이미지 용량이 너무 큽니다. 장당 %s, 전체 %s 이하로 올려주세요.",
+                maxFileSize, maxRequestSize);
+        return new ApiResponse<>(false, 413, msg, null);
+    }
 
     // @Valid 또는 @Validated로 binding error 발생시 발생하는 예외
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -152,6 +181,44 @@ public class GlobalExceptionHandler {
     // 본인의 댓글이 아님
     @ExceptionHandler(VintageCommentException.CommentNotOwnedException.class)
     protected ApiResponse<?> commentNotOwned(VintageCommentException.CommentNotOwnedException e) {
+        return new ApiResponse<>(false, 403, e.getMessage(), null);
+    }
+
+    /**
+     * [report]
+     */
+
+    // 같은 대상을 두 번 신고 (선체크 또는 유니크 제약)
+    @ExceptionHandler(ReportException.DuplicateReportException.class)
+    protected ApiResponse<?> duplicateReport(ReportException.DuplicateReportException e) {
+        return new ApiResponse<>(false, 409, e.getMessage(), null);
+    }
+
+    // 신고 대상이 존재하지 않음
+    @ExceptionHandler(ReportException.ReportTargetNotFoundException.class)
+    protected ApiResponse<?> reportTargetNotFound(ReportException.ReportTargetNotFoundException e) {
+        return new ApiResponse<>(false, 404, e.getMessage(), null);
+    }
+
+    // 본인이 작성한 콘텐츠 신고
+    @ExceptionHandler(ReportException.SelfReportException.class)
+    protected ApiResponse<?> selfReport(ReportException.SelfReportException e) {
+        return new ApiResponse<>(false, 403, e.getMessage(), null);
+    }
+
+    /**
+     * [block]
+     */
+
+    // 자기 자신 차단
+    @ExceptionHandler(MemberBlockException.SelfBlockException.class)
+    protected ApiResponse<?> selfBlock(MemberBlockException.SelfBlockException e) {
+        return new ApiResponse<>(false, 403, e.getMessage(), null);
+    }
+
+    // 나를 차단한 회원의 글에 댓글 작성 시도
+    @ExceptionHandler(MemberBlockException.BlockedByAuthorException.class)
+    protected ApiResponse<?> blockedByAuthor(MemberBlockException.BlockedByAuthorException e) {
         return new ApiResponse<>(false, 403, e.getMessage(), null);
     }
 
